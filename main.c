@@ -94,7 +94,10 @@ void main(void)
 {
 	char var_str[100];
 
+    // Create a task with priority 0 (the highest)
 	core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
+    
+    // Create a task with priority 5 (less priority)
 	core_create(cnt1_task, 5, DEFAULT_STACK_SIZE);
 
 	console_put_data(0x1b, 176, 80*25, 0);
@@ -107,6 +110,8 @@ void main(void)
 	console_put_string(0x4f, itoa(totalMem, var_str, 10), 2, line++);
 
 	console_put_string(0x4f, "Mallocs:", 2, line++);
+    
+    // Alloc two buffers of memory
 	char *mem0 = core_malloc(10000);
 	console_put_string(0x4f, itoa(mem0, var_str, 16), 2, line++);
 	char *mem1 = core_malloc(50000);
@@ -116,6 +121,7 @@ void main(void)
 	console_put_string(0x4f, "Used Mem After malloc:", 2, line++);
 	console_put_string(0x4f, itoa(totalMem, var_str, 10), 2, line++);
 
+    // Free memory buffers
 	core_free(mem0);
 	core_free(mem1);
 
@@ -137,5 +143,6 @@ void main(void)
 
 	console_put_string(0x4f, "End", 2, line++);
 
+    // When main function reaches end, the system is restarted
 	for(;;);
 }

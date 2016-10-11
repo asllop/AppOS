@@ -85,7 +85,7 @@ void *fake_timer_interrupt(void *stackPointer)
     return timer_interrupt(stackPointer);
 }
 
-__attribute__((naked)) void fake_timer_isr()
+__attribute__((interrupt)) void fake_timer_isr()
 {
     asm(
         "pushal;"

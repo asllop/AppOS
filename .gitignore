@@ -34,3 +34,5 @@
 
 # Mac stuff
 .DS_Store
+*.xcodeproj
+
