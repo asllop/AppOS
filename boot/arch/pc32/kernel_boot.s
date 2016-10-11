@@ -14,7 +14,8 @@
 .section .bss
 .align 16
 stack_bottom:
-.skip 16384 # 16 KiB
+# Amount of memory for initial kernel stack
+.skip 16 * 1024
 stack_top:
 
 .section .text

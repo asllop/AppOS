@@ -60,34 +60,38 @@ void console_put_data(int colour, char data, int repeat, unsigned int offset)
     }
 }
 
+void counter_foo(int line)
+{
+    char var_str[100];
+    
+    for (unsigned int i = 0 ;; i++)
+    {
+        char *mem = core_malloc(10000);
+        
+        if (i == 0)
+        {
+            console_put_string(0x4f, "                               ", 2, line);
+        }
+        
+        console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
+        
+        core_free(mem);
+    }
+}
+
 void cnt0_task()
 {
-	char var_str[100];
-
-	for (unsigned int i = 0 ;; i++)
-	{
-		if (i == 0)
-		{
-			console_put_string(0x4f, "                               ", 2, 23);
-		}
-
-		console_put_string(0x4f, itoa(i, var_str, 10), 2, 23);
-	}
+	counter_foo(22);
 }
 
 void cnt1_task()
 {
-	char var_str[100];
+    counter_foo(23);
+}
 
-	for (unsigned int i = 0 ;; i++)
-	{
-		if (i == 0)
-		{
-			console_put_string(0x4f, "                               ", 2, 24);
-		}
-
-		console_put_string(0x4f, itoa(i, var_str, 10), 2, 24);
-	}
+void cnt2_task()
+{
+    counter_foo(24);
 }
 
 void main(void)
@@ -97,8 +101,11 @@ void main(void)
     // Create a task with priority 0 (the highest)
 	core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
     
-    // Create a task with priority 5 (less priority)
-	core_create(cnt1_task, 5, DEFAULT_STACK_SIZE);
+    // Create a task with priority 2 (less priority)
+	core_create(cnt1_task, 2, DEFAULT_STACK_SIZE);
+    
+    // Create a task with priority 5 (even less priority)
+    core_create(cnt2_task, 5, DEFAULT_STACK_SIZE);
 
 	console_put_data(0x1b, 176, 80*25, 0);
 	console_put_string(0x4f, " Hello AppOS ", 34, 1);

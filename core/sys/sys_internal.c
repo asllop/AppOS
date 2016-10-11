@@ -22,10 +22,10 @@ LOCK *get_lock(MUTEX mutex)
     return &locks[mutex];
 }
 
-LOCK *get_counter(MUTEX mutex)
+LOCK get_counter(MUTEX mutex)
 {
     counters[mutex] ++;
-    return &counters[mutex];
+    return counters[mutex];
 }
 
 void acquire_mutex(MUTEX mutex)
@@ -33,7 +33,7 @@ void acquire_mutex(MUTEX mutex)
     bool scheduling = get_scheduling();
     core_forbid();
     
-    LOCK currentCnt = *get_counter(mutex);
+    LOCK currentCnt = get_counter(mutex);
     LOCK *lock = get_lock(mutex);
     
     if (scheduling) core_permit();
