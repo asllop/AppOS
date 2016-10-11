@@ -8,7 +8,7 @@
 static struct TaskStruct    *taskArray;
 static int                  taskCounter;
 static struct TaskStruct    *currentTask;
-static bool                 isScheduling;
+static bool                 isScheduling = 0;
 
 void init_task_buffer()
 {
