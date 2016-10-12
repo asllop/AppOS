@@ -15,7 +15,7 @@ OBJECTS=boot/arch/pc32/kernel_boot.o \
 	core/task/task.o \
 	core/task/task_internal.o \
 	core/task/arch/pc32/task_arch.o \
-	main.o
+	app/main.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

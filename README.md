@@ -7,7 +7,7 @@ To compile your AppOS, first generate a GCC cross compiler, following the instru
 
 #### Prepare App
 
-Write your app in main.c or add your own files and modify the Makefile.
+Write your app in **app/main.c** or add your own files and modify the Makefile.
 
 #### Make
 
