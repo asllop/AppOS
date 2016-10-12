@@ -1,4 +1,4 @@
-#include <common/appos.h>
+#include <appos.h>
 
 #ifndef TASK_INTERNAL_H
 #define	TASK_INTERNAL_H

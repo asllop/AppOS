@@ -1,4 +1,4 @@
-#include <common/appos.h>
+#include <appos.h>
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
 #include <task/task.h>

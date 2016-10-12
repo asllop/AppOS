@@ -1,4 +1,4 @@
-#include <common/appos.h>
+#include <appos.h>
 #include <sys/io/arch/pc32/io.h>
 
 // Quick and dirty function to print on console

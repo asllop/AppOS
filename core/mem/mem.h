@@ -1,4 +1,4 @@
-#include <common/appos.h>
+#include <appos.h>
 
 #ifndef MEM_H
 #define	MEM_H

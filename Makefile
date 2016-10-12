@@ -1,6 +1,6 @@
 CC=i686-elf-gcc
 AS=i686-elf-as
-CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./ -I./core
+CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./core -I./include
 OUTPUT=build/appos.elf
 OBJECTS=boot/arch/pc32/kernel_boot.o \
 	boot/arch/pc32/cmdline_args.o \
