@@ -94,10 +94,15 @@ void cnt2_task()
     counter_foo(24);
 }
 
-void main(void)
+void main(int argc, char **argv)
 {
 	char var_str[100];
+    
+    // Draw Background
+    console_put_data(0x1b, 176, 80*25, 0);
 
+    console_put_string(0x4f, itoa(argc, var_str, 10), 70, 3);
+    
     // Create a task with priority 0 (the highest)
 	core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
     
@@ -107,7 +112,6 @@ void main(void)
     // Create a task with priority 5 (even less priority)
     core_create(cnt2_task, 5, DEFAULT_STACK_SIZE);
 
-	console_put_data(0x1b, 176, 80*25, 0);
 	console_put_string(0x4f, " Hello AppOS ", 34, 1);
 
 	int line = 3;
@@ -151,5 +155,5 @@ void main(void)
 	console_put_string(0x4f, "End", 2, line++);
 
     // When main function reaches end, the system is restarted
-	for(;;);
+	for (;;);
 }

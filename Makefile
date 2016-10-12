@@ -3,6 +3,7 @@ AS=i686-elf-as
 CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./ -I./core
 OUTPUT=build/appos.elf
 OBJECTS=boot/arch/pc32/kernel_boot.o \
+	boot/arch/pc32/cmdline_args.o \
 	boot/start.o \
 	core/mem/arch/pc32/mem_arch.o \
 	core/mem/mem_internal.o \

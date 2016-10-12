@@ -5,10 +5,13 @@
 #include <task/task_internal.h>
 
 int                         main(int, char **);
+char                        **setup_cmdline(int *argcPointer);
 
 void main_task()
 {
-	main(0, NULL);
+    int argc = 0;
+    char **argv = setup_cmdline(&argc);
+	main(argc, argv);
 	core_reboot();
 }
 
