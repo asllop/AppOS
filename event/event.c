@@ -3,7 +3,7 @@
 #include <event/event_internal.h>
 #include <task/task.h>
 
-int core_produce(EVENT code, void *message, size_t size)
+int event_produce(EVENT code, void *message, size_t size)
 {
     if ((int)code > MAX_EVENT_QUEUES - 1)
     {
@@ -20,7 +20,7 @@ int core_produce(EVENT code, void *message, size_t size)
     return 0;
 }
 
-void *core_consume(EVENT code, size_t *size)
+void *event_consume(EVENT code, size_t *size)
 {
     if ((int)code > MAX_EVENT_QUEUES - 1)
     {
@@ -39,7 +39,7 @@ void *core_consume(EVENT code, size_t *size)
     return event.message;
 }
 
-int core_wait(EVENT code)
+int event_wait(EVENT code)
 {
     struct QueueStruct *queue = get_queue(code);
     
@@ -56,7 +56,7 @@ int core_wait(EVENT code)
     return 0;
 }
 
-long core_queue(EVENT code)
+long event_queue(EVENT code)
 {
     struct QueueStruct *queue = get_queue(code);
     

@@ -66,7 +66,7 @@ void counter_foo(int line)
 {
     char var_str[100];
     
-    for (unsigned int i = 0 ;; i++)
+    for (unsigned int i = 0 ;;)
     {
         char *mem = core_malloc(10000);
         
@@ -75,15 +75,17 @@ void counter_foo(int line)
             console_put_string(0x4f, "                               ", 2, line);
         }
         
-        console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
-        
         if (mem)
         {
+            console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
             core_free(mem);
+            
+            i ++;
         }
         else
         {
-            core_fatal("NO MEM!");
+            // Not enough free mem
+            i --;
         }
     }
 }
@@ -109,10 +111,10 @@ void event_receiver_task()
     
     for (;;)
     {
-        if (!core_wait(0))
+        if (!event_wait(0))
         {
             size_t size;
-            long long int *counter = (long long int *)core_consume(0, &size);
+            long long int *counter = (long long int *)event_consume(0, &size);
             
             if (counter)
             {
@@ -145,8 +147,9 @@ void main(int argc, char **argv)
     
     // Draw Background
     console_put_data(0x1b, 176, 80*25, 0);
-
-    //console_put_string(0x4f, itoa(argc, var_str, 10), 70, 3);
+    
+    // NOTE: to force free memory crash
+    //while (core_malloc(100000));
     
     // Create a task with priority 0 (the highest)
 	core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
@@ -177,15 +180,19 @@ void main(int argc, char **argv)
         {
             size_t cnt_sz = sizeof(long long int);
             long long int *counter = (long long int *)core_malloc(cnt_sz);
+            
             if (!counter)
             {
-                core_fatal("Couldn't alloc counter");
+                // No enough free mem
             }
-            
-            *counter = (long long int)i;
-            
-            if (core_produce(0, (void *)counter, cnt_sz)) {
-                core_free(counter);
+            else
+            {
+                *counter = (long long int)i;
+                
+                if (event_produce(0, (void *)counter, cnt_sz)) {
+                    // Error producing event, free mem and continue
+                    core_free(counter);
+                }
             }
             
             showUsedMem();
