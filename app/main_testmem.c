@@ -72,7 +72,7 @@ void counter_foo(int line)
     {
         char *mem0 = core_malloc(5000);
         
-        core_sleep(0);
+        //core_sleep(0);
         
         char *mem1 = core_malloc(5000);
         
@@ -80,7 +80,7 @@ void counter_foo(int line)
         
         if (mem0)
         {
-            fast_free(mem0);
+            core_free(mem0);
         }
         else
         {
@@ -90,7 +90,7 @@ void counter_foo(int line)
         
         if (mem1)
         {
-            fast_free(mem1);
+            core_free(mem1);
         }
         else
         {
@@ -120,6 +120,26 @@ void cnt3_task()
     counter_foo(21);
 }
 
+void cnt4_task()
+{
+    counter_foo(20);
+}
+
+void cnt5_task()
+{
+    counter_foo(19);
+}
+
+void cnt6_task()
+{
+    counter_foo(18);
+}
+
+void cnt7_task()
+{
+    counter_foo(17);
+}
+
 void showUsedMem()
 {
     char var_str[20];
@@ -147,6 +167,14 @@ void main(int argc, char **argv)
     
     core_create(cnt3_task, 20, DEFAULT_STACK_SIZE);
     
+    core_create(cnt4_task, 0, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt5_task, 5, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt6_task, 10, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt7_task, 20, DEFAULT_STACK_SIZE);
+    
     console_put_string(0x4f, " Hello AppOS ", 34, 1);
     
     int line = 5;
@@ -166,7 +194,7 @@ void main(int argc, char **argv)
         
         if (mem)
         {
-            fast_free(mem);
+            core_free(mem);
         }
         else
         {

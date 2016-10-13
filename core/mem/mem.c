@@ -130,79 +130,84 @@ int core_free(void *buf)
     
     acquire_mutex(MUTEX_MEM);
     
-    struct AllocStruct *allocBuffer = buf - sizeof(struct AllocStruct);
+    int ret = fast_free(buf);
     
-    if (buf != allocBuffer->buffer)
-    {
-        core_fatal("Couldn't free pointer, is not an alloc buffer");
-    }
-    
-    // Ok, buffer relased, now let's try to join boundary buffers
-    allocBuffer->hole = YES;
-    allocBuffer->block->usedSize -= allocBuffer->totalSize;
-    
-    // Join contiguous buffers, Prev
-    
-    struct AllocStruct *prevBuffer = find_prev_alloc(allocBuffer);
-    
-    while (prevBuffer)
-    {
-        if (prevBuffer->hole == YES)
-        {
-            prevBuffer->next = allocBuffer->next;
-            
-            if (allocBuffer->next)
-            {
-                allocBuffer->next->prev = prevBuffer;
-            }
-            
-            prevBuffer->totalSize += allocBuffer->totalSize + sizeof(struct AllocStruct);
-            prevBuffer->block->usedSize -= sizeof(struct AllocStruct);
-            allocBuffer->buffer = NULL;
-            
-            allocBuffer = prevBuffer;
-        }
-        else
-        {
-            // No more free space to join
-            break;
-        }
-        
-        prevBuffer = find_prev_alloc(allocBuffer);
-    }
-    
-    // Join contiguous buffers, Next (find nextBuffer starting from current allocBuffer)
-    
-    struct AllocStruct *nextBuffer = find_next_alloc(allocBuffer);
-    
-    while (nextBuffer)
-    {
-        if (nextBuffer->hole == YES)
-        {
-            allocBuffer->next = nextBuffer->next;
-            
-            if (allocBuffer->next)
-            {
-                allocBuffer->next->prev = allocBuffer;
-            }
-            
-            allocBuffer->totalSize += nextBuffer->totalSize + sizeof(struct AllocStruct);
-            allocBuffer->block->usedSize -= sizeof(struct AllocStruct);
-            nextBuffer->buffer = NULL;
-        }
-        else
-        {
-            // No more free space to join
-            break;
-        }
-        
-        nextBuffer = find_next_alloc(nextBuffer);
-    }
-    
+//    struct AllocStruct *allocBuffer = buf - sizeof(struct AllocStruct);
+//    
+//    if (buf != allocBuffer->buffer)
+//    {
+//        core_fatal("Couldn't free pointer, is not an alloc buffer");
+//    }
+//    
+//    // Ok, buffer relased, now let's try to join boundary buffers
+//    allocBuffer->hole = YES;
+//    allocBuffer->block->usedSize -= allocBuffer->totalSize;
+//    
+//    // Join contiguous buffers, Prev
+//    
+//    struct AllocStruct *prevBuffer = find_prev_alloc(allocBuffer);
+//    
+//    while (prevBuffer)
+//    {
+//        if (prevBuffer->hole == YES)
+//        {
+//            prevBuffer->next = allocBuffer->next;
+//            
+//            if (allocBuffer->next)
+//            {
+//                allocBuffer->next->prev = prevBuffer;
+//            }
+//            
+//            prevBuffer->totalSize += allocBuffer->totalSize + sizeof(struct AllocStruct);
+//            prevBuffer->block->usedSize -= sizeof(struct AllocStruct);
+//            allocBuffer->buffer = NULL;
+//            
+//            allocBuffer = prevBuffer;
+//        }
+//        else
+//        {
+//            // No more free space to join
+//            break;
+//        }
+//        
+//        prevBuffer = find_prev_alloc(allocBuffer);
+//    }
+//    
+//    // Join contiguous buffers, Next (find nextBuffer starting from current allocBuffer)
+//    
+//    struct AllocStruct *nextBuffer = find_next_alloc(allocBuffer);
+//    
+//    while (nextBuffer)
+//    {
+//        if (nextBuffer->hole == YES)
+//        {
+//            allocBuffer->next = nextBuffer->next;
+//            
+//            if (allocBuffer->next)
+//            {
+//                allocBuffer->next->prev = allocBuffer;
+//            }
+//            
+//            allocBuffer->totalSize += nextBuffer->totalSize + sizeof(struct AllocStruct);
+//            allocBuffer->block->usedSize -= sizeof(struct AllocStruct);
+//            nextBuffer->buffer = NULL;
+//        }
+//        else
+//        {
+//            // No more free space to join
+//            break;
+//        }
+//        
+//        nextBuffer = find_next_alloc(nextBuffer);
+//    }
+//    
     free_mutex(MUTEX_MEM);
     
-    return 0;
+    return ret;
+    //return 0;
 }
+
+// TODO: core_defrag: join blocks to defrag memory
 
 size_t core_avail(MEM_TYPE memtype)
 {
