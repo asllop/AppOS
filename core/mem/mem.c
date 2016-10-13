@@ -123,17 +123,18 @@ void *core_realloc(void *buf, size_t size)
 
 int core_free(void *buf)
 {
+    if (!buf)
+    {
+        return ERR_CODE_RELEASE;
+    }
+    
     acquire_mutex(MUTEX_MEM);
     
     struct AllocStruct *allocBuffer = buf - sizeof(struct AllocStruct);
     
     if (buf != allocBuffer->buffer)
     {
-        free_mutex(MUTEX_MEM);
-        
         core_fatal("Couldn't free pointer, is not an alloc buffer");
-        
-        return ERR_CODE_RELEASE;
     }
     
     // Ok, buffer relased, now let's try to join boundary buffers

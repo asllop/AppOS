@@ -1,6 +1,6 @@
 CC=i686-elf-gcc
 AS=i686-elf-as
-CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./core -I./include
+CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./include -I./core -I./
 OUTPUT=build/appos.elf
 OBJECTS=boot/arch/pc32/kernel_boot.o \
 	boot/arch/pc32/cmdline_args.o \
@@ -15,6 +15,8 @@ OBJECTS=boot/arch/pc32/kernel_boot.o \
 	core/task/task.o \
 	core/task/task_internal.o \
 	core/task/arch/pc32/task_arch.o \
+	event/event_internal.o \
+	event/event.o \
 	app/main.o
 
 %.o: %.c

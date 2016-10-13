@@ -1,5 +1,7 @@
 #include <mem/mem.h>
 #include <task/task.h>
+#include <event/event.h>
+#include <sys/sys.h>
 
 char *itoa(long long int value, char *str, int base)
 {
@@ -75,7 +77,14 @@ void counter_foo(int line)
         
         console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
         
-        core_free(mem);
+        if (mem)
+        {
+            core_free(mem);
+        }
+        else
+        {
+            core_fatal("NO MEM!");
+        }
     }
 }
 
@@ -94,14 +103,50 @@ void cnt2_task()
     counter_foo(24);
 }
 
+void event_receiver_task()
+{
+    char var_str[20];
+    
+    for (;;)
+    {
+        if (!core_wait(0))
+        {
+            size_t size;
+            long long int *counter = (long long int *)core_consume(0, &size);
+            
+            if (counter)
+            {
+                console_put_string(0x4f, itoa(*counter, var_str, 10), 70, 2);
+                core_free((void *)counter);
+            }
+            else
+            {
+                core_fatal("No message arrived in event");
+            }
+        }
+        else
+        {
+            core_fatal("Error waiting for an event");
+        }
+    }
+}
+
+void showUsedMem()
+{
+    char var_str[20];
+    size_t totalMem = core_avail(MEM_TYPE_USED);
+    console_put_string(0x4f, "Used Mem:", 2, 3);
+    console_put_string(0x4f, itoa(totalMem, var_str, 10), 2, 4);
+}
+
 void main(int argc, char **argv)
 {
-	char var_str[100];
+	char var_str[20];
     
     // Draw Background
     console_put_data(0x1b, 176, 80*25, 0);
 
-    console_put_string(0x4f, itoa(argc, var_str, 10), 70, 3);
+    //console_put_string(0x4f, itoa(argc, var_str, 10), 70, 3);
     
     // Create a task with priority 0 (the highest)
 	core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
@@ -111,34 +156,13 @@ void main(int argc, char **argv)
     
     // Create a task with priority 5 (even less priority)
     core_create(cnt2_task, 5, DEFAULT_STACK_SIZE);
+    
+    // Create task to listen events
+    core_create(event_receiver_task, 0, DEFAULT_STACK_SIZE);
 
 	console_put_string(0x4f, " Hello AppOS ", 34, 1);
 
-	int line = 3;
-
-	size_t totalMem = core_avail(MEM_TYPE_USED);
-	console_put_string(0x4f, "Used Mem:", 2, line++);
-	console_put_string(0x4f, itoa(totalMem, var_str, 10), 2, line++);
-
-	console_put_string(0x4f, "Mallocs:", 2, line++);
-    
-    // Alloc two buffers of memory
-	char *mem0 = core_malloc(10000);
-	console_put_string(0x4f, itoa(mem0, var_str, 16), 2, line++);
-	char *mem1 = core_malloc(50000);
-	console_put_string(0x4f, itoa(mem1, var_str, 16), 2, line++);
-
-	totalMem = core_avail(MEM_TYPE_USED);
-	console_put_string(0x4f, "Used Mem After malloc:", 2, line++);
-	console_put_string(0x4f, itoa(totalMem, var_str, 10), 2, line++);
-
-    // Free memory buffers
-	core_free(mem0);
-	core_free(mem1);
-
-	totalMem = core_avail(MEM_TYPE_USED);
-	console_put_string(0x4f, "Used Mem After free:", 2, line++);
-	console_put_string(0x4f, itoa(totalMem, var_str, 10), 2, line++);
+	int line = 5;
 
 	for (unsigned int i = 0 ;; i++)
 	{
@@ -148,6 +172,24 @@ void main(int argc, char **argv)
 		}
 
 		console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
+        
+        if (i % 100 == 0)
+        {
+            size_t cnt_sz = sizeof(long long int);
+            long long int *counter = (long long int *)core_malloc(cnt_sz);
+            if (!counter)
+            {
+                core_fatal("Couldn't alloc counter");
+            }
+            
+            *counter = (long long int)i;
+            
+            if (core_produce(0, (void *)counter, cnt_sz)) {
+                core_free(counter);
+            }
+            
+            showUsedMem();
+        }
 	}
 
 	line++;

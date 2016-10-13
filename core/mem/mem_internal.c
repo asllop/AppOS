@@ -105,8 +105,6 @@ int fast_free(void *buf)
     if (buf != allocBuffer->buffer)
     {
         core_fatal("Couldn't fast-free pointer, is not an alloc buffer");
-        
-        return ERR_CODE_RELEASE;
     }
     
     // Ok, buffer relased
