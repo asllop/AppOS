@@ -17,7 +17,7 @@ OBJECTS=boot/arch/pc32/kernel_boot.o \
 	core/task/arch/pc32/task_arch.o \
 	event/event_internal.o \
 	event/event.o \
-	app/main.o
+	app/main_testmem.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

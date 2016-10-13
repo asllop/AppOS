@@ -148,9 +148,6 @@ void main(int argc, char **argv)
     // Draw Background
     console_put_data(0x1b, 176, 80*25, 0);
     
-    // NOTE: to force free memory crash
-    //while (core_malloc(100000));
-    
     // Create a task with priority 0 (the highest)
 	core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
     
