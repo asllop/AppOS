@@ -60,8 +60,6 @@ void init_cpu_ints()
     set_isr(bad_thing_isr, 13);
     // Page Fault
     set_isr(bad_thing_isr, 14);
-    // Machine Check
-    set_isr(bad_thing_isr, 18);
 }
 
 void io_init()
