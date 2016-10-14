@@ -2,7 +2,8 @@ CC=i686-elf-gcc
 AS=i686-elf-as
 CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./include -I./core -I./ -g
 OUTPUT=build/appos.elf
-OBJECTS=boot/arch/pc32/kernel_boot.o \
+OBJECTS= \
+    boot/arch/pc32/kernel_boot.o \
 	boot/cmdline_args.o \
 	boot/start.o \
 	core/mem/arch/pc32/mem_arch.o \
@@ -17,7 +18,8 @@ OBJECTS=boot/arch/pc32/kernel_boot.o \
 	core/task/arch/pc32/task_arch.o \
 	event/event_internal.o \
 	event/event.o \
-	app/main_testmem.o
+    app/utils.o \
+	app/main_mutextest.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

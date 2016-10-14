@@ -1,15 +1,15 @@
 # AppOS
 *"Don't search an operating system for your application, make your App the OS"*
 
-#### Cross Compiler
+#### 1. Cross Compiler
 
 To compile your AppOS, first generate a GCC cross compiler, following the instructions in [OSDev tutorial](http://wiki.osdev.org/GCC_Cross-Compiler).
 
-#### Prepare App
+#### 2. Prepare App
 
 Write your app in **app/main.c** or add your own files and modify the Makefile.
 
-#### Make
+#### 3. Make
 
 Just it, from a terminal run:
 
@@ -17,7 +17,7 @@ Just it, from a terminal run:
 
 Resulting binary is stored in **build** directory.
 
-#### Run
+#### 4. Run
 
 The easiest way is using QEMU:
 

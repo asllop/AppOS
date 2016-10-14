@@ -17,8 +17,8 @@ typedef enum
 } MUTEX;
 
 void                        mutex_init();
-void                        acquire_mutex(MUTEX mutex);
-void                        free_mutex(MUTEX mutex);
+int                         acquire_mutex(MUTEX mutex);
+int                         free_mutex(MUTEX mutex);
 
 /* Architecture dependant functions */
 

@@ -15,8 +15,8 @@
 TASK                        core_create(void (*task)(), PRIORITY priority, size_t stackSize);
 TASK                        core_self();
 int                         core_escalate(PRIORITY priority);
-int                         core_forbid();
-int                         core_permit();
+void                        core_forbid();
+void                        core_permit();
 TASK_STATE                  core_state(TASK taskid);
 int                         core_result(TASK taskid, int *returnCode, void **bufferPointer);
 void                        core_sleep(unsigned long millis);

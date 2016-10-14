@@ -118,16 +118,14 @@ int core_escalate(PRIORITY priority)
     }
 }
 
-int core_forbid()
+void core_forbid()
 {
     set_scheduling(FALSE);
-    return 0;
 }
 
-int core_permit()
+void core_permit()
 {
     set_scheduling(TRUE);
-    return 0;
 }
 
 TASK_STATE core_state(TASK taskid)
@@ -188,7 +186,10 @@ void core_sleep(unsigned long millis)
         
         while (task->waitUntil > core_timestamp())
         {
-            force_task_scheduling();
+            if (get_scheduling())
+            {
+                force_task_scheduling();
+            }
         }
         
         task->waitUntil = 0;
@@ -197,7 +198,10 @@ void core_sleep(unsigned long millis)
     {
         task->waitUntil = 0;
         
-        force_task_scheduling();
+        if (get_scheduling())
+        {
+            force_task_scheduling();
+        }
     }
 }
 

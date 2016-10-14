@@ -28,29 +28,41 @@ LOCK get_counter(MUTEX mutex)
     return counters[mutex];
 }
 
-void acquire_mutex(MUTEX mutex)
+int acquire_mutex(MUTEX mutex)
 {
-    bool scheduling = get_scheduling();
+    if (!get_scheduling())
+    {
+        return ERR_CODE_MUTEXWHILEFORBID;
+    }
+    
     core_forbid();
     
     LOCK currentCnt = get_counter(mutex);
     LOCK *lock = get_lock(mutex);
     
-    if (scheduling) core_permit();
+    core_permit();
     
     while (*lock != currentCnt)
     {
         core_sleep(0);
     }
+    
+    return 0;
 }
 
-void free_mutex(MUTEX mutex)
+int free_mutex(MUTEX mutex)
 {
-    bool scheduling = get_scheduling();
+    if (!get_scheduling())
+    {
+        return ERR_CODE_MUTEXWHILEFORBID;
+    }
+    
     core_forbid();
     
     LOCK *lock = get_lock(mutex);
     (*lock) ++;
     
-    if (scheduling) core_permit();
+    core_permit();
+    
+    return 0;
 }
