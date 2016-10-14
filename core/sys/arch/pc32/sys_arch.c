@@ -15,8 +15,10 @@ void console_puts(unsigned char color, const char *string, unsigned int x, unsig
 
 void core_halt()
 {
-    asm("cli");
-    asm("hlt");
+    asm(
+        "cli;"
+        "hlt;"
+        );
 }
 
 void core_fatal(char *msg)
