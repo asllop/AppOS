@@ -64,6 +64,7 @@ void *timer_interrupt(void *stackPointer)
     return newStackPointer;
 }
 
+// TODO: implemente interrupts as GCC doc demonstrates
 __attribute__((interrupt)) void pit_isr()
 {
     asm(
@@ -85,6 +86,7 @@ void *fake_timer_interrupt(void *stackPointer)
     return timer_interrupt(stackPointer);
 }
 
+// TODO: implemente interrupts as GCC doc demonstrates
 __attribute__((interrupt)) void fake_timer_isr()
 {
     asm(

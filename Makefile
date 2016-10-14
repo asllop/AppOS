@@ -19,7 +19,7 @@ OBJECTS= \
 	event/event_internal.o \
 	event/event.o \
     app/utils.o \
-	app/main_mutextest.o
+	app/main.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

@@ -1,4 +1,6 @@
 #include <sys/io/arch/pc32/io.h>
+#include <mem/arch/pc32/mem_arch.h>
+#include <sys/sys.h>
 
 // Init PIC1 and PIC2 (Programmable Interrupt Controllers)
 void init_pics()
@@ -26,7 +28,44 @@ void init_pics()
     outportb(PIC1 + 1, 0b11111111);
 }
 
+void bad_thing()
+{
+    core_fatal("Error interrupt received: System Crash!");
+}
+
+// TODO: implemente interrupts as GCC doc demonstrates
+__attribute__((interrupt)) void bad_thing_isr()
+{
+    asm(
+        "pushal;"
+        "calll bad_thing;"
+        "popal;"
+        "iretl;"
+        );
+}
+
+void init_cpu_ints()
+{
+    // Divide Error
+    set_isr(bad_thing_isr, 0);
+    // Non-Maskable Interrupt
+    set_isr(bad_thing_isr, 2);
+    // Invalid Opcode
+    set_isr(bad_thing_isr, 6);
+    // Segment Not Present
+    set_isr(bad_thing_isr, 11);
+    // Stack-Segment Fault
+    set_isr(bad_thing_isr, 12);
+    // General Protection Fault
+    set_isr(bad_thing_isr, 13);
+    // Page Fault
+    set_isr(bad_thing_isr, 14);
+    // Machine Check
+    set_isr(bad_thing_isr, 18);
+}
+
 void io_init()
 {
+    init_cpu_ints();
     init_pics();
 }
