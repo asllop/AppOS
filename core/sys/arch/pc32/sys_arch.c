@@ -13,18 +13,17 @@ void console_puts(unsigned char color, const char *string, unsigned int x, unsig
     }
 }
 
+void emergency_puts(char *str)
+{
+    console_puts(0x4f, str, 0, 0);
+}
+
 void core_halt()
 {
     asm(
         "cli;"
         "hlt;"
         );
-}
-
-void core_fatal(char *msg)
-{
-	console_puts(0x4f, msg, 0, 0);
-    core_halt();
 }
 
 void core_reboot()

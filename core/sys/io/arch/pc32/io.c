@@ -46,12 +46,18 @@ __attribute__((interrupt)) void bad_thing_isr()
 
 void init_cpu_ints()
 {
+    // 2 (NMI) & 4 (Overflow) ignored
+    
     // Divide Error
     set_isr(bad_thing_isr, 0);
-    // Non-Maskable Interrupt
-    set_isr(bad_thing_isr, 2);
+    // BOUND range exceeded
+    set_isr(bad_thing_isr, 5);
     // Invalid Opcode
     set_isr(bad_thing_isr, 6);
+    // Double fault
+    set_isr(bad_thing_isr, 8);
+    // Invalid TSS
+    set_isr(bad_thing_isr, 10);
     // Segment Not Present
     set_isr(bad_thing_isr, 11);
     // Stack-Segment Fault
@@ -60,6 +66,12 @@ void init_cpu_ints()
     set_isr(bad_thing_isr, 13);
     // Page Fault
     set_isr(bad_thing_isr, 14);
+    // Floating-Point Exception
+    set_isr(bad_thing_isr, 16);
+    // Alignment Check
+    set_isr(bad_thing_isr, 17);
+    // Machine Check
+    set_isr(bad_thing_isr, 18);
 }
 
 void io_init()

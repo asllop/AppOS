@@ -1,13 +1,12 @@
-#include <mem/mem_internal.h>
-#include <task/task_internal.h>
 #include <sys/sys_internal.h>
-#include <event/event_internal.h>
+#include <sys/sys.h>
 
-void core_init()
+void core_fatal(char *msg)
 {
-    mutex_init();
-    mem_init();
-    io_init();
-    task_init();
-    event_init();
+    emergency_puts(msg);
+#if REBOOT_ON_FATAL
+    core_reboot();
+#else
+    core_halt();
+#endif
 }
