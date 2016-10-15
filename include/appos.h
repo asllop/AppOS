@@ -22,10 +22,6 @@
 #define FALSE               false
 #endif
 
-#ifndef REBOOT_ON_FATAL
-#define REBOOT_ON_FATAL     NO
-#endif
-
 typedef enum
 {
     ERR_CODE_MEMCOPY        = -512,
