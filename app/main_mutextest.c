@@ -12,9 +12,9 @@ void cnt0_task()
     for (unsigned i = 0 ;; i++)
     {
         core_forbid();
-        acquire_mutex(MUTEX_TERM);
+        core_lock(MUTEX_GENERIC_0);
         console_put_string(0x4f, itoa(i, var_str, 10), 2, 5);
-        free_mutex(MUTEX_TERM);
+        core_unlock(MUTEX_GENERIC_0);
         core_permit();
     }
 }
@@ -24,9 +24,9 @@ void cnt1_task()
     char var_str[20];
     for (unsigned i = 0 ;; i++)
     {
-        acquire_mutex(MUTEX_TERM);
+        core_lock(MUTEX_GENERIC_0);
         console_put_string(0x4f, itoa(i, var_str, 10), 2, 6);
-        free_mutex(MUTEX_TERM);
+        core_unlock(MUTEX_GENERIC_0);
     }
 }
 
@@ -35,9 +35,9 @@ void cnt2_task()
     char var_str[20];
     for (unsigned i = 0 ;; i++)
     {
-        acquire_mutex(MUTEX_TERM);
+        core_lock(MUTEX_GENERIC_0);
         console_put_string(0x4f, itoa(i, var_str, 10), 2, 7);
-        free_mutex(MUTEX_TERM);
+        core_unlock(MUTEX_GENERIC_0);
     }
 }
 

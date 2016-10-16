@@ -10,7 +10,8 @@ void counter_foo(int line)
     
     for (unsigned int i = 0 ;;)
     {
-        char *mem = core_malloc(10000);
+        size_t memsz = 10000;
+        char *mem = core_malloc(memsz);
         
         if (i == 0)
         {
@@ -19,6 +20,7 @@ void counter_foo(int line)
         
         if (mem)
         {
+            core_set(mem, 0x55, memsz);
             console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
             core_free(mem);
             
@@ -143,5 +145,5 @@ void main(int argc, char **argv)
 	console_put_string(0x4f, "End", 2, line++);
 
     // When main function reaches end, the system is restarted
-	for (;;);
+    core_exit(0, NULL);
 }

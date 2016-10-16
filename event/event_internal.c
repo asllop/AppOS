@@ -26,7 +26,7 @@ void event_init()
 
 bool enqueue_event(EVENT code, struct EventStruct *event)
 {
-    acquire_mutex(MUTEX_EVENT);
+    core_lock(MUTEX_EVENT);
     
     if (queueArray[code].elements < MAX_EVENT_NUMBER)
     {
@@ -44,13 +44,13 @@ bool enqueue_event(EVENT code, struct EventStruct *event)
             queueArray[code].tail = 0;
         }
         
-        free_mutex(MUTEX_EVENT);
+        core_unlock(MUTEX_EVENT);
         
         return YES;
     }
     else
     {
-        free_mutex(MUTEX_EVENT);
+        core_unlock(MUTEX_EVENT);
         
         return NO;
     }
@@ -58,7 +58,7 @@ bool enqueue_event(EVENT code, struct EventStruct *event)
 
 bool dequeue_event(EVENT code, struct EventStruct *event)
 {
-    acquire_mutex(MUTEX_EVENT);
+    core_lock(MUTEX_EVENT);
     
     if (queueArray[code].elements)
     {
@@ -84,13 +84,13 @@ bool dequeue_event(EVENT code, struct EventStruct *event)
             queueArray[code].tail = 0;
         }
         
-        free_mutex(MUTEX_EVENT);
+        core_unlock(MUTEX_EVENT);
         
         return YES;
     }
     else
     {
-        free_mutex(MUTEX_EVENT);
+        core_unlock(MUTEX_EVENT);
         
         return NO;
     }

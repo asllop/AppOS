@@ -9,14 +9,14 @@ TIME                        systemTimestamp;
 
 TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
 {
-    acquire_mutex(MUTEX_TASK);
+    core_lock(MUTEX_TASK);
     
     // Search empty slot
     struct TaskStruct *slot = empty_slot();
     
     if (!slot)
     {
-        free_mutex(MUTEX_TASK);
+        core_unlock(MUTEX_TASK);
         
         return 0;
     }
@@ -30,7 +30,7 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     
     if (bestStackSize < stackSize)
     {
-        free_mutex(MUTEX_TASK);
+        core_unlock(MUTEX_TASK);
         
         return 0;
     }
@@ -39,7 +39,7 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     
     if (!stackBuffer)
     {
-        free_mutex(MUTEX_TASK);
+        core_unlock(MUTEX_TASK);
         
         return 0;
     }
@@ -92,7 +92,7 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     // Initialize stack with an empty context
     context_init(slot);
     
-    free_mutex(MUTEX_TASK);
+    core_unlock(MUTEX_TASK);
     
     return slot->id;
 }
@@ -162,11 +162,11 @@ int core_result(TASK taskid, int *returnCode, void **bufferPointer)
         *returnCode = task->returnCode;
         *bufferPointer = task->returnBuffer;
         
-        acquire_mutex(MUTEX_TASK);
+        core_lock(MUTEX_TASK);
         
         terminate_task(task);
         
-        free_mutex(MUTEX_TASK);
+        core_unlock(MUTEX_TASK);
         
         return 0;
     }
@@ -204,6 +204,8 @@ void core_sleep(unsigned long millis)
         }
     }
 }
+
+// TODO: create an exit function without return code that ends immediately
 
 void core_exit(int returnCode, void *returnBuffer)
 {

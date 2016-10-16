@@ -1,25 +1,15 @@
-#include <sys/sys.h>
-
 #ifndef SYS_INTERNAL_H
 #define	SYS_INTERNAL_H
 
-typedef enum
-{
-    MUTEX_MEM               = 0,
-    MUTEX_TASK,
-    MUTEX_EVENT,
-    MUTEX_TERM,
-    
-    /* Custom mutex goes here ... */
-    
-    MUTEX_NUMBER
-    
-} MUTEX;
+#include <appos.h>
+#include <sys/sys.h>
+
+typedef unsigned int        LOCK;
 
 void                        core_init();
 void                        mutex_init();
-int                         acquire_mutex(MUTEX mutex);
-int                         free_mutex(MUTEX mutex);
+LOCK                        *get_lock(MUTEX mutex);
+LOCK                        get_counter(MUTEX mutex);
 
 /* Architecture dependant functions */
 

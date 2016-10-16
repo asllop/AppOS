@@ -8,7 +8,7 @@
 
 void *core_malloc(size_t size)
 {
-    acquire_mutex(MUTEX_MEM);
+    core_lock(MUTEX_MEM);
     
     int numBlocks;
     struct BlockStruct *blocks = get_blocks(&numBlocks);
@@ -66,7 +66,7 @@ void *core_malloc(size_t size)
                             blocks[i].usedSize += size;
                         }
                         
-                        free_mutex(MUTEX_MEM);
+                        core_unlock(MUTEX_MEM);
                         
                         return allocBuffer->buffer;
                     }
@@ -77,7 +77,7 @@ void *core_malloc(size_t size)
         }
     }
     
-    free_mutex(MUTEX_MEM);
+    core_unlock(MUTEX_MEM);
     
     return NULL;
 }
@@ -91,7 +91,7 @@ void *core_realloc(void *buf, size_t size)
         return NULL;
     }
     
-    acquire_mutex(MUTEX_MEM);
+    core_lock(MUTEX_MEM);
     
     struct AllocStruct *allocBuffer = buf - sizeof(struct AllocStruct);
     
@@ -113,7 +113,7 @@ void *core_realloc(void *buf, size_t size)
         copySize = size;
     }
     
-    free_mutex(MUTEX_MEM);
+    core_unlock(MUTEX_MEM);
     
     core_copy(newBuff, buf, copySize);
     core_free(buf);
@@ -128,7 +128,7 @@ int core_free(void *buf)
         return ERR_CODE_RELEASE;
     }
     
-    acquire_mutex(MUTEX_MEM);
+    core_lock(MUTEX_MEM);
     
     int ret = fast_free(buf);
     
@@ -201,7 +201,7 @@ int core_free(void *buf)
 //        nextBuffer = find_next_alloc(nextBuffer);
 //    }
 //    
-    free_mutex(MUTEX_MEM);
+    core_unlock(MUTEX_MEM);
     
     return ret;
     //return 0;
@@ -211,7 +211,7 @@ int core_free(void *buf)
 
 size_t core_avail(MEM_TYPE memtype)
 {
-    acquire_mutex(MUTEX_MEM);
+    core_lock(MUTEX_MEM);
     
     int numBlocks;
     struct BlockStruct *blocks = get_blocks(&numBlocks);
@@ -227,7 +227,7 @@ size_t core_avail(MEM_TYPE memtype)
                 total += blocks[i].totalSize;
             }
             
-            free_mutex(MUTEX_MEM);
+            core_unlock(MUTEX_MEM);
             
             return total;
         }
@@ -242,7 +242,7 @@ size_t core_avail(MEM_TYPE memtype)
                 free += (blocks[i].totalSize - blocks[i].usedSize);
             }
             
-            free_mutex(MUTEX_MEM);
+            core_unlock(MUTEX_MEM);
             
             return free;
         }
@@ -257,14 +257,14 @@ size_t core_avail(MEM_TYPE memtype)
                 used += blocks[i].usedSize;
             }
             
-            free_mutex(MUTEX_MEM);
+            core_unlock(MUTEX_MEM);
             
             return used;
         }
             break;
             
         default:
-            free_mutex(MUTEX_MEM);
+            core_unlock(MUTEX_MEM);
             
             return 0;
     }
@@ -272,7 +272,7 @@ size_t core_avail(MEM_TYPE memtype)
 
 size_t core_best(size_t size)
 {
-    acquire_mutex(MUTEX_MEM);
+    core_lock(MUTEX_MEM);
     
     size_t biggestSize = 0;
     int numBlocks;
@@ -293,13 +293,13 @@ size_t core_best(size_t size)
                 {
                     if (allocBuffer->totalSize > BUFFER_MIN_SIZE(size))
                     {
-                        free_mutex(MUTEX_MEM);
+                        core_unlock(MUTEX_MEM);
                         
                         return size;
                     }
                     else
                     {
-                        free_mutex(MUTEX_MEM);
+                        core_unlock(MUTEX_MEM);
                         
                         return allocBuffer->totalSize;
                     }
@@ -316,7 +316,7 @@ size_t core_best(size_t size)
     }
     
     // Not enought space to fit the buffer, return the biggest allocable size
-    free_mutex(MUTEX_MEM);
+    core_unlock(MUTEX_MEM);
     
     return biggestSize;
 }

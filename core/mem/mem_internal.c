@@ -113,17 +113,3 @@ int fast_free(void *buf)
     
     return 0;
 }
-
-/* clang makes implicit use of memset and memcpy to initialize and copy structs */
-
-// void *memset(void *b, int c, size_t len)
-// {
-//     core_set(b, c, len);
-//     return b;
-// }
-
-// void *memcpy(void *restrict dst, const void *restrict src, size_t n)
-// {
-//     core_copy(dst, (void *)src, n);
-//     return dst;
-// }
