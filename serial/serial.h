@@ -31,7 +31,7 @@ typedef unsigned char       SERIAL_PARITY;
 
 typedef unsigned char       PORT;
 
-void                        serial_send(PORT serial_port, byte *data, size_t size);
+size_t                      serial_send(PORT serial_port, byte *data, size_t size);
 size_t                      serial_receive(PORT serial_port, byte *data, size_t size);
 bool                        serial_avail(PORT serial_port);
 void                        serial_wait(PORT serial_port);
