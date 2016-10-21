@@ -64,9 +64,7 @@ unsigned char port_parity(SERIAL_PARITY parity)
     }
 }
 
-// TODO: check interrupts stuff
-
-int serial_setup(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP stop, int baudrate)
+int serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP stop, int baudrate)
 {
     if (115200 % baudrate != 0 || baudrate <= 0)
     {

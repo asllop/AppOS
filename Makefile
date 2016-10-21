@@ -21,7 +21,7 @@ OBJECTS= \
     serial/arch/pc32/serial_arch.o \
     serial/serial.o \
     app/utils.o \
-	app/main.o
+	app/main_serial.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

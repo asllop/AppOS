@@ -2,8 +2,6 @@
 #include <serial/serial.h>
 #include <serial/serial_internal.h>
 
-#define READ_RETRY      3
-
 static time_t serial_timeout_t_ms = 500;
 
 size_t serial_send(PORT serial_port, byte *data, size_t size)

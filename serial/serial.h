@@ -39,6 +39,6 @@ void                        serial_timeout(time_t millis);
 
 /* Architecture dependant functions */
 
-int                         serial_setup(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP stop, int baudrate);
+int                         serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP stop, int baudrate);
 
 #endif

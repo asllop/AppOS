@@ -1,3 +1,4 @@
+#include <appos.h>
 
 char *itoa(long long int value, char *str, int base)
 {
@@ -56,4 +57,20 @@ void console_put_data(int colour, char data, int repeat, unsigned int offset)
         *video++ = data;
         *video++ = colour;
     }
+}
+
+size_t strlen(const char *str)
+{
+    size_t i;
+    
+    for (i = 0 ; str[i] != 0 ; i++)
+    {
+        // Limit
+        if (i > 10000)
+        {
+            break;
+        }
+    }
+    
+    return i;
 }
