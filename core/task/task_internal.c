@@ -84,7 +84,7 @@ struct TaskStruct *prev_used_slot(struct TaskStruct *slot)
     // Move to the end of task buffer
     initId = MAX_NUM_TASK;
     
-    for (int i = initId ; i >= slot->id ; i--)
+    for (unsigned int i = initId ; i >= slot->id ; i--)
     {
         task = get_slot(i);
         
@@ -120,7 +120,7 @@ struct TaskStruct *next_used_slot(struct TaskStruct *slot)
     // Move to the start of task buffer
     initId = 1;
     
-    for (int i = initId ; i <= slot->id ; i++)
+    for (unsigned int i = initId ; i <= slot->id ; i++)
     {
         task = get_slot(i);
         

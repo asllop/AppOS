@@ -115,9 +115,9 @@ int scan_blocks(struct BlockStruct *blockArray)
                 if (mmap_unit->base_addr > 0)
                 {
                     // NOTE: Part of the HiMem is being used by the kernel code, we must reserve this
-                    //unsigned int margin = 100*1024;
-                    unsigned int margin = 0;
-                    unsigned long long kernelSize = (unsigned long long)(kernel_end - (void *)mmap_unit->base_addr);
+                    //uint32_t margin = 100*1024;
+                    uint32_t margin = 0;
+                    uint32_t kernelSize = (uint32_t)(kernel_end - mmap_unit->base_addr);
                     
                     blockArray[0].block = kernel_end + margin;
                     blockArray[0].totalSize = mmap_unit->length - kernelSize - margin;

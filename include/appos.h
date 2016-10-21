@@ -22,6 +22,10 @@
 #define FALSE               false
 #endif
 
+#ifndef __unused
+#define __unused            __attribute__((unused))
+#endif
+
 typedef enum
 {
     ERR_CODE_MEMCOPY        = -512,
@@ -35,7 +39,8 @@ typedef enum
     ERR_CODE_BADCONSOLERES,
     ERR_CODE_FRAMEBUFFERMEM,
     ERR_CODE_INPUTBUFFERMEM,
-    ERR_CODE_MUTEXWHILEFORBID
+    ERR_CODE_MUTEXWHILEFORBID,
+    ERR_CODE_BADSERIALCONFIG,
     
 } ERR_CODE;
 

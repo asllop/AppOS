@@ -4,7 +4,7 @@
 #define	EVENT_INTERNAL_H
 
 #ifndef MAX_EVENT_QUEUES
-#define MAX_EVENT_QUEUES    256
+#define MAX_EVENT_QUEUES    128             // Since EVENT is 1 Byte wide, MAX_EVENT_QUEUES could be 256 at most 
 #endif
 
 #ifndef MAX_EVENT_NUMBER

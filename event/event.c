@@ -5,7 +5,7 @@
 
 int event_produce(EVENT code, void *message, size_t size)
 {
-    if ((int)code > MAX_EVENT_QUEUES - 1)
+    if (code > MAX_EVENT_QUEUES - 1)
     {
         return ERR_CODE_NOEVENT;
     }
@@ -22,7 +22,7 @@ int event_produce(EVENT code, void *message, size_t size)
 
 void *event_consume(EVENT code, size_t *size)
 {
-    if ((int)code > MAX_EVENT_QUEUES - 1)
+    if (code > MAX_EVENT_QUEUES - 1)
     {
         return NULL;
     }

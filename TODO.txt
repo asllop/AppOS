@@ -1,0 +1,16 @@
+ * core_defrag, join empty blocks of memory.
+
+ * Create an alternative memory manager for small dynamic blocks. Two mm: Big Blocks (the current) and Small Blocks.
+
+ * Add event_register and event_send, to receive messages async. It will create a new task when event is received, passing data to it. The thread must end before it can receive another event.
+
+ * Serial port interface (UART)
+
+ * Console interface, with support for drivers. Drivers for Serial Port console and Screen-Keyb console.
+
+ * USB: host controller driver and libUSB-like interface for API (or port libUSB).
+
+ * Interface for other ports (SPI, I2C)
+
+ * Networking with support for drivers.
+    - SLIP-Serial port driver
