@@ -36,15 +36,12 @@ size_t serial_receive(PORT serial_port, byte *data, size_t size)
             {
                 break;
             }
-            else
-            {
-                lastTimestamp = core_timestamp();
-            }
         }
         
         if (is_data_ready(serial_port))
         {
             data[read_bytes] = serial_read_byte(serial_port);
+            lastTimestamp = core_timestamp();
         }
         else
         {
