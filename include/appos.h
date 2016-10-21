@@ -49,6 +49,7 @@ typedef unsigned int            PRIORITY;
 typedef unsigned char           EVENT;
 typedef unsigned long long      TIME;
 typedef long                    time_t;
+typedef unsigned char           byte;
 
 #endif
 

@@ -18,6 +18,8 @@ OBJECTS= \
 	core/task/arch/pc32/task_arch.o \
 	event/event_internal.o \
 	event/event.o \
+    serial/arch/pc32/serial_arch.o \
+    serial/serial.o \
     app/utils.o \
 	app/main.o
 
