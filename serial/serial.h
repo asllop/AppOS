@@ -35,6 +35,7 @@ size_t                      serial_send(PORT serial_port, byte *data, size_t siz
 size_t                      serial_receive(PORT serial_port, byte *data, size_t size);
 bool                        serial_avail(PORT serial_port);
 void                        serial_wait(PORT serial_port);
+void                        serial_timeout(time_t millis);
 
 /* Architecture dependant functions */
 
