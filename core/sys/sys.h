@@ -29,5 +29,6 @@ int                         core_unlock(MUTEX mutex);
 
 void                        core_halt();
 void                        core_reboot();
+void                        core_log(char *str);
 
 #endif

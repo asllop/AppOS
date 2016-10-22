@@ -44,8 +44,29 @@ __attribute__((interrupt)) void bad_thing_isr()
         );
 }
 
+void empty_int()
+{
+    core_log("AppOS Empty Int :)\n");
+}
+
+// TODO: implemente interrupts as GCC doc demonstrates
+__attribute__((interrupt)) void empty_int_isr()
+{
+    asm(
+        "pushal;"
+        "calll empty_int;"
+        "popal;"
+        "iretl;"
+        );
+}
+
 void init_cpu_ints()
 {
+    for (int vector = 0 ; vector < 256 ; vector++)
+    {
+        set_isr(empty_int_isr, vector);
+    }
+    
     // 2 (NMI) & 4 (Overflow) ignored
     
     // Divide Error

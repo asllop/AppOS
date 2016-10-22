@@ -7,7 +7,7 @@
 
 void main(__unused int argc, __unused char **argv)
 {
-	char *hola = "Write data:\n";
+	char *message = "Write data:\n";
     PORT port = 0;
     int line = 3;
     
@@ -18,10 +18,10 @@ void main(__unused int argc, __unused char **argv)
 
     if (serial_init(port, SERIAL_DATA_8b, SERIAL_PARITY_NONE, SERIAL_STOP_1b, 9600))
     {
-        core_fatal("Error seting up serial device");
+        core_fatal("Error setting up serial device");
     }
     
-    serial_send(port, (byte *)hola, strlen(hola));
+    serial_send(port, (byte *)message, strlen(message));
     
     char data[5];
     

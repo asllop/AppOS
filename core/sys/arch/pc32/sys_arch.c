@@ -38,3 +38,14 @@ void core_reboot()
     outportb(0x64, 0xFE);
     core_halt();
 }
+
+// NOTE: We are not configuring serial port, Only for QEMU
+void core_log(char *str)
+{
+    for (int i = 0 ; str[i] != 0 ; i++)
+    {
+        while ((inportb(0x3F8 + 5) & 0x20) == 0);
+        
+        outportb(0x3F8, (unsigned char)str[i]);
+    }
+}
