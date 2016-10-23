@@ -13,6 +13,8 @@ void core_init()
     mem_init();
     io_init();
     task_init();
+    
+    // TODO: make it optional
     event_init();
 }
 

@@ -98,5 +98,14 @@ void init_cpu_ints()
 void io_init()
 {
     init_cpu_ints();
+    
+//    core_log("Int 0xCC...\n");
+//    asm(
+//        "int %0;"
+//        :
+//        : "i" (0xCC)
+//        );
+//    core_log("Done!\n");
+    
     init_pics();
 }

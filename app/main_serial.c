@@ -5,9 +5,16 @@
 #include <serial/serial.h>
 #include "utils.h"
 
+#define ESC "\x1b["
+
 void main(__unused int argc, __unused char **argv)
 {
-	char *message = "Write data:\n";
+	char *setColors = ESC"37;41m";
+    char *clearScreen = ESC"2J";
+    char *setCursosOrg = ESC"0;0H";
+    char *message = "Hello AppOS!\n\r";
+    char *resetColors = ESC"0m";
+    
     PORT port = 0;
     int line = 3;
     
@@ -21,6 +28,11 @@ void main(__unused int argc, __unused char **argv)
         core_fatal("Error setting up serial device");
     }
     
+    serial_send(port, (byte *)clearScreen, strlen(clearScreen));
+    serial_send(port, (byte *)setCursosOrg, strlen(setCursosOrg));
+    serial_send(port, (byte *)setColors, strlen(setColors));
+    serial_send(port, (byte *)message, strlen(message));
+    serial_send(port, (byte *)resetColors, strlen(resetColors));
     serial_send(port, (byte *)message, strlen(message));
     
     char data[5];
