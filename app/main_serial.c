@@ -43,7 +43,7 @@ void main(__unused int argc, __unused char **argv)
     {
         serial_wait(port);
         console_put_string(0x4f, "> ", 0, line);
-        size_t sz = serial_receive(port, data, 5);
+        size_t sz = serial_receive(port, (byte *)data, 5);
         data[sz] = 0;
         console_put_string(0x4f, data, 2, line++);
     }

@@ -1,7 +1,8 @@
+#include <appos.h>
+
 #ifndef TERM_INTERNAL_H
 #define	TERM_INTERNAL_H
 
-#include <appos.h>
 #include <term/term.h>
 
 #ifndef TERM_NUM_DRIVERS
