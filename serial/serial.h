@@ -3,31 +3,31 @@
 #ifndef SERIAL_H
 #define	SERIAL_H
 
-enum SERIAL_DATA
+typedef enum
 {
     SERIAL_DATA_8b          = 0,
     SERIAL_DATA_7b,
     SERIAL_DATA_6b,
     SERIAL_DATA_5b
-};
-typedef unsigned char       SERIAL_DATA;
+    
+} SERIAL_DATA;
 
-enum SERIAL_STOP
+typedef enum
 {
     SERIAL_STOP_1b          = 0,
     SERIAL_STOP_2b
-};
-typedef unsigned char       SERIAL_STOP;
+    
+} SERIAL_STOP;
 
-enum SERIAL_PARITY
+typedef enum
 {
     SERIAL_PARITY_NONE      = 0,
     SERIAL_PARITY_ODD,
     SERIAL_PARITY_EVEN,
     SERIAL_PARITY_MARK,
     SERIAL_PARITY_SPACE
-};
-typedef unsigned char       SERIAL_PARITY;
+    
+} SERIAL_PARITY;
 
 typedef unsigned char       PORT;
 
