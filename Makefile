@@ -20,6 +20,8 @@ OBJECTS= \
 	event/event.o \
     serial/arch/pc32/serial_arch.o \
     serial/serial.o \
+    term/term_internal.o \
+    term/term.o \
     app/utils.o \
 	app/main_serial.o
 
