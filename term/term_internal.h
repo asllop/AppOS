@@ -9,15 +9,6 @@
 #define TERM_NUM_DRIVERS    2
 #endif
 
-typedef enum
-{
-    TERM_TYPE_TEXT          = 0,
-    TERM_TYPE_GFX,
-    TERM_TYPE_SERIAL,
-    TERM_TYPE_VIRTUAL
-    
-} TERM_TYPE;
-
 struct TermDriverStruct
 {
     TERM_TYPE               type;

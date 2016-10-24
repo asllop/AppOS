@@ -26,11 +26,22 @@ typedef enum
     
 } TERM_CTRL;
 
-#define TERM_EMPTY          -1
+typedef enum
+{
+    TERM_TYPE_TEXT          = 0,
+    TERM_TYPE_GFX,
+    TERM_TYPE_SERIAL,
+    TERM_TYPE_NET,
+    TERM_TYPE_BT,
+    TERM_TYPE_BLE,
+    TERM_TYPE_USB,
+    TERM_TYPE_VIRTUAL
+    
+} TERM_TYPE;
 
 typedef unsigned char       TERM;
 
-bool                        term_ready(TERM term);
+TERM_TYPE                   term_type(TERM term);
 void                        term_text(TERM term, TERM_COLOR color);
 void                        term_background(TERM term, TERM_COLOR color);
 void                        term_resolution(TERM term, int *w, int *h);

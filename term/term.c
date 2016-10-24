@@ -1,16 +1,16 @@
 #include <term/term.h>
 #include <term/term_internal.h>
 
-bool term_ready(TERM term)
+TERM_TYPE term_type(TERM term)
 {
     struct TermDriverStruct *driver = get_term_driver(term);
     if (driver)
     {
-        return YES;
+        return driver->type;
     }
     else
     {
-        return NO;
+        return -1;
     }
 }
 

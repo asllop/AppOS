@@ -30,7 +30,7 @@ int term_register(struct TermDriverStruct *driver)
 
 struct TermDriverStruct *get_term_driver(TERM term)
 {
-    if (term_driver_ID_count < TERM_NUM_DRIVERS)
+    if (term < term_driver_ID_count)
     {
         return &term_drivers_list[term];
     }
