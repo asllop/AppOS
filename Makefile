@@ -22,6 +22,7 @@ OBJECTS= \
     serial/serial.o \
     term/term_internal.o \
     term/term.o \
+    term/ansi.o \
     app/utils.o \
 	app/main_serial.o
 

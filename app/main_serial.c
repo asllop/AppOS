@@ -3,17 +3,15 @@
 #include <event/event.h>
 #include <sys/sys.h>
 #include <serial/serial.h>
+#include <term/ansi.h>
 #include "utils.h"
 
 #define ESC "\x1b["
 
 void main(__unused int argc, __unused char **argv)
 {
-	char *setColors = ESC"37;41m";
-    char *clearScreen = ESC"2J";
-    char *setCursosOrg = ESC"0;0H";
-    char *message = "Hello AppOS!\n\r";
-    char *resetColors = ESC"0m";
+    char var_str[20];
+    char *message = "Hello AppOS!\n";
     
     PORT port = 0;
     int line = 3;
@@ -28,12 +26,45 @@ void main(__unused int argc, __unused char **argv)
         core_fatal("Error setting up serial device");
     }
     
-    serial_send(port, (byte *)clearScreen, strlen(clearScreen));
-    serial_send(port, (byte *)setCursosOrg, strlen(setCursosOrg));
-    serial_send(port, (byte *)setColors, strlen(setColors));
+    char cmd[10];
+    
+    // Clear screen
+    ansi_clear_screen(cmd);
+    serial_send(port, (byte *)cmd, strlen(cmd));
+    
+    // Set Cursor Pos
+    ansi_set_cursor(cmd, 20, 10);
+    serial_send(port, (byte *)cmd, strlen(cmd));
+    
+    // Set Gfx modes (Text and Background colors in this case)
+    int modes[] = {37, 41};
+    ansi_set_gfx_mode(cmd, modes, 2);
+    serial_send(port, (byte *)cmd, strlen(cmd));
+    
     serial_send(port, (byte *)message, strlen(message));
-    serial_send(port, (byte *)resetColors, strlen(resetColors));
+    
+    // Disable gfx modes (colors)
+    modes[0] = 0;
+    ansi_set_gfx_mode(cmd, modes, 1);
+    serial_send(port, (byte *)cmd, strlen(cmd));
+    
     serial_send(port, (byte *)message, strlen(message));
+    
+    // Hide/show cursor
+    ansi_show_cursor(cmd);
+    serial_send(port, (byte *)cmd, strlen(cmd));
+    
+    // Report cursor position
+    ansi_report_cursor(cmd);
+    serial_send(port, (byte *)cmd, strlen(cmd));
+    
+    // Parse cursor report response
+    int row, col;
+    if (ansi_parse_report(ESC"21;56R", &row, &col))
+    {
+        console_put_string(0x4f, itoa(row, var_str, 10), 20, 4);
+        console_put_string(0x4f, itoa(col, var_str, 10), 20, 5);
+    }
     
     char data[5];
     
