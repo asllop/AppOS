@@ -33,7 +33,6 @@ typedef enum
     TERM_TYPE_SERIAL,
     TERM_TYPE_NET,
     TERM_TYPE_BT,
-    TERM_TYPE_BLE,
     TERM_TYPE_USB,
     TERM_TYPE_VIRTUAL
     
