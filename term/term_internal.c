@@ -7,7 +7,7 @@ int term_register(struct TermDriverStruct *driver)
 {
     if (term_driver_ID_count < TERM_NUM_DRIVERS)
     {
-        byte driverID = term_driver_ID_count;
+        TERM driverID = term_driver_ID_count;
         term_driver_ID_count ++;
         
         term_drivers_list[driverID].type = driver->type;
