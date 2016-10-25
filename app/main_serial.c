@@ -37,15 +37,13 @@ void main(__unused int argc, __unused char **argv)
     serial_send(port, (byte *)cmd, strlen(cmd));
     
     // Set Gfx modes (Text and Background colors in this case)
-    int modes[] = {37, 41};
-    ansi_set_gfx_mode(cmd, modes, 2);
+    ansi_set_gfx_mode(cmd, (int[]){37, 41}, 2);
     serial_send(port, (byte *)cmd, strlen(cmd));
     
     serial_send(port, (byte *)message, strlen(message));
     
     // Disable gfx modes (colors)
-    modes[0] = 0;
-    ansi_set_gfx_mode(cmd, modes, 1);
+    ansi_set_gfx_mode(cmd, (int[]){0}, 1);
     serial_send(port, (byte *)cmd, strlen(cmd));
     
     serial_send(port, (byte *)message, strlen(message));
