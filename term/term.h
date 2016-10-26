@@ -38,7 +38,7 @@ typedef enum
     
 } TERM_TYPE;
 
-typedef unsigned char       TERM;
+typedef int                 TERM;
 
 TERM_TYPE                   term_type(TERM term);
 void                        term_text(TERM term, TERM_COLOR color);
@@ -48,6 +48,8 @@ void                        term_position(TERM term, int x, int y);
 void                        term_cursor(TERM term, bool visible);
 void                        term_reset(TERM term);
 void                        term_putc(TERM term, char c);
+void                        term_puts(TERM term, char *str);
 int                         term_getc(TERM term);
+int                         term_gets(TERM term, char *str);
 
 #endif

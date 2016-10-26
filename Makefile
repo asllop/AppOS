@@ -22,9 +22,10 @@ OBJECTS= \
     serial/serial.o \
     term/term_internal.o \
     term/term.o \
+    term/drivers/term_serial/term_serial.o \
     term/ansi.o \
     app/utils.o \
-	app/main_serial.o
+	app/main_term.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

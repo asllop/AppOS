@@ -3,7 +3,7 @@
 static TERM term_driver_ID_count = 0;
 static struct TermDriverStruct term_drivers_list[TERM_NUM_DRIVERS];
 
-int term_register(struct TermDriverStruct *driver)
+TERM term_register(struct TermDriverStruct *driver)
 {
     if (term_driver_ID_count < TERM_NUM_DRIVERS)
     {
@@ -11,6 +11,7 @@ int term_register(struct TermDriverStruct *driver)
         term_driver_ID_count ++;
         
         term_drivers_list[driverID].type = driver->type;
+        term_drivers_list[driverID].customID = driver->customID;
         term_drivers_list[driverID].text = driver->text;
         term_drivers_list[driverID].background = driver->background;
         term_drivers_list[driverID].resolution = driver->resolution;

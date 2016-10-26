@@ -12,17 +12,18 @@
 struct TermDriverStruct
 {
     TERM_TYPE               type;
-    void                    (*text)(TERM_COLOR color);
-    void                    (*background)(TERM_COLOR color);
-    void                    (*resolution)(int *w, int *h);
-    void                    (*position)(int x, int y);
-    void                    (*cursor)(bool visible);
-    void                    (*reset)();
-    void                    (*putc)(char c);
-    int                     (*getc)();
+    int                     customID;
+    void                    (*text)(int customID, TERM_COLOR color);
+    void                    (*background)(int customID, TERM_COLOR color);
+    void                    (*resolution)(int customID, int *w, int *h);
+    void                    (*position)(int customID, int x, int y);
+    void                    (*cursor)(int customID, bool visible);
+    void                    (*reset)(int customID);
+    void                    (*putc)(int customID, char c);
+    int                     (*getc)(int customID);
 };
 
-int                         term_register(struct TermDriverStruct *driver);
+TERM                        term_register(struct TermDriverStruct *driver);
 struct TermDriverStruct     *get_term_driver(TERM term);
 
 #endif
