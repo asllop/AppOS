@@ -17,13 +17,22 @@ void main(__unused int argc, __unused char **argv)
     }
     
     term_reset(termID);
+    term_text(termID, TERM_COLOR_RED);
+    term_position(termID, 0, 2);
+    
+    term_puts(termID, "                                                          \n");
+    term_puts(termID, "         _/_/                          _/_/      _/_/_/   \n");
+    term_puts(termID, "      _/    _/  _/_/_/    _/_/_/    _/    _/  _/          \n");
+    term_puts(termID, "     _/_/_/_/  _/    _/  _/    _/  _/    _/    _/_/       \n");
+    term_puts(termID, "    _/    _/  _/    _/  _/    _/  _/    _/        _/      \n");
+    term_puts(termID, "   _/    _/  _/_/_/    _/_/_/      _/_/    _/_/_/         \n");
+    term_puts(termID, "            _/        _/                                  \n");
+    term_puts(termID, "           _/        _/                                   \n");
+    term_puts(termID, "                                                          \n");
+    
+    term_puts(termID, "\n\n");
     term_text(termID, TERM_COLOR_WHITE);
-    term_background(termID, TERM_COLOR_RED);
-    term_position(termID, 30, 2);
-    term_puts(termID, "Hello AppOS!");
-    term_text(termID, TERM_COLOR_BLACK);
-    term_background(termID, TERM_COLOR_WHITE);
-    term_position(termID, 0, 4);
+    term_background(termID, TERM_COLOR_BLUE);
     
     for (;;)
     {
@@ -57,13 +66,8 @@ void main(__unused int argc, __unused char **argv)
         }
     }
     
-    term_puts(termID, "\n\n");
-    term_text(termID, TERM_COLOR_WHITE);
-    term_background(termID, TERM_COLOR_BLUE);
-    term_puts(termID, "Good bye");
-    term_text(termID, TERM_COLOR_BLACK);
-    term_background(termID, TERM_COLOR_WHITE);
-    term_puts(termID, "\n");
+    term_reset(termID);
+    term_puts(termID, "Good bye!\n");
     
     core_halt();
 }
