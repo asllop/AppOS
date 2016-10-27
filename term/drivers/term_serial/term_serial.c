@@ -50,23 +50,7 @@ void term_serial_resolution(int customID, int *w, int *h)
     ansi_set_cursor(cmd, 999, 999);
     serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
     
-    ansi_report_cursor(cmd);
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
-    
-    int i = 0;
-    while (true) {
-        if (serial_avail((PORT)customID)) {
-            byte ch;
-            serial_receive((PORT)customID, &ch, 1);
-            cmd[i++] = (char)ch;
-            if (ch == 'R')
-            {
-                cmd[i] = '\0';
-                break;
-            }
-        }
-    }
-    ansi_parse_report(cmd, h, w);
+    term_serial_where(customID, w, h);
     
     ansi_set_cursor(cmd, x, y);
     serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
