@@ -41,6 +41,15 @@ void term_resolution(TERM term, int *w, int *h)
     }
 }
 
+void term_where(TERM term, int *x, int *y)
+{
+    struct TermDriverStruct *driver = get_term_driver(term);
+    if (driver)
+    {
+        driver->where(driver->customID, x, y);
+    }
+}
+
 void term_position(TERM term, int x, int y)
 {
     struct TermDriverStruct *driver = get_term_driver(term);

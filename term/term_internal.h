@@ -16,6 +16,7 @@ struct TermDriverStruct
     void                    (*text)(int customID, TERM_COLOR color);
     void                    (*background)(int customID, TERM_COLOR color);
     void                    (*resolution)(int customID, int *w, int *h);
+    void                    (*where)(int customID, int *x, int *y);
     void                    (*position)(int customID, int x, int y);
     void                    (*cursor)(int customID, bool visible);
     void                    (*reset)(int customID);

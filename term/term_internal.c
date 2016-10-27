@@ -15,6 +15,7 @@ TERM term_register(struct TermDriverStruct *driver)
         term_drivers_list[driverID].text = driver->text;
         term_drivers_list[driverID].background = driver->background;
         term_drivers_list[driverID].resolution = driver->resolution;
+        term_drivers_list[driverID].where = driver->where;
         term_drivers_list[driverID].position = driver->position;
         term_drivers_list[driverID].cursor = driver->cursor;
         term_drivers_list[driverID].reset = driver->reset;

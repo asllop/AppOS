@@ -16,20 +16,19 @@ typedef enum
     
 } TERM_COLOR;
 
-typedef enum
-{
-    TERM_CTRL_UP            = 256,
-    TERM_CTRL_DOWN,
-    TERM_CTRL_LEFT,
-    TERM_CTRL_RIGHT
-    // TODO: more control seq returned by term_getc
-    
-} TERM_CTRL;
+//typedef enum
+//{
+//    TERM_CTRL_UP            = 256,
+//    TERM_CTRL_DOWN,
+//    TERM_CTRL_LEFT,
+//    TERM_CTRL_RIGHT
+//    // TODO: more control seq returned by term_getc
+//    
+//} TERM_CTRL;
 
 typedef enum
 {
-    TERM_TYPE_TEXT          = 0,
-    TERM_TYPE_GFX,
+    TERM_TYPE_CONSOLE       = 0,
     TERM_TYPE_SERIAL,
     TERM_TYPE_NET,
     TERM_TYPE_BT,
@@ -44,6 +43,7 @@ TERM_TYPE                   term_type(TERM term);
 void                        term_text(TERM term, TERM_COLOR color);
 void                        term_background(TERM term, TERM_COLOR color);
 void                        term_resolution(TERM term, int *w, int *h);
+void                        term_where(TERM term, int *x, int *y);
 void                        term_position(TERM term, int x, int y);
 void                        term_cursor(TERM term, bool visible);
 void                        term_reset(TERM term);

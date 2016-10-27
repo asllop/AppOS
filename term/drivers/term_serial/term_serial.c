@@ -17,9 +17,59 @@ void term_serial_background(int customID, TERM_COLOR color)
     serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
 }
 
+void term_serial_where(int customID, int *x, int *y)
+{
+    char cmd[10];
+    
+    ansi_report_cursor(cmd);
+    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    
+    int i = 0;
+    while (true) {
+        if (serial_avail((PORT)customID)) {
+            byte ch;
+            serial_receive((PORT)customID, &ch, 1);
+            cmd[i++] = (char)ch;
+            if (ch == 'R')
+            {
+                cmd[i] = '\0';
+                break;
+            }
+        }
+    }
+    ansi_parse_report(cmd, y, x);
+}
+
 void term_serial_resolution(int customID, int *w, int *h)
 {
-    // TODO:
+    char cmd[12];
+    
+    int x, y;
+    term_serial_where(customID, &x, &y);
+    
+    ansi_set_cursor(cmd, 999, 999);
+    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    
+    ansi_report_cursor(cmd);
+    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    
+    int i = 0;
+    while (true) {
+        if (serial_avail((PORT)customID)) {
+            byte ch;
+            serial_receive((PORT)customID, &ch, 1);
+            cmd[i++] = (char)ch;
+            if (ch == 'R')
+            {
+                cmd[i] = '\0';
+                break;
+            }
+        }
+    }
+    ansi_parse_report(cmd, h, w);
+    
+    ansi_set_cursor(cmd, x, y);
+    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
 }
 
 void term_serial_position(int customID, int x, int y)
@@ -82,6 +132,7 @@ TERM term_serial_init(PORT port)
         .text = term_serial_text,
         .background = term_serial_background,
         .resolution = term_serial_resolution,
+        .where = term_serial_where,
         .position = term_serial_position,
         .cursor = term_serial_cursor,
         .reset = term_serial_reset,

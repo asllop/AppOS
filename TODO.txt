@@ -1,4 +1,6 @@
- * core_defrag, join empty blocks of memory.
+* Make serial and term modules thread save, using system mutex.
+ 
+* core_defrag, join empty blocks of memory.
 
  * Create an alternative memory manager for small dynamic blocks. Two mm: Big Blocks (the current) and Small Blocks.
 
