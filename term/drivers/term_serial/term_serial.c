@@ -45,7 +45,7 @@ void term_serial_where(int customID, int *x, int *y)
 
 void term_serial_position(int customID, int x, int y)
 {
-    char cmd[10];
+    char cmd[12];
     ansi_set_cursor(cmd, y + 1, x + 1);
     serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
 }
@@ -58,6 +58,8 @@ void term_serial_resolution(int customID, int *w, int *h)
     term_serial_position(customID, 999, 999);
     term_serial_where(customID, w, h);
     term_serial_position(customID, x, y);
+    (*w) ++;
+    (*h) ++;
 }
 
 void term_serial_cursor(int customID, bool visible)
