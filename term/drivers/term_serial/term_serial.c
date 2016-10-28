@@ -38,24 +38,26 @@ void term_serial_where(int customID, int *x, int *y)
         }
     }
     ansi_parse_report(cmd, y, x);
+    
+    (*y) --;
+    (*x) --;
+}
+
+void term_serial_position(int customID, int x, int y)
+{
+    char cmd[10];
+    ansi_set_cursor(cmd, y + 1, x + 1);
+    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
 }
 
 void term_serial_resolution(int customID, int *w, int *h)
 {
-    char cmd[12];
     int x, y;
     
     term_serial_where(customID, &x, &y);
     term_serial_position(customID, 999, 999);
     term_serial_where(customID, w, h);
     term_serial_position(customID, x, y);
-}
-
-void term_serial_position(int customID, int x, int y)
-{
-    char cmd[10];
-    ansi_set_cursor(cmd, y, x);
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
 }
 
 void term_serial_cursor(int customID, bool visible)
@@ -80,8 +82,7 @@ void term_serial_reset(int customID)
     
     ansi_clear_screen(cmd);
     serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
-    ansi_set_cursor(cmd, 0, 0);
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    term_serial_position(customID, 0, 0);
 }
 
 void term_serial_putc(int customID, char c)

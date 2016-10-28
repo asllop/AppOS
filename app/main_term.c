@@ -21,10 +21,12 @@ void main(__unused int argc, __unused char **argv)
     
     term_reset(termID);
     term_text(termID, TERM_COLOR_RED);
-    term_position(termID, 0, 2);
+    term_position(termID, 2, 2);
     
     int x = 0, y = 0;
     term_where(termID, &x, &y);
+    
+    term_puts(termID, "@\n");
     
     term_puts(termID, "                                                          \n");
     term_puts(termID, "         _/_/                          _/_/      _/_/_/   \n");
