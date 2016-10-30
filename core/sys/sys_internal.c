@@ -37,3 +37,8 @@ LOCK get_counter(MUTEX mutex)
     counters[mutex] ++;
     return counters[mutex];
 }
+
+LOCK current_counter(MUTEX mutex)
+{
+    return counters[mutex];
+}

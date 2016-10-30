@@ -1,3 +1,5 @@
+#include <appos.h>
+
 #ifndef SYS_H
 #define	SYS_H
 
@@ -24,6 +26,7 @@ typedef enum
 void                        core_fatal(char *msg);
 int                         core_lock(MUTEX mutex);
 int                         core_unlock(MUTEX mutex);
+byte                        core_mutex(MUTEX mutex);
 
 /* Architecture dependant functions */
 

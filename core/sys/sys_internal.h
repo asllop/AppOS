@@ -10,6 +10,7 @@ void                        core_init();
 void                        mutex_init();
 LOCK                        *get_lock(MUTEX mutex);
 LOCK                        get_counter(MUTEX mutex);
+LOCK                        current_counter(MUTEX mutex);
 
 /* Architecture dependant functions */
 

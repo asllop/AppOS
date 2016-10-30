@@ -52,3 +52,13 @@ int core_unlock(MUTEX mutex)
     
     return 0;
 }
+
+// NOTE: Should be used while not scheduling or the result could be invalid,
+//       due to change on mutex state performed by an other task.
+byte core_mutex(MUTEX mutex)
+{
+    LOCK currentCnt = current_counter(mutex) + 1;
+    LOCK *lock = get_lock(mutex);
+    
+    return (*lock == currentCnt);
+}
