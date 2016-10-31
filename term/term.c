@@ -111,7 +111,48 @@ int term_getc(TERM term)
     }
 }
 
-int term_gets(TERM term, char *str)
+int term_gets(TERM term, char *str, int sz)
 {
-    // TODO
+    struct TermDriverStruct *driver = get_term_driver(term);
+    if (driver)
+    {
+        int i = 0;
+        
+        while (i < sz - 1)
+        {
+            int ich;
+            
+            do
+            {
+                ich = driver->getc(driver->customID);
+            }
+            while (ich == -1);
+            
+            char ch = ich & 0xff;
+            
+            if (ch == '\r' || ch == '\n')
+            {
+                str[i] = '\0';
+                return i;
+            }
+            else if (ch == 127 || ch == '\b')
+            {
+                i --;
+                if (i < 0) i = 0;
+                str[i] = '\0';
+            }
+            else if (ch >= 32)
+            {
+                str[i] = ch;
+                i ++;
+            }
+        }
+        
+        str[i] = '\0';
+        return i;
+    }
+    else
+    {
+        return -1;
+    }
 }

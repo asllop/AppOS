@@ -70,40 +70,49 @@ void main(__unused int argc, __unused char **argv)
     term_puts(termID, hStr);
     term_puts(termID, "\n");
     
-    for (;;)
+    while (true)
     {
-        int ch = term_getc(termID);
-        if (ch != -1)
-        {
-            if (ch == 27)
-            {
-                break;
-            }
-            
-            if (ch == 127 || ch == '\b')
-            {
-                term_putc(termID, '\b');
-                term_putc(termID, ' ');
-                term_putc(termID, '\b');
-                continue;
-            }
-            
-            if (ch == '\r')
-            {
-                term_putc(termID, '\n');
-                continue;
-            }
-            
-            term_putc(termID, (char)ch);
-        }
-        else
-        {
-            core_sleep(0);
-        }
+        term_puts(termID, "\nWRITE> ");
+        char str[100];
+        term_gets(termID, str, 100);
+        
+        term_puts(termID, str);
     }
     
-    term_reset(termID);
-    term_puts(termID, "Good bye!\n");
+//    for (;;)
+//    {
+//        int ch = term_getc(termID);
+//        if (ch != -1)
+//        {
+//            if (ch == 27)
+//            {
+//                break;
+//            }
+//            
+//            if (ch == 127 || ch == '\b')
+//            {
+//                term_putc(termID, '\b');
+//                term_putc(termID, ' ');
+//                term_putc(termID, '\b');
+//                continue;
+//            }
+//            
+//            if (ch == '\r')
+//            {
+//                term_putc(termID, '\n');
+//                continue;
+//            }
+//            
+//            term_putc(termID, (char)ch);
+//        }
+//        else
+//        {
+//            core_sleep(0);
+//        }
+//    }
+//    
+//    term_reset(termID);
+//    term_puts(termID, "Good bye!\n");
     
     core_halt();
 }

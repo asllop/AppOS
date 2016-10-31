@@ -50,6 +50,6 @@ void                        term_reset(TERM term);
 void                        term_putc(TERM term, char c);
 void                        term_puts(TERM term, char *str);
 int                         term_getc(TERM term);
-int                         term_gets(TERM term, char *str);
+int                         term_gets(TERM term, char *str, int sz);
 
 #endif

@@ -1,3 +1,5 @@
+* New MEM management, based on array of segments.
+
 * Make serial and term modules thread save, using system mutex.
  
 * core_defrag, join empty blocks of memory.
