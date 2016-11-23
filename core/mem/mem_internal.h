@@ -4,7 +4,7 @@
 #define	MEM_INTERNAL_H
 
 #ifndef MAX_NUM_BLOCKS
-#define MAX_NUM_BLOCKS      10
+#define MAX_NUM_BLOCKS      4
 #endif
 
 struct BlockStruct
