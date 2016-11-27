@@ -218,13 +218,9 @@ bool get_scheduling()
 // When a task dies, here is where it goes
 void task_end_point()
 {
-    bool scheduling = get_scheduling();
     core_forbid();
-    
     terminate_task(currentTask);
-    
-    if (scheduling) core_permit();
-    
+    core_permit();
     core_sleep(0);
     
     for(;;) {}
