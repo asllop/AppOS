@@ -35,4 +35,5 @@
 # Mac stuff
 .DS_Store
 *.xcodeproj
+.fuse_*
 

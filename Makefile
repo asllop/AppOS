@@ -1,6 +1,7 @@
 CC=i686-elf-gcc
 AS=i686-elf-as
-CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./include -I./core -I./ -g
+#CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./include -I./core -I./ -g
+CFLAGS=-std=gnu99 -ffreestanding -O0 -Wall -Wextra -I./include -I./core -I./ -g
 OUTPUT=build/appos.elf
 OBJECTS= \
     boot/arch/pc32/kernel_boot.o \
@@ -13,9 +14,11 @@ OBJECTS= \
 	core/sys/sys_internal.o \
 	core/sys/arch/pc32/sys_arch.o \
 	core/sys/io/arch/pc32/io.o \
+    core/sys/io/arch/pc32/io_isr.o \
 	core/task/task.o \
 	core/task/task_internal.o \
 	core/task/arch/pc32/task_arch.o \
+    core/task/arch/pc32/task_isr.o \
 	event/event_internal.o \
 	event/event.o \
     serial/arch/pc32/serial_arch.o \

@@ -2,6 +2,9 @@
 #include <mem/arch/pc32/mem_arch.h>
 #include <sys/sys.h>
 
+extern void empty_int_isr();
+extern void bad_thing_isr();
+
 // Init PIC1 and PIC2 (Programmable Interrupt Controllers)
 void init_pics()
 {
@@ -33,31 +36,9 @@ void bad_thing()
     core_fatal("Error interrupt received: System Crash!");
 }
 
-// TODO: implemente interrupts as GCC doc demonstrates
-__attribute__((interrupt)) void bad_thing_isr()
-{
-    asm(
-        "pushal;"
-        "calll bad_thing;"
-        "popal;"
-        "iretl;"
-        );
-}
-
 void empty_int()
 {
-    core_log("AppOS Empty Int :)\n");
-}
-
-// TODO: implemente interrupts as GCC doc demonstrates
-__attribute__((interrupt)) void empty_int_isr()
-{
-    asm(
-        "pushal;"
-        "calll empty_int;"
-        "popal;"
-        "iretl;"
-        );
+    core_fatal("Called empty Int!");
 }
 
 void init_cpu_ints()
@@ -98,14 +79,5 @@ void init_cpu_ints()
 void io_init()
 {
     init_cpu_ints();
-    
-//    core_log("Int 0xCC...\n");
-//    asm(
-//        "int %0;"
-//        :
-//        : "i" (0xCC)
-//        );
-//    core_log("Done!\n");
-    
     init_pics();
 }

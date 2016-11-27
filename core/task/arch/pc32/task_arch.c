@@ -7,6 +7,9 @@
 #define MILLIS_PER_TICK     (1000 / TIMER_FREQ_HZ)
 #define TMP_STACK_SIZE      128 * sizeof(void *)
 
+extern void pit_isr();
+extern void fake_timer_isr();
+
 void *push32(void *stackPointer, uint32_t value)
 {
     stackPointer -= 4;
@@ -64,41 +67,11 @@ void *timer_interrupt(void *stackPointer)
     return newStackPointer;
 }
 
-// TODO: implemente interrupts as GCC doc demonstrates
-__attribute__((interrupt)) void pit_isr()
-{
-    asm(
-        "pushal;"
-        // Send current ESP as an argument to function timer_interrupt
-        "pushl %esp;"
-        "calll timer_interrupt;"
-        // Get the stack pointer for next task
-        "movl %eax, %esp;"
-        "popal;"
-        "iretl;"
-        );
-}
-
 void *fake_timer_interrupt(void *stackPointer)
 {
     systemTimestamp -= MILLIS_PER_TICK;
     
     return timer_interrupt(stackPointer);
-}
-
-// TODO: implemente interrupts as GCC doc demonstrates
-__attribute__((interrupt)) void fake_timer_isr()
-{
-    asm(
-        "pushal;"
-        // Send current ESP as an argument to function fake_timer_interrupt
-        "pushl %esp;"
-        "calll fake_timer_interrupt;"
-        // Get the stack pointer for next task
-        "movl %eax, %esp;"
-        "popal;"
-        "iretl;"
-        );
 }
 
 // Init PIT (Programable Interval Timer)
