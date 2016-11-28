@@ -4,7 +4,7 @@
 #define	TASK_INTERNAL_H
 
 #ifndef MAX_NUM_TASK
-#define MAX_NUM_TASK        256
+#define MAX_NUM_TASK        10
 #endif
 
 typedef enum

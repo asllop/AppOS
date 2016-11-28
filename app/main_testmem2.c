@@ -47,6 +47,10 @@ void main(__unused int argc, __unused char **argv)
     // Draw Background
     console_put_data(0x1b, 176, 80*25, 0);
     
+    size_t totalMem = core_avail(MEM_TYPE_USED);
+    console_put_string(0x4f, "Initial Used Mem:", 60, 5);
+    console_put_string(0x4f, itoa(totalMem, var_str, 10), 60, 6);
+    
     void *p0 = core_malloc(10000);
     void *p1 = core_malloc(10000);
     void *p2 = core_malloc(10000);

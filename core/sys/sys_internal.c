@@ -1,7 +1,6 @@
 #include <mem/mem_internal.h>
 #include <task/task_internal.h>
 #include <sys/sys_internal.h>
-#include <event/event_internal.h>
 #include <task/task.h>
 
 static LOCK                 locks[MUTEX_NUMBER];
@@ -13,9 +12,6 @@ void core_init()
     mem_init();
     io_init();
     task_init();
-    
-    // TODO: make it optional
-    event_init();
 }
 
 void mutex_init()

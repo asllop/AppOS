@@ -5,7 +5,7 @@
 #define	TASK_H
 
 #ifndef DEFAULT_STACK_SIZE
-#define DEFAULT_STACK_SIZE  8*1024
+#define DEFAULT_STACK_SIZE  1024
 #endif
 
 #ifndef MIN_STACK_SIZE
