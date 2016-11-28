@@ -237,6 +237,8 @@ void terminate_task(struct TaskStruct *task)
             core_fatal("Task buffer or counter seems to be corrupted");
         }
         
+        // TODO: Why don't just free all task resources instead of setting TASK_STATE_DEAD?
+        
         task->task = NULL;
         task->priority = 0;
         task->counter = 0;

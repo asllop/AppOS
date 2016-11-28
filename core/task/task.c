@@ -150,7 +150,7 @@ int core_result(TASK taskid, int *returnCode, void **bufferPointer)
     {
         while (task->state != TASK_STATE_FINISHED)
         {
-            if (task->state == (TASK_STATE)ERR_CODE_NOTASKID)
+            if (task->state == TASK_STATE_NULL)
             {
                 return ERR_CODE_NOTASKID;
             }
