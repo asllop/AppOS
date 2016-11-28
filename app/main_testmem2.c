@@ -3,31 +3,33 @@
 #include <sys/sys.h>
 #include "utils.h"
 
-int sum(int a, int b)
-{
-    char var_str[20];
-    console_put_string(0x4f, itoa(a + b, var_str, 10), 2, 10);
-    return a + b;
-}
-
 void cnt0_task()
 {
     char var_str[20];
-    int i = 0;
     
     while (1)
     {
-        sum(0, i++);
+        void *p = core_malloc(10000);
+        unsigned long sleepTime = (core_timestamp() & 0xff) * 4;
+        core_sleep(sleepTime);
+        console_put_string(0x4f, itoa(sleepTime, var_str, 10), 2, 10);
+        core_free(p);
+    }
+}
+
+void test_task()
+{
+    char var_str[20];
+    
+    for (long i = 0 ; i < 100000 ; i ++)
+    {
+        void *p = core_malloc(1000);
+        core_sleep(0);
+        console_put_string(0x4f, itoa(i, var_str, 10), 60, 10);
+        core_free(p);
     }
     
-//    while (1)
-//    {
-//        void *p = core_malloc(10000);
-//        unsigned long sleepTime = core_timestamp() & 0xff;
-//        core_sleep(sleepTime);
-//        console_put_string(0x4f, itoa(sleepTime, var_str, 10), 2, 10);
-//        core_free(p);
-//    }
+    console_put_string(0x4f, "TEST TASK ENDED", 60, 11);
 }
 
 void showUsedMem()
@@ -52,6 +54,7 @@ void main(__unused int argc, __unused char **argv)
     void *p4 = core_malloc(10000);
     
     core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
+    core_create(test_task, 0, DEFAULT_STACK_SIZE);
     
     console_put_string(0x4f, " Hello AppOS ", 34, 1);
     
@@ -67,6 +70,8 @@ void main(__unused int argc, __unused char **argv)
         }
         
         console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
+        
+        core_sleep(0);
         
         showUsedMem();
         
