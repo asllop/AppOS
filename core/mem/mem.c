@@ -207,8 +207,6 @@ int core_free(void *buf)
     //return 0;
 }
 
-// TODO: core_defrag: join blocks to defrag memory
-
 size_t core_avail(MEM_TYPE memtype)
 {
     core_lock(MUTEX_MEM);

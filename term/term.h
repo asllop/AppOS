@@ -16,16 +16,6 @@ typedef enum
     
 } TERM_COLOR;
 
-//typedef enum
-//{
-//    TERM_CTRL_UP            = 256,
-//    TERM_CTRL_DOWN,
-//    TERM_CTRL_LEFT,
-//    TERM_CTRL_RIGHT
-//    // TODO: more control seq returned by term_getc
-//    
-//} TERM_CTRL;
-
 typedef enum
 {
     TERM_TYPE_CONSOLE       = 0,

@@ -148,10 +148,9 @@ int core_result(TASK taskid, int *returnCode, void **bufferPointer)
     
     if (task)
     {
-        // TODO: use task->state instead of core_state to save CPU time
-        while (core_state(taskid) != TASK_STATE_FINISHED)
+        while (task->state != TASK_STATE_FINISHED)
         {
-            if (core_state(taskid) == (TASK_STATE)ERR_CODE_NOTASKID)
+            if (task->state == (TASK_STATE)ERR_CODE_NOTASKID)
             {
                 return ERR_CODE_NOTASKID;
             }
@@ -204,8 +203,6 @@ void core_sleep(unsigned long millis)
         }
     }
 }
-
-// TODO: create an exit function without return code that ends immediately
 
 void core_exit(int returnCode, void *returnBuffer)
 {
