@@ -63,7 +63,10 @@ void serial_wait(PORT serial_port)
     }
 }
 
-void serial_timeout(time_t millis)
+time_t serial_timeout(time_t millis)
 {
-    serial_timeout_t_ms = millis;
+    if (millis > 0) {
+        serial_timeout_t_ms = millis;
+    }
+    return serial_timeout_t_ms;
 }
