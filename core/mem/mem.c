@@ -84,41 +84,8 @@ void *core_malloc(size_t size)
 
 void *core_realloc(void *buf, size_t size)
 {
-    void *newBuff = core_malloc(size);
-    
-    if (!newBuff)
-    {
-        return NULL;
-    }
-    
-    core_lock(MUTEX_MEM);
-    
-    struct AllocStruct *allocBuffer = buf - sizeof(struct AllocStruct);
-    
-    if (buf != allocBuffer->buffer)
-    {
-        core_fatal("Couldn't realloc, pointer is not an alloc buffer");
-    }
-    
-    size_t oldSize = allocBuffer->totalSize;
-    
-    size_t copySize;
-    
-    if (oldSize < size)
-    {
-        copySize = oldSize;
-    }
-    else
-    {
-        copySize = size;
-    }
-    
-    core_unlock(MUTEX_MEM);
-    
-    core_copy(newBuff, buf, copySize);
-    core_free(buf);
-    
-    return newBuff;
+    // TODO
+    return NULL;
 }
 
 int core_free(void *buf)
@@ -132,98 +99,23 @@ int core_free(void *buf)
     
     int ret = fast_free(buf);
     
-//    struct AllocStruct *allocBuffer = buf - sizeof(struct AllocStruct);
-//    
-//    if (buf != allocBuffer->buffer)
-//    {
-//        core_fatal("Couldn't free pointer, is not an alloc buffer");
-//    }
-//    
-//    // Ok, buffer relased, now let's try to join boundary buffers
-//    allocBuffer->hole = YES;
-//    allocBuffer->block->usedSize -= allocBuffer->totalSize;
-//    
-//    // Join contiguous buffers, Prev
-//    
-//    struct AllocStruct *prevBuffer = find_prev_alloc(allocBuffer);
-//    
-//    while (prevBuffer)
-//    {
-//        if (prevBuffer->hole == YES)
-//        {
-//            prevBuffer->next = allocBuffer->next;
-//            
-//            if (allocBuffer->next)
-//            {
-//                allocBuffer->next->prev = prevBuffer;
-//            }
-//            
-//            prevBuffer->totalSize += allocBuffer->totalSize + sizeof(struct AllocStruct);
-//            prevBuffer->block->usedSize -= sizeof(struct AllocStruct);
-//            allocBuffer->buffer = NULL;
-//            
-//            allocBuffer = prevBuffer;
-//        }
-//        else
-//        {
-//            // No more free space to join
-//            break;
-//        }
-//        
-//        prevBuffer = find_prev_alloc(allocBuffer);
-//    }
-//    
-//    // Join contiguous buffers, Next (find nextBuffer starting from current allocBuffer)
-//    
-//    struct AllocStruct *nextBuffer = find_next_alloc(allocBuffer);
-//    
-//    while (nextBuffer)
-//    {
-//        if (nextBuffer->hole == YES)
-//        {
-//            allocBuffer->next = nextBuffer->next;
-//            
-//            if (allocBuffer->next)
-//            {
-//                allocBuffer->next->prev = allocBuffer;
-//            }
-//            
-//            allocBuffer->totalSize += nextBuffer->totalSize + sizeof(struct AllocStruct);
-//            allocBuffer->block->usedSize -= sizeof(struct AllocStruct);
-//            nextBuffer->buffer = NULL;
-//        }
-//        else
-//        {
-//            // No more free space to join
-//            break;
-//        }
-//        
-//        nextBuffer = find_next_alloc(nextBuffer);
-//    }
-//    
     core_unlock(MUTEX_MEM);
     
     return ret;
-    //return 0;
 }
 
 size_t core_avail(MEM_TYPE memtype)
 {
-    core_lock(MUTEX_MEM);
-    
-    int numBlocks;
-    struct BlockStruct *blocks = get_blocks(&numBlocks);
-    
     switch (memtype)
     {
+        default:
         case MEM_TYPE_TOTAL:
         {
             size_t total = 0;
             
-            for (int i = 0 ; i < numBlocks ; i++)
-            {
-                total += blocks[i].totalSize;
-            }
+            core_lock(MUTEX_MEM);
+            
+            // TODO
             
             core_unlock(MUTEX_MEM);
             
@@ -235,10 +127,9 @@ size_t core_avail(MEM_TYPE memtype)
         {
             size_t free = 0;
             
-            for (int i = 0 ; i < numBlocks ; i++)
-            {
-                free += (blocks[i].totalSize - blocks[i].usedSize);
-            }
+            core_lock(MUTEX_MEM);
+            
+            // TODO
             
             core_unlock(MUTEX_MEM);
             
@@ -250,73 +141,16 @@ size_t core_avail(MEM_TYPE memtype)
         {
             size_t used = 0;
             
-            for (int i = 0 ; i < numBlocks ; i++)
-            {
-                used += blocks[i].usedSize;
-            }
+            core_lock(MUTEX_MEM);
+            
+            // TODO
             
             core_unlock(MUTEX_MEM);
             
             return used;
         }
             break;
-            
-        default:
-            core_unlock(MUTEX_MEM);
-            
-            return 0;
     }
-}
-
-size_t core_best(size_t size)
-{
-    core_lock(MUTEX_MEM);
-    
-    size_t biggestSize = 0;
-    int numBlocks;
-    struct BlockStruct *blocks = get_blocks(&numBlocks);
-    
-    for (int i = 0 ; i < numBlocks ; i++)
-    {
-        // Find a free alloc inside the block
-        struct AllocStruct *allocBuffer = find_first_alloc(&blocks[i]);
-
-        while (allocBuffer)
-        {
-            // Found free space
-            if (allocBuffer->hole == YES)
-            {
-                // With size enought
-                if (allocBuffer->totalSize >= size)
-                {
-                    if (allocBuffer->totalSize > BUFFER_MIN_SIZE(size))
-                    {
-                        core_unlock(MUTEX_MEM);
-                        
-                        return size;
-                    }
-                    else
-                    {
-                        core_unlock(MUTEX_MEM);
-                        
-                        return allocBuffer->totalSize;
-                    }
-                }
-
-                if (biggestSize < allocBuffer->totalSize)
-                {
-                    biggestSize = allocBuffer->totalSize;
-                }
-            }
-
-            allocBuffer = find_next_alloc(allocBuffer);
-        }
-    }
-    
-    // Not enought space to fit the buffer, return the biggest allocable size
-    core_unlock(MUTEX_MEM);
-    
-    return biggestSize;
 }
 
 // If ARCH_MEM is defined, means there is an architecture dependant definition, that is supposed to speed up the process.
