@@ -3,78 +3,17 @@
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
 
-#define MARGIN              4 * sizeof(struct AllocStruct)
-#define BUFFER_MIN_SIZE(X)  X + sizeof(struct AllocStruct) + MARGIN
-
 void *core_malloc(size_t size)
 {
     core_lock(MUTEX_MEM);
     
-    int numBlocks;
+    byte numBlocks;
     struct BlockStruct *blocks = get_blocks(&numBlocks);
     
     // Find a block with enought free space
-    for (int i = 0 ; i < numBlocks ; i++)
+    for (byte i = 0 ; i < numBlocks ; i++)
     {
-        if (blocks[i].totalSize - blocks[i].usedSize >= size)
-        {
-            // Find a free alloc inside the block
-            struct AllocStruct *allocBuffer = find_first_alloc(&blocks[i]);
-            
-            while (allocBuffer)
-            {
-                // Found free space
-                if (allocBuffer->hole == YES)
-                {
-                    // With size enought
-                    if (allocBuffer->totalSize >= size)
-                    {
-                        // Enought space to split the buffer?
-                        if (allocBuffer->totalSize > BUFFER_MIN_SIZE(size))
-                        {
-                            size_t originalSize = allocBuffer->totalSize;
-                            struct AllocStruct *originalNext = allocBuffer->next;
-                            
-                            // Calculate pointer for the splitted buffer
-                            void *nextAllocStruct = allocBuffer->buffer + size;
-                            void *nextAllocBuffer = nextAllocStruct + sizeof(struct AllocStruct);
-                            
-                            // Transform the buffer to fit exactly the memory we need
-                            allocBuffer->hole = NO;
-                            allocBuffer->totalSize = size;
-                            allocBuffer->next = (struct AllocStruct *)nextAllocStruct;
-                            
-                            // Splitted buffer struct
-                            struct AllocStruct *nextStruct = (struct AllocStruct *)nextAllocStruct;
-                            
-                            nextStruct->block = allocBuffer->block;
-                            nextStruct->buffer = nextAllocBuffer;
-                            nextStruct->hole = YES;
-                            nextStruct->prev = allocBuffer;
-                            nextStruct->next = originalNext;
-                            nextStruct->totalSize = originalSize - size - sizeof(struct AllocStruct);
-                            
-                            // Update used memory
-                            blocks[i].usedSize += size + sizeof(struct AllocStruct);
-                        }
-                        else
-                        {
-                            // Use the current buffer as is
-                            allocBuffer->hole = NO;
-                            
-                            // Update used memory
-                            blocks[i].usedSize += size;
-                        }
-                        
-                        core_unlock(MUTEX_MEM);
-                        
-                        return allocBuffer->buffer;
-                    }
-                }
-                
-                allocBuffer = find_next_alloc(allocBuffer);
-            }
-        }
+        // TODO: find a number of contiguous free segments
     }
     
     core_unlock(MUTEX_MEM);
@@ -88,20 +27,13 @@ void *core_realloc(void *buf, size_t size)
     return NULL;
 }
 
-int core_free(void *buf)
+void core_free(void *buf)
 {
-    if (!buf)
-    {
-        return ERR_CODE_RELEASE;
-    }
-    
     core_lock(MUTEX_MEM);
     
-    int ret = fast_free(buf);
+    internal_free(buf);
     
     core_unlock(MUTEX_MEM);
-    
-    return ret;
 }
 
 size_t core_avail(MEM_TYPE memtype)

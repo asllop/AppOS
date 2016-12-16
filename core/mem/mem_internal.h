@@ -7,32 +7,21 @@
 #define MAX_NUM_BLOCKS      1
 #endif
 
+#ifndef SEGMENT_SIZE
+#define SEGMENT_SIZE        256
+#endif
+
 struct BlockStruct
 {
     void                    *block;
-    size_t                  totalSize;
-    size_t                  usedSize;
-    struct AllocStruct      *first;
-    struct AllocStruct      *last;
+    size_t                  blockSize;
 };
 
-struct AllocStruct
-{
-    void                    *buffer;
-    size_t                  totalSize;
-    unsigned char           hole;
-    struct BlockStruct      *block;
-    struct AllocStruct      *next;
-    struct AllocStruct      *prev;
-};
+typedef uint16_t            SEGMENT;
 
 void                        mem_init();
-struct BlockStruct          *get_blocks(int *num);
-struct AllocStruct          *find_first_alloc(struct BlockStruct *block);
-struct AllocStruct          *find_last_alloc(struct BlockStruct *block);
-struct AllocStruct          *find_next_alloc(struct AllocStruct *allocBuffer);
-struct AllocStruct          *find_prev_alloc(struct AllocStruct *allocBuffer);
-int                         fast_free(void *buf);
+struct BlockStruct          *get_blocks(byte *num);
+void                        internal_free(void *buf);
 
 /* Architecture dependant functions */
 

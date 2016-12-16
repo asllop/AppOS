@@ -117,10 +117,7 @@ int scan_blocks(struct BlockStruct *blockArray)
                     uint32_t kernelSize = (uint32_t)(kernel_end - mmap_unit->base_addr);
                     
                     blockArray[0].block = kernel_end;
-                    blockArray[0].totalSize = mmap_unit->length - kernelSize;
-                    blockArray[0].usedSize = 0;
-                    blockArray[0].first = NULL;
-                    blockArray[0].last = NULL;
+                    blockArray[0].blockSize = mmap_unit->length - kernelSize;
                     
                     return 1;
                 }
