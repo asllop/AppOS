@@ -51,11 +51,28 @@ void main(__unused int argc, __unused char **argv)
     console_put_string(0x4f, "Initial Used Mem:", 60, 5);
     console_put_string(0x4f, itoa(totalMem, var_str, 10), 60, 6);
     
+    check_segments();
+    
     void *p0 = core_malloc(10000);
-    void *p1 = core_malloc(10000);
-    void *p2 = core_malloc(10000);
-    void *p3 = core_malloc(10000);
-    void *p4 = core_malloc(10000);
+    check_segments();
+    void *p1 = core_malloc(5000);
+    check_segments();
+    void *p2 = core_malloc(2500);
+    check_segments();
+    void *p3 = core_malloc(1250);
+    check_segments();
+    
+    core_log("\nP0 = 0x");
+    core_log(itoa(p0, var_str, 16));
+    core_log("\nP1 = 0x");
+    core_log(itoa(p1, var_str, 16));
+    core_log("\nP2 = 0x");
+    core_log(itoa(p2, var_str, 16));
+    core_log("\nP3 = 0x");
+    core_log(itoa(p3, var_str, 16));
+    
+    // TEST
+    core_halt();
     
     core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
     core_create(test_task, 0, DEFAULT_STACK_SIZE);
@@ -93,7 +110,6 @@ void main(__unused int argc, __unused char **argv)
     core_free(p1);
     core_free(p2);
     core_free(p3);
-    core_free(p4);
     
     line++;
     
