@@ -89,20 +89,24 @@ size_t core_avail(MEM_TYPE memtype)
 {
     switch (memtype)
     {
-        default:
         case MEM_TYPE_TOTAL:
         {
             size_t total = 0;
             
             core_lock(MUTEX_MEM);
             
-            // TODO
+            byte numBlocks;
+            struct BlockStruct *blocks = get_blocks(&numBlocks);
+            
+            for (byte i = 0 ; i < numBlocks ; i++)
+            {
+                total += blocks[i].blockSize;
+            }
             
             core_unlock(MUTEX_MEM);
             
             return total;
         }
-            break;
             
         case MEM_TYPE_FREE:
         {
@@ -110,13 +114,37 @@ size_t core_avail(MEM_TYPE memtype)
             
             core_lock(MUTEX_MEM);
             
-            // TODO
+            byte numBlocks;
+            struct BlockStruct *blocks = get_blocks(&numBlocks);
+            
+            for (byte i = 0 ; i < numBlocks ; i++)
+            {
+                size_t numSegments = blocks[i].blockSize / SEGMENT_SIZE;
+                void *p = blocks[i].block;
+                size_t j = 0;
+                
+                while (j < numSegments)
+                {
+                    if (*((SEGMENT *)p) == 0)
+                    {
+                        // Empty segment
+                        j ++;
+                        free += SEGMENT_SIZE;
+                    }
+                    else
+                    {
+                        // Used segment, part of a buffer. Jump to the end of the buffer
+                        j += *((SEGMENT *)p);
+                    }
+                    
+                    p = blocks[i].block + (SEGMENT_SIZE * j);
+                }
+            }
             
             core_unlock(MUTEX_MEM);
             
             return free;
         }
-            break;
             
         case MEM_TYPE_USED:
         {
@@ -124,13 +152,41 @@ size_t core_avail(MEM_TYPE memtype)
             
             core_lock(MUTEX_MEM);
             
-            // TODO
+            byte numBlocks;
+            struct BlockStruct *blocks = get_blocks(&numBlocks);
+            
+            for (byte i = 0 ; i < numBlocks ; i++)
+            {
+                size_t numSegments = blocks[i].blockSize / SEGMENT_SIZE;
+                void *p = blocks[i].block;
+                size_t j = 0;
+                
+                while (j < numSegments)
+                {
+                    SEGMENT sizeSegs = *((SEGMENT *)p);
+                    if (sizeSegs == 0)
+                    {
+                        // Empty segment
+                        j ++;
+                    }
+                    else
+                    {
+                        // Used segment, part of a buffer. Jump to the end of the buffer
+                        j += sizeSegs;
+                        used += SEGMENT_SIZE * sizeSegs;
+                    }
+                    
+                    p = blocks[i].block + (SEGMENT_SIZE * j);
+                }
+            }
             
             core_unlock(MUTEX_MEM);
             
             return used;
         }
-            break;
+            
+        default:
+            return 0;
     }
 }
 

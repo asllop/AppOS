@@ -28,7 +28,7 @@ OBJECTS= \
     term/drivers/term_serial/term_serial.o \
     term/ansi.o \
     app/utils.o \
-	app/main_testmem2.o
+	app/main_testmem.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
