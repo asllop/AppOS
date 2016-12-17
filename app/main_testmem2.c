@@ -86,6 +86,8 @@ void main(__unused int argc, __unused char **argv)
     
     console_put_string(0x4f, " Hello AppOS ", 34, 1);
     
+    showUsedMem();
+    
     int line = 5;
     
     for (unsigned int i = 0 ;; i++)
@@ -101,7 +103,7 @@ void main(__unused int argc, __unused char **argv)
         
         core_sleep(0);
         
-        showUsedMem();
+        //showUsedMem();
         
         if (mem)
         {

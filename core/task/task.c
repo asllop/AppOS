@@ -27,6 +27,7 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     }
     
     void *stackBuffer = core_malloc(stackSize);
+    stackSize = core_size(stackBuffer);
     
     if (!stackBuffer)
     {
