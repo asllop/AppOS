@@ -3,16 +3,8 @@
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
 
-// TEST
-#include <app/utils.h>
-
-// TODO: return in a pointer the actual buffer size
 void *core_malloc(size_t size)
 {
-    // TEST
-    char var_str[10];
-    core_log("--- MALLOC\n");
-
     core_lock(MUTEX_MEM);
     
     byte numBlocks;
@@ -27,41 +19,22 @@ void *core_malloc(size_t size)
         sizeInSegments ++;
     }
     
-    core_log("Size segments = ");
-    core_log(itoa(sizeInSegments, var_str, 10));
-    core_log("\n");
-    
     for (byte i = 0 ; i < numBlocks ; i++)
     {
         size_t numSegments = blocks[i].blockSize / SEGMENT_SIZE;
         void *p = blocks[i].block;
-        
-        core_log("Num segments = ");
-        core_log(itoa(numSegments, var_str, 10));
-        core_log("\n");
         
         SEGMENT foundSegments = 0;
         size_t j = 0;
         
         while (j < numSegments)
         {
-            core_log("---> Segment index (j) = ");
-            core_log(itoa(j, var_str, 10));
-            core_log("\n");
-            
             if (foundSegments == sizeInSegments)
             {
                 // Found room enough for the buffer
                 size_t firstSegment = j - sizeInSegments;
                 void *b = blocks[i].block + (SEGMENT_SIZE * firstSegment);
                 *((SEGMENT *)b) = (SEGMENT)sizeInSegments;
-                
-                core_log("First segment = ");
-                core_log(itoa(firstSegment, var_str, 10));
-                core_log("\n");
-                core_log("Current segment (j) = ");
-                core_log(itoa(j, var_str, 10));
-                core_log("\n");
                 
                 core_unlock(MUTEX_MEM);
                 
@@ -70,22 +43,16 @@ void *core_malloc(size_t size)
             
             if (*((SEGMENT *)p) == 0)
             {
-                core_log("---> Empty segment, see next\n");
                 // Empty segment
                 foundSegments ++;
                 j ++;
             }
             else
             {
-                core_log("---> Used segment, jump to index + size\n");
                 // Used segment, part of a buffer. Jump to the end of the buffer
                 foundSegments = 0;
                 j += *((SEGMENT *)p);
             }
-            
-            core_log("P pointer = 0x");
-            core_log(itoa(p, var_str, 16));
-            core_log("\n");
             
             p = blocks[i].block + (SEGMENT_SIZE * j);
         }
@@ -105,9 +72,6 @@ void *core_realloc(void *buf, size_t size)
 
 void core_free(void *buf)
 {
-    //TEST
-    core_log("--- FREE\n");
-    
     core_lock(MUTEX_MEM);
     
     internal_free(buf);

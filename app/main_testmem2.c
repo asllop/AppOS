@@ -81,10 +81,6 @@ void main(__unused int argc, __unused char **argv)
     core_free(p3);
     check_segments();
     
-    // TEST
-    core_log("HALT!\n");
-    core_halt();
-    
     core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
     core_create(test_task, 0, DEFAULT_STACK_SIZE);
     
