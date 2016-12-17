@@ -56,7 +56,6 @@ void *core_malloc(size_t size)
             
             p = blocks[i].block + (SEGMENT_SIZE * j);
         }
-
     }
     
     core_unlock(MUTEX_MEM);
