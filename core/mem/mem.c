@@ -115,6 +115,12 @@ void core_free(void *buf)
     core_unlock(MUTEX_MEM);
 }
 
+size_t core_size(void *buf)
+{
+    // TODO: return size of buf
+    return 0;
+}
+
 size_t core_avail(MEM_TYPE memtype)
 {
     switch (memtype)

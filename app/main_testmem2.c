@@ -70,8 +70,19 @@ void main(__unused int argc, __unused char **argv)
     core_log(itoa(p2, var_str, 16));
     core_log("\nP3 = 0x");
     core_log(itoa(p3, var_str, 16));
+    core_log("\n");
+
+    core_free(p0);
+    check_segments();
+    core_free(p1);
+    check_segments();
+    core_free(p2);
+    check_segments();
+    core_free(p3);
+    check_segments();
     
     // TEST
+    core_log("HALT!\n");
     core_halt();
     
     core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
@@ -105,11 +116,6 @@ void main(__unused int argc, __unused char **argv)
             core_fatal("Main could not malloc");
         }
     }
-    
-    core_free(p0);
-    core_free(p1);
-    core_free(p2);
-    core_free(p3);
     
     line++;
     

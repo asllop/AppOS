@@ -79,5 +79,24 @@ void internal_free(void *buf)
         return;
     }
     
-    // TODO
+    buf -= sizeof(SEGMENT);
+    SEGMENT sizeInSegments = *((SEGMENT *)buf);
+    SEGMENT i = sizeInSegments - 1;
+    
+    // Starting from last segment, free all
+    while (true)
+    {
+        // Convert segment number (i) into an address and put header = 0
+        void *p = buf + (SEGMENT_SIZE * i);
+        *((SEGMENT *)p) = (SEGMENT)0;
+        
+        if (i == 0)
+        {
+            break;
+        }
+        else
+        {
+            i --;
+        }
+    }
 }
