@@ -109,7 +109,7 @@ void showUsedMem()
     console_put_string(0x4f, itoa(totalMem, var_str, 10), 60, 4);
 }
 
-void main(int argc, char **argv)
+void main(__unused int argc, __unused char **argv)
 {
     char var_str[20];
     

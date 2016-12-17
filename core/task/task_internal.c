@@ -282,12 +282,7 @@ void *schedule(void *stackPointer)
             if (nextTask->state == TASK_STATE_DEAD)
             {
                 // Definitively remove task
-#warning We could corrupt the block free space
-                // WARNING: We could corrupt the block free space if there is an other task performing a malloc/free
-                //          and it is just changing "block->usedSize" variable.
-                
-                // Fast free, mark as empty but do not join blocks
-                fast_free(nextTask->stackBuffer);
+                internal_free(nextTask->stackBuffer);
                 
                 nextTask->state = TASK_STATE_NULL;
                 nextTask->stackBuffer = NULL;

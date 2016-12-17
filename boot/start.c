@@ -26,6 +26,8 @@ void kernel_init()
         core_fatal("Could not create Main task");
     }
     
+    // TODO: we could setup the initial stack for the first stack and avoid checking for TASK_STATE_STARTING in the scheduler
+    
     struct TaskStruct *mainTaskStruct = get_task(mainTaskID);
     mainTaskStruct->state = TASK_STATE_STARTING;
     

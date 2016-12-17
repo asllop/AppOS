@@ -26,16 +26,8 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
         stackSize = MIN_STACK_SIZE;
     }
     
-    size_t bestStackSize = core_best(stackSize);
-    
-    if (bestStackSize < stackSize)
-    {
-        core_unlock(MUTEX_TASK);
-        
-        return 0;
-    }
-    
-    void *stackBuffer = core_malloc(bestStackSize);
+    void *stackBuffer = core_malloc(stackSize);
+    stackSize = core_size(stackBuffer);
     
     if (!stackBuffer)
     {
@@ -57,7 +49,7 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     slot->state = TASK_STATE_RUNNING;
     slot->returnCode = 0;
     slot->returnBuffer = NULL;
-    slot->stackSize = bestStackSize;
+    slot->stackSize = stackSize;
     slot->stackBuffer = stackBuffer;
     slot->stack = stackBuffer + slot->stackSize;
     

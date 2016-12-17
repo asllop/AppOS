@@ -4,7 +4,7 @@
 #include <sys/sys_internal.h>
 
 static struct BlockStruct   blocks[MAX_NUM_BLOCKS];
-static int                  numBlocks;
+static byte                 numBlocks;
 
 void mem_init()
 {
@@ -12,28 +12,18 @@ void mem_init()
     
     if ((numBlocks = scan_blocks(blocks)) > 0)
     {
-        // Create a hole for every block
-        for (int i = 0 ; i < numBlocks ; i++)
+        // Init headers for all segments (free segment)
+        
+        for (byte i = 0 ; i < numBlocks ; i ++)
         {
-            struct AllocStruct *allocBuffer = (struct AllocStruct *)blocks[i].block;
+            size_t numSegments = blocks[i].blockSize / SEGMENT_SIZE;
+            void *p = blocks[i].block;
             
-            allocBuffer->block = &blocks[i];
-            allocBuffer->buffer = blocks[i].block + sizeof(struct AllocStruct);
-            allocBuffer->totalSize = blocks[i].totalSize - sizeof(struct AllocStruct);
-            allocBuffer->hole = YES;
-            allocBuffer->next = NULL;
-            allocBuffer->prev = NULL;
-            
-            // Copy allocBuffer at the start of current block
-            if (core_copy(allocBuffer, blocks[i].block, sizeof(struct AllocStruct)) < 0)
+            for (size_t j = 0 ; j < numSegments ; j ++)
             {
-                // Could not copy memory
-                core_fatal("Could not init dynamic memory structure");
+                *((SEGMENT *)p) = (SEGMENT)0;
+                p += SEGMENT_SIZE;
             }
-            
-            // Update block's node info
-            blocks[i].first = blocks[i].last = (struct AllocStruct *)blocks[i].block;
-            blocks[i].usedSize += sizeof(struct AllocStruct);
         }
     }
     else
@@ -43,73 +33,37 @@ void mem_init()
     }
 }
 
-struct BlockStruct *get_blocks(int *num)
+struct BlockStruct *get_blocks(byte *num)
 {
     *num = numBlocks;
     return blocks;
 }
 
-struct AllocStruct *find_first_alloc(struct BlockStruct *block)
+void internal_free(void *buf)
 {
-    if (block)
+    if (!buf)
     {
-        return block->first;
-    }
-    else
-    {
-        return (struct AllocStruct *)NULL;
-    }
-}
-
-struct AllocStruct *find_last_alloc(struct BlockStruct *block)
-{
-    if (block)
-    {
-        return block->last;
-    }
-    else
-    {
-        return (struct AllocStruct *)NULL;
-    }
-}
-
-struct AllocStruct *find_next_alloc(struct AllocStruct *allocBuffer)
-{
-    if (allocBuffer)
-    {
-        return allocBuffer->next;
-    }
-    else
-    {
-        return (struct AllocStruct *)NULL;
-    }
-}
-
-struct AllocStruct *find_prev_alloc(struct AllocStruct *allocBuffer)
-{
-    if (allocBuffer)
-    {
-        return allocBuffer->prev;
-    }
-    else
-    {
-        return (struct AllocStruct *)NULL;
-    }
-}
-
-// Causes memory fragmentation, use carefully
-int fast_free(void *buf)
-{
-    struct AllocStruct *allocBuffer = buf - sizeof(struct AllocStruct);
-    
-    if (buf != allocBuffer->buffer)
-    {
-        core_fatal("Couldn't fast-free pointer, is not an alloc buffer");
+        return;
     }
     
-    // Ok, buffer relased
-    allocBuffer->hole = YES;
-    allocBuffer->block->usedSize -= allocBuffer->totalSize;
+    buf -= sizeof(SEGMENT);
+    SEGMENT sizeInSegments = *((SEGMENT *)buf);
+    SEGMENT i = sizeInSegments - 1;
     
-    return 0;
+    // Starting from last segment, free all
+    while (true)
+    {
+        // Convert segment number (i) into an address and put header = 0
+        void *p = buf + (SEGMENT_SIZE * i);
+        *((SEGMENT *)p) = (SEGMENT)0;
+        
+        if (i == 0)
+        {
+            break;
+        }
+        else
+        {
+            i --;
+        }
+    }
 }
