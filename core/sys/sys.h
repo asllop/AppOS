@@ -9,6 +9,7 @@ typedef enum
     MUTEX_TASK,
     MUTEX_EVENT,
     MUTEX_SERIAL,
+    MUTEX_TERM,
     MUTEX_GENERIC,
     
     /* Custom mutex goes here ... */

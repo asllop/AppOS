@@ -1,12 +1,16 @@
 #include <mem/mem.h>
 #include <task/task.h>
 #include <sys/sys.h>
-#include <serial/serial.h>
+#include <term/drivers/term_serial/term_serial.h>
+#include <term/term.h>
+
 #include "utils.h"
+
+static TERM termID;
 
 void counter_foo(int line)
 {
-    char *str = "Hello World using serial port\n";
+    char *str = "Hello World using term serial\n";
     char var_str[100];
     
     console_put_string(0x4f, "                               ", 2, line);
@@ -15,7 +19,8 @@ void counter_foo(int line)
     {
         char *mem0 = core_malloc(5000);
         
-        serial_send(0, (byte *)str, strlen(str));
+        term_text(termID, TERM_COLOR_GREEN);
+        term_puts(termID, str);
         
         //core_sleep(0);
         
@@ -117,9 +122,12 @@ void main(__unused int argc, __unused char **argv)
 {
     char var_str[20];
     
-    if (serial_init(0, SERIAL_DATA_8b, SERIAL_PARITY_NONE, SERIAL_STOP_1b, 9600))
+    // Init Term Serial driver on port 0
+    termID = term_serial_init(0);
+    
+    if (termID == -1)
     {
-        core_fatal("Error setting up serial device");
+        core_fatal("Term serial driver failed to init");
     }
     
     // Draw Background
