@@ -1,10 +1,12 @@
 #include <mem/mem.h>
 #include <task/task.h>
 #include <sys/sys.h>
+#include <serial/serial.h>
 #include "utils.h"
 
 void counter_foo(int line)
 {
+    char *str = "Hello World using serial port\n";
     char var_str[100];
     
     console_put_string(0x4f, "                               ", 2, line);
@@ -12,6 +14,8 @@ void counter_foo(int line)
     for (unsigned int i = 0 ;; i++)
     {
         char *mem0 = core_malloc(5000);
+        
+        serial_send(0, (byte *)str, strlen(str));
         
         //core_sleep(0);
         
@@ -112,6 +116,11 @@ void showUsedMem()
 void main(__unused int argc, __unused char **argv)
 {
     char var_str[20];
+    
+    if (serial_init(0, SERIAL_DATA_8b, SERIAL_PARITY_NONE, SERIAL_STOP_1b, 9600))
+    {
+        core_fatal("Error setting up serial device");
+    }
     
     // Draw Background
     console_put_data(0x1b, 176, 80*25, 0);

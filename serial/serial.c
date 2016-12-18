@@ -1,3 +1,4 @@
+#include <sys/sys.h>
 #include <task/task.h>
 #include <serial/serial.h>
 #include <serial/serial_internal.h>
@@ -6,6 +7,8 @@ static time_t serial_timeout_t_ms = 500;
 
 size_t serial_send(PORT serial_port, byte *data, size_t size)
 {
+    core_lock(MUTEX_SERIAL);
+    
     for (size_t i = 0 ; i < size ; i++)
     {
         while (is_transmit_empty(serial_port) == 0)
@@ -16,6 +19,8 @@ size_t serial_send(PORT serial_port, byte *data, size_t size)
         serial_write_byte(serial_port, data[i]);
     }
     
+    core_unlock(MUTEX_SERIAL);
+    
     return size;
 }
 
@@ -23,6 +28,8 @@ size_t serial_receive(PORT serial_port, byte *data, size_t size)
 {
     size_t read_bytes;
     TIME lastTimestamp = core_timestamp();
+    
+    core_lock(MUTEX_SERIAL);
     
     for (read_bytes = 0 ; read_bytes < size ; read_bytes++)
     {
@@ -46,6 +53,8 @@ size_t serial_receive(PORT serial_port, byte *data, size_t size)
             break;
         }
     }
+    
+    core_unlock(MUTEX_SERIAL);
     
     return read_bytes;
 }

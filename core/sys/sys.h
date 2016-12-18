@@ -8,10 +8,8 @@ typedef enum
     MUTEX_MEM               = 0,
     MUTEX_TASK,
     MUTEX_EVENT,
-    MUTEX_GENERIC_0,
-    MUTEX_GENERIC_1,
-    MUTEX_GENERIC_2,
-    MUTEX_GENERIC_3,
+    MUTEX_SERIAL,
+    MUTEX_GENERIC,
     
     /* Custom mutex goes here ... */
     
