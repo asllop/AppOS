@@ -5,6 +5,13 @@
 
 void *core_malloc(size_t size)
 {
+    size_t maxBuffSize = (size_t)((SEGMENT)-1) * SEGMENT_SIZE;
+    if (size >= maxBuffSize)
+    {
+        // Can't allocate that buffer size, "SEGMENT" type precision is not big enought
+        return NULL;
+    }
+    
     core_lock(MUTEX_MEM);
     
     byte numBlocks;
