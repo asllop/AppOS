@@ -116,8 +116,12 @@ void main(__unused int argc, __unused char **argv)
     // Draw Background
     console_put_data(0x1b, 176, 80*25, 0);
     
-    // TEST: consume the memory of the system
-    //while (core_malloc(100000));
+    void *p0 = core_malloc(70000);
+    size_t p0sz = core_size(p0);
+    
+    core_log("P0 real size = ");
+    core_log(itoa(p0sz, var_str, 10));
+    core_log("\n");
     
     // Create a task with priority 0 (the highest)
     core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
@@ -145,6 +149,8 @@ void main(__unused int argc, __unused char **argv)
     core_create(cnt11_task, 20, DEFAULT_STACK_SIZE);
     
     console_put_string(0x4f, " Hello AppOS ", 34, 1);
+    
+    core_free(p0);
     
     int line = 5;
     
