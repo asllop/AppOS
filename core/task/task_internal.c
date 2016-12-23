@@ -5,7 +5,7 @@
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
 
-static struct TaskStruct    *taskArray;
+static struct TaskStruct    taskArray[MAX_NUM_TASK];
 static int                  taskCounter;
 static struct TaskStruct    *currentTask;
 static bool                 isScheduling = 0;
@@ -14,13 +14,6 @@ void init_task_buffer()
 {
     isScheduling = 0;
     taskCounter = 0;
-    
-    taskArray = (struct TaskStruct *)core_malloc(MAX_NUM_TASK * sizeof(struct TaskStruct));
-    
-    if (!taskArray)
-    {
-        core_fatal("Could not create buffer for tasks");
-    }
     
     struct TaskStruct *slot;
     
