@@ -88,7 +88,15 @@ void core_free(void *buf)
 size_t core_size(void *buf)
 {
     SEGMENT sizeSegs = *((SEGMENT *)(buf - sizeof(SEGMENT)));
-    return ((size_t)sizeSegs * SEGMENT_SIZE) - sizeof(SEGMENT);
+    
+    if (sizeSegs > 0)
+    {
+        return ((size_t)sizeSegs * SEGMENT_SIZE) - sizeof(SEGMENT);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 size_t core_avail(MEM_TYPE memtype)

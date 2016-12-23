@@ -1,5 +1,22 @@
- * Make serial and term modules thread save, using system mutex.
- 
+
+ * Rework core/task to be smaller and simpler.
+
+ * Networking with support for drivers.
+    - Port an IP stack:
+      uIP (https://github.com/adamdunkels/uip)
+      lwIP (http://savannah.nongnu.org/projects/lwip/)
+    - SLIP-Serial port driver
+
+ * Port AppOS to Arduino UNO & Leonardo (ATmega328P, ATmega32u4)
+
+ * Port AppOS to RaspberryPI
+
+ * Port AppOS to MSP430
+
+ * Port AppOS to Microchip PIC 8 & 16 bits
+
+ * Implement SMP for RasPI and PC.
+
  * Console driver for term.
  
  * Add event_register and event_send, to receive messages async. It will create a new task when event is received, passing data to it. The thread must end before it can receive another event.
@@ -7,8 +24,3 @@
  * USB: host controller driver and libUSB-like interface for API (or port libUSB).
 
  * Interface for other ports (SPI, I2C)
-
- * Networking with support for drivers.
-    - SLIP-Serial port driver
-
- * Watchdog
