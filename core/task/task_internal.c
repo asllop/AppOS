@@ -230,7 +230,9 @@ void terminate_task(struct TaskStruct *task)
             core_fatal("Task buffer or counter seems to be corrupted");
         }
         
-        // TODO: Why don't just free all task resources instead of setting TASK_STATE_DEAD?
+        // NOTE:
+        // Why don't just free all task resources instead of setting TASK_STATE_DEAD?
+        // Because the current task stack is still being used and deallocating it could cause a crash/mem corruption on next context change.
         
         task->task = NULL;
         task->priority = 0;
