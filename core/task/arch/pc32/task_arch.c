@@ -1,4 +1,6 @@
 #include <task/task_internal.h>
+#include <task/task.h>
+#include <sys/sys.h>
 #include <sys/io/arch/pc32/io.h>
 #include <mem/arch/pc32/mem_arch.h>
 
@@ -114,4 +116,29 @@ void scheduler_init()
     systemTimestamp = 0;
     
     init_pit(TIMER_FREQ_HZ);
+}
+
+extern void main_task();
+
+void setup_stack(void *stackPointer)
+{
+    // User main task stack as current stack
+    
+    asm("cli");
+    
+    asm(
+        "movl %0, %%eax\n"
+        "movl %%eax, %%esp\n"
+        : : "m" (stackPointer)
+        );
+    
+    // Enable multitasking
+    core_permit();
+    asm("sti");
+    
+    // Jump to main task
+    asm("jmp main_task");
+    
+    // We should never get here
+    core_fatal("Reached end of setup_stack");
 }

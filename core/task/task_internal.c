@@ -257,16 +257,7 @@ void *schedule(void *stackPointer)
         return stackPointer;
     }
     
-    // If TASK_STATE_STARTING, we are on first task, current stack pointer is the initial kernel stack, not the actual task stack
-    // Else, save the stack pointer for current task
-    if (currentTask->state == TASK_STATE_STARTING)
-    {
-        currentTask->state = TASK_STATE_RUNNING;
-    }
-    else
-    {
-        currentTask->stack = stackPointer;
-    }
+    currentTask->stack = stackPointer;
     
     struct TaskStruct *nextTask = currentTask->next;
     

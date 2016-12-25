@@ -26,13 +26,9 @@ void kernel_init()
         core_fatal("Could not create Main task");
     }
     
-    // TODO: we could setup the initial stack for the first stack and avoid checking for TASK_STATE_STARTING in the scheduler
-    
     struct TaskStruct *mainTaskStruct = get_task(mainTaskID);
-    mainTaskStruct->state = TASK_STATE_STARTING;
+    mainTaskStruct->state = TASK_STATE_RUNNING;
     
-    // Task Scheduling is disabled by default, so we need to enable it and start the multitasking magic!
-    core_permit();
-
-    for(;;);
+    // Setup initial context for main task and run it
+    setup_stack(mainTaskStruct->stack);
 }
