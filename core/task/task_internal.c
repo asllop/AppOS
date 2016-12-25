@@ -279,7 +279,7 @@ void *schedule(void *stackPointer)
                     nextTask->next->prev = nextTask->prev;
                 }
             }
-            else if (nextTask->counter <= 0 && nextTask->state == TASK_STATE_RUNNING)
+            else if (nextTask->counter == 0 && nextTask->state == TASK_STATE_RUNNING)
             {
                 nextTask->counter = nextTask->priority;
                 break;
