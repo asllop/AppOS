@@ -27,7 +27,6 @@ void kernel_init()
     }
     
     struct TaskStruct *mainTaskStruct = get_task(mainTaskID);
-    mainTaskStruct->state = TASK_STATE_RUNNING;
     
     // Setup initial context for main task and run it
     setup_stack(mainTaskStruct->stack);
