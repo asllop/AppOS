@@ -115,6 +115,7 @@ void showUsedMem()
     char var_str[20];
     size_t totalMem = core_avail(MEM_TYPE_USED);
     console_put_string(0x4f, "Used Mem:", 60, 3);
+    console_put_string(0x4f, "          ", 60, 4);
     console_put_string(0x4f, itoa(totalMem, var_str, 10), 60, 4);
 }
 

@@ -15,7 +15,7 @@
 .align 16
 stack_bottom:
 # Amount of memory for initial kernel stack
-.skip 16 * 1024
+.skip 1024
 stack_top:
 
 .section .text
@@ -31,9 +31,10 @@ _start:
 
 	call kernel_init
 
+hlt_loop:
 	cli
-1:	hlt
-	jmp 1b
+    hlt
+	jmp hlt_loop
 
 .global grub_struct, kernel_end
 
