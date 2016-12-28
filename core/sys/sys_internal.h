@@ -4,6 +4,10 @@
 #include <appos.h>
 #include <sys/sys.h>
 
+#ifndef REBOOT_ON_FATAL
+#define REBOOT_ON_FATAL     NO
+#endif
+
 typedef unsigned int        LOCK;
 
 void                        core_init();

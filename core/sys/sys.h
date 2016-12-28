@@ -18,10 +18,6 @@ typedef enum
     
 } MUTEX;
 
-#ifndef REBOOT_ON_FATAL
-#define REBOOT_ON_FATAL     NO
-#endif
-
 void                        core_fatal(char *msg);
 int                         core_lock(MUTEX mutex);
 int                         core_unlock(MUTEX mutex);
