@@ -27,8 +27,10 @@ OBJECTS= \
     term/term.o \
     term/drivers/term_serial/term_serial.o \
     term/ansi.o \
+    net/slip/slip.o \
+    net/slip/slip_internal.o \
     app/utils.o \
-	app/main_testmem.o
+	app/main_net.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
