@@ -7,20 +7,8 @@ TERM term_register(struct TermDriverStruct *driver)
 {
     if (term_driver_ID_count < TERM_NUM_DRIVERS)
     {
-        TERM driverID = term_driver_ID_count;
-        term_driver_ID_count ++;
-        
-        term_drivers_list[driverID].type = driver->type;
-        term_drivers_list[driverID].customID = driver->customID;
-        term_drivers_list[driverID].text = driver->text;
-        term_drivers_list[driverID].background = driver->background;
-        term_drivers_list[driverID].resolution = driver->resolution;
-        term_drivers_list[driverID].where = driver->where;
-        term_drivers_list[driverID].position = driver->position;
-        term_drivers_list[driverID].cursor = driver->cursor;
-        term_drivers_list[driverID].reset = driver->reset;
-        term_drivers_list[driverID].putc = driver->putc;
-        term_drivers_list[driverID].getc = driver->getc;
+        TERM driverID = term_driver_ID_count ++;
+        term_drivers_list[driverID] = *driver;
         
         return driverID;
     }

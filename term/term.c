@@ -156,6 +156,7 @@ int term_gets(TERM term, char *str, int sz)
             if (ch == '\r' || ch == '\n')
             {
                 str[i] = '\0';
+                core_unlock(MUTEX_TERM);
                 return i;
             }
             else if (ch == 127 || ch == '\b')
