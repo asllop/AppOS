@@ -5,7 +5,7 @@ static PORT slip_serial_port;
 char slip_serial_get()
 {
     char c;
-    serial_receive(slip_serial_port, (byte *)&c, 1);
+    while (!serial_receive(slip_serial_port, (byte *)&c, 1));
     return c;
 }
 

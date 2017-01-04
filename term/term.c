@@ -132,6 +132,7 @@ int term_getc(TERM term)
     }
 }
 
+// TODO: add char echo
 int term_gets(TERM term, char *str, int sz)
 {
     struct TermDriverStruct *driver = get_term_driver(term);

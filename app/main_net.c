@@ -41,19 +41,21 @@ void main(__unused int argc, __unused char **argv)
     
     char *buff = core_malloc(10000);
     
-    term_puts(termID, "Hola term\n");
+    term_puts(termID, "Waiting packets...\n");
     
-    while (1)
-    {
-        slip_send("Hola slip", 9);
-        core_sleep(1000);
-    }
-    
-    /*
+//    while (1)
+//    {
+//        slip_send("Hola slip", 9);
+//        core_sleep(1000);
+//    }
+//
     while (1)
     {
         int sz = slip_recv(buff, 10000);
         // TODO: print data received
+        
+        term_puts(termID, "Received packet of size ");
+        term_puts(termID, itoa(sz, var_str, 10));
+        term_puts(termID, "\n");
     }
-     */
 }
