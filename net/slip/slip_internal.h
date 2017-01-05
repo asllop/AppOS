@@ -3,8 +3,7 @@
 #ifndef SLIP_INTERNAL_H
 #define	SLIP_INTERNAL_H
 
-char                        slip_serial_get();
-void                        slip_serial_put(char c);
-void                        slip_set_serial_port(PORT port);
+byte                        slip_serial_get(PORT port);
+void                        slip_serial_put(PORT port, byte c);
 
 #endif

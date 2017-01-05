@@ -4,8 +4,7 @@
 #ifndef SLIP_H
 #define	SLIP_H
 
-void                        slip_init(PORT port);
-void                        slip_send(char *p, int len);
-int                         slip_recv(char *p, int len);
+void                        slip_send(PORT port, byte *p, int len);
+int                         slip_recv(PORT port, byte *p, int len);
 
 #endif

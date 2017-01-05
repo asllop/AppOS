@@ -1,3 +1,6 @@
+// SLIP implementation mainly stolen from the RFC1055 (https://tools.ietf.org/html/rfc1055)
+// Original comments preserved, just added few modifications.
+
 #include <net/slip/slip.h>
 #include <net/slip/slip_internal.h>
 
@@ -8,30 +11,22 @@
 #define ESC_END         0xDC    /* ESC ESC_END means END data byte */
 #define ESC_ESC         0xDD    /* ESC ESC_ESC means ESC data byte */
 
-void slip_init(PORT port)
-{
-    slip_set_serial_port(port);
-}
-
-// Code below mainly stolen from the RFC1055 (https://tools.ietf.org/html/rfc1055)
-// Original comments preserved, just added few modifications.
-
 /* SEND_PACKET: sends a packet of length "len", starting at
  * location "p".
  */
-void slip_send(char *p, int len)
+void slip_send(PORT port, byte *p, int len)
 {
     /* send an initial END character to flush out any data that may
      * have accumulated in the receiver due to line noise
      */
-    slip_serial_put(END);
+    slip_serial_put(port, END);
     
     /* for each byte in the packet, send the appropriate character
      * sequence
      */
     while (len--)
     {
-        switch ((byte)*p)
+        switch (*p)
         {
                 /* if it's the same code as an END character, we send a
                  * special two character code so as not to make the
@@ -39,8 +34,8 @@ void slip_send(char *p, int len)
                  */
             case END:
             {
-                slip_serial_put(ESC);
-                slip_serial_put(ESC_END);
+                slip_serial_put(port, ESC);
+                slip_serial_put(port, ESC_END);
                 break;
             }
                 
@@ -50,8 +45,8 @@ void slip_send(char *p, int len)
                  */
             case ESC:
             {
-                slip_serial_put(ESC);
-                slip_serial_put(ESC_ESC);
+                slip_serial_put(port, ESC);
+                slip_serial_put(port, ESC_ESC);
                 break;
             }
                 
@@ -59,7 +54,7 @@ void slip_send(char *p, int len)
                  */
             default:
             {
-                slip_serial_put(*p);
+                slip_serial_put(port, *p);
             }
         }
         
@@ -68,7 +63,7 @@ void slip_send(char *p, int len)
     
     /* tell the receiver that we're done sending the packet
      */
-    slip_serial_put(END);
+    slip_serial_put(port, END);
 }
 
 /* RECV_PACKET: receives a packet into the buffer located at "p".
@@ -76,9 +71,9 @@ void slip_send(char *p, int len)
  *      be truncated.
  *      Returns the number of bytes stored in the buffer.
  */
-int slip_recv(char *p, int len)
+int slip_recv(PORT port, byte *p, int len)
 {
-    char c;
+    byte c;
     int received = 0;
     
     /* sit in a loop reading bytes until we put together
@@ -90,11 +85,11 @@ int slip_recv(char *p, int len)
     {
         /* get a character to process
          */
-        c = slip_serial_get();
+        c = slip_serial_get(port);
         
         /* handle bytestuffing if necessary
          */
-        switch ((byte)c)
+        switch (c)
         {
                 
                 /* if it's an END character then we're done with
@@ -120,14 +115,14 @@ int slip_recv(char *p, int len)
                  */
             case ESC:
             {
-                c = slip_serial_get();
+                c = slip_serial_get(port);
                 
                 /* if "c" is not one of these two, then we
                  * have a protocol violation.  The best bet
                  * seems to be to leave the byte alone and
                  * just stuff it into the packet
                  */
-                switch ((byte)c)
+                switch (c)
                 {
                     case ESC_END:
                         c = END;
@@ -144,6 +139,7 @@ int slip_recv(char *p, int len)
             {
                 if (received < len)
                     p[received++] = c;
+                // TODO: else, buffer overflow condition
             }
         }
     }

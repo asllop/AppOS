@@ -1,20 +1,13 @@
 #include <serial/serial.h>
 
-static PORT slip_serial_port;
-
-char slip_serial_get()
+byte slip_serial_get(PORT port)
 {
-    char c;
-    while (!serial_receive(slip_serial_port, (byte *)&c, 1));
+    byte c;
+    while (!serial_receive(port, &c, 1));
     return c;
 }
 
-void slip_serial_put(char c)
+void slip_serial_put(PORT port, byte c)
 {
-    serial_send(slip_serial_port, (byte *)&c, 1);
-}
-
-void slip_set_serial_port(PORT port)
-{
-    slip_serial_port = port;
+    serial_send(port, &c, 1);
 }
