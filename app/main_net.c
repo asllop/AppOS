@@ -5,6 +5,7 @@
 #include <net/slip/slip.h>
 #include <term/term.h>
 #include <term/drivers/term_serial/term_serial.h>
+#include <net/ipv4/ipv4.h>
 
 #include "utils.h"
 
@@ -42,19 +43,27 @@ void main(__unused int argc, __unused char **argv)
     
     term_puts(termID, "Waiting packets...\n");
     
-//    while (1)
-//    {
-//        slip_send("Hola slip", 9);
-//        core_sleep(1000);
-//    }
-//
     while (1)
     {
         int sz = slip_recv(slip, buff, 10000);
+        
         // TODO: print data received
         
         term_puts(termID, "Received packet of size ");
         term_puts(termID, itoa(sz, var_str, 10));
         term_puts(termID, "\n");
+        
+        int res = ipv4_insert(buff, sz);
+        
+        if (res < 0)
+        {
+            term_puts(termID, "Error = ");
+            term_puts(termID, itoa(res, var_str, 10));
+            term_puts(termID, "\n");
+        }
+        else
+        {
+            term_puts(termID, "Correct IP package\n");
+        }
     }
 }

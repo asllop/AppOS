@@ -14,7 +14,7 @@ TERM term_register(struct TermDriverStruct *driver)
     }
     else
     {
-        return -1;
+        return ERR_CODE_TERMDRIVERCNTOVR;
     }
 }
 

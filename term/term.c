@@ -11,7 +11,7 @@ TERM_TYPE term_type(TERM term)
     }
     else
     {
-        return -1;
+        return ERR_CODE_NOTERMDRIVER;
     }
 }
 
@@ -128,7 +128,7 @@ int term_getc(TERM term)
     }
     else
     {
-        return -1;
+        return ERR_CODE_NOTERMDRIVER;
     }
 }
 
@@ -181,6 +181,6 @@ int term_gets(TERM term, char *str, int sz)
     }
     else
     {
-        return -1;
+        return ERR_CODE_NOTERMDRIVER;
     }
 }

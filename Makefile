@@ -29,6 +29,8 @@ OBJECTS= \
     term/ansi.o \
     net/slip/slip.o \
     net/slip/slip_internal.o \
+    net/ipv4/ipv4.o \
+    net/net_utils.o \
     app/utils.o \
 	app/main_net.o
 
