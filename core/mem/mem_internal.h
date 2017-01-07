@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef MEM_INTERNAL_H
 #define	MEM_INTERNAL_H
+
+#include <appos.h>
 
 #ifndef MAX_NUM_BLOCKS
 #define MAX_NUM_BLOCKS      1

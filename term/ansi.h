@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef ANSI_H
 #define	ANSI_H
+
+#include <appos.h>
 
 char                        *ansi_itoa(int i, char *b);
 int                         ansi_atoi(char *str);

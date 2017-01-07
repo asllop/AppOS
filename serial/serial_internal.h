@@ -1,8 +1,8 @@
-#include <appos.h>
-#include <serial/serial.h>
-
 #ifndef SERIAL_INTERNAL_H
 #define SERIAL_INTERNAL_H
+
+#include <appos.h>
+#include <serial/serial.h>
 
 /* Architecture dependant functions */
 

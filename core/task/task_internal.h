@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef TASK_INTERNAL_H
 #define	TASK_INTERNAL_H
+
+#include <appos.h>
 
 #ifndef MAX_NUM_TASK
 #define MAX_NUM_TASK        10

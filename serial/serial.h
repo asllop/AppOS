@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef SERIAL_H
 #define	SERIAL_H
+
+#include <appos.h>
 
 typedef enum
 {

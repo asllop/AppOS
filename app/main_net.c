@@ -34,9 +34,16 @@ void main(__unused int argc, __unused char **argv)
     // Init SLIP in serial port 1
     PORT slip = 1;
     
+    struct NetIfaceStruct *slipIface = slip_init(slip);
+    
     if (termID == -1)
     {
         core_fatal("Term serial driver failed to init");
+    }
+    
+    if (!slipIface)
+    {
+        core_fatal("Error initializing SLIP Network Interface");
     }
     
     byte *buff = (byte *)core_malloc(10000);
@@ -53,7 +60,7 @@ void main(__unused int argc, __unused char **argv)
         term_puts(termID, itoa(sz, var_str, 10));
         term_puts(termID, "\n");
         
-        int res = ipv4_insert(buff, sz);
+        int res = ipv4_insert(slipIface, buff, sz);
         
         if (res < 0)
         {
@@ -63,7 +70,7 @@ void main(__unused int argc, __unused char **argv)
         }
         else
         {
-            term_puts(termID, "Correct IP package\n");
+            term_puts(termID, "Correct IP packet\n");
         }
     }
 }

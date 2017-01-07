@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef TERM_H
 #define	TERM_H
+
+#include <appos.h>
 
 typedef enum
 {

@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef EVENT_INTERNAL_H
 #define	EVENT_INTERNAL_H
+
+#include <appos.h>
 
 #ifndef MAX_EVENT_QUEUES
 #define MAX_EVENT_QUEUES    128             // Since EVENT is 1 Byte wide, MAX_EVENT_QUEUES could be 256 at most 

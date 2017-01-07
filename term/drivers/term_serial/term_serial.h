@@ -1,8 +1,7 @@
-#include <appos.h>
-
 #ifndef TERM_SERIAL_H
 #define	TERM_SERIAL_H
 
+#include <appos.h>
 #include <serial/serial.h>
 #include <term/term.h>
 

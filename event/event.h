@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef EVENT_H
 #define	EVENT_H
+
+#include <appos.h>
 
 int                         event_produce(EVENT code, void *message, size_t size);
 void                        *event_consume(EVENT code, size_t *size);

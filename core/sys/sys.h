@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef SYS_H
 #define	SYS_H
+
+#include <appos.h>
 
 typedef enum
 {

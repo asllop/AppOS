@@ -1,7 +1,7 @@
-#include <appos.h>
-
 #ifndef MEM_H
 #define	MEM_H
+
+#include <appos.h>
 
 typedef enum
 {

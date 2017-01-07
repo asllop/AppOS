@@ -1,8 +1,8 @@
-#include <appos.h>
-#include <task/task_internal.h>
-
 #ifndef TASK_H
 #define	TASK_H
+
+#include <appos.h>
+#include <task/task_internal.h>
 
 #ifndef DEFAULT_STACK_SIZE
 #define DEFAULT_STACK_SIZE  1024

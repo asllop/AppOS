@@ -8,14 +8,14 @@
  
  */
 
-#include <appos.h>
-#include <net/net_utils.h>
-
+#include <net/net.h>
+#include <net/net_utils/net_utils.h>
+#include <net/ipv4/ipv4_internal.h>
 // TEST:
 #include <app/utils.h>
 #include <sys/sys.h>
 
-int ipv4_insert(byte *packet, size_t len)
+int ipv4_insert(struct NetIfaceStruct *iface, byte *packet, size_t len)
 {
     if ((packet[0] & 0xf0) != 0x40)
     {
@@ -36,8 +36,6 @@ int ipv4_insert(byte *packet, size_t len)
         return ERR_CODE_BADIPPACKETSIZE;
     }
     
-    //uint16_t checksum = packet[10] << 8 | packet[11];
-    
     uint16_t cksum = net_checksum(packet, hlen);
     
     if (cksum)
@@ -45,5 +43,31 @@ int ipv4_insert(byte *packet, size_t len)
         return ERR_CODE_BADIPCHECKSUM;
     }
     
+    if (packet[6] & 0x20)
+    {
+        // TODO: more fragments
+        
+        if (!ipv4_is_fragmented(iface))
+        {
+            // TODO: start fragments
+            ipv4_start_fragments(iface);
+        }
+    }
+    else
+    {
+        // TODO: no fragments after
+        
+        if (ipv4_is_fragmented(iface))
+        {
+            // TODO: finished collecting fragments, reorder and put into linked list
+            ipv4_end_fragments(iface);
+        }
+    }
+    
     return 0;
+}
+
+// TODO: get the first IP packet in the buffer
+int ipv4_retrieve(byte **packet, size_t *len)
+{
 }
