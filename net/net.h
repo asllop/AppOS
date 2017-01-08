@@ -17,6 +17,14 @@ typedef enum
 #define NET_BUFFER_SLOTS    128
 #endif
 
+#ifndef NET_NUM_INTERFACES
+#define NET_NUM_INTERFACES  1
+#endif
+
+#if NET_NUM_INTERFACES > 254
+#error NET_NUM_INTERFACES must be smaller than 255
+#endif
+
 #define NET_FLAG_FRAGMENT   (1 << 0)
 
 struct NetIfaceStruct

@@ -4,6 +4,7 @@
 #include <net/slip/slip.h>
 #include <net/slip/slip_internal.h>
 #include <mem/mem.h>
+#include <net/ipv4/ipv4.h>
 
 /* SLIP special character codes
  */
@@ -12,23 +13,9 @@
 #define ESC_END         0xDC    /* ESC ESC_END means END data byte */
 #define ESC_ESC         0xDD    /* ESC ESC_ESC means ESC data byte */
 
-struct NetIfaceStruct *slip_init(PORT port)
+NETWORK slip_init(PORT port)
 {
-    struct NetIfaceStruct *netIface = (struct NetIfaceStruct *)core_malloc(sizeof(struct NetIfaceStruct));
-    
-    if (!netIface)
-    {
-        return NULL;
-    }
-    
-    netIface->type = NET_IFACE_TYPE_SLIP;
-    netIface->id = (byte)port;
-    netIface->flags = 0;
-    netIface->queueFront = 0;
-    netIface->queueRear = -1;
-    netIface->queueItems = 0;
-    
-    return netIface;
+    return ipv4_new_iface(NET_IFACE_TYPE_SLIP, (byte)port);
 }
 
 /* SEND_PACKET: sends a packet of length "len", starting at

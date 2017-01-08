@@ -50,6 +50,7 @@ typedef unsigned int            TASK;
 typedef unsigned int            PRIORITY;
 typedef unsigned char           EVENT;
 typedef unsigned long long      TIME;
+typedef unsigned char           NETWORK;
 typedef long                    time_t;
 typedef unsigned char           byte;
 

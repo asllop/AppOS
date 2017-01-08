@@ -1,5 +1,6 @@
 #include <net/net.h>
 #include <net/net_utils/net_utils.h>
+#include <net/ipv4/ipv4.h>
 #include <net/ipv4/ipv4_internal.h>
 #include <mem/mem.h>
 
@@ -7,7 +8,29 @@
 #include <app/utils.h>
 #include <sys/sys.h>
 
-int ipv4_insert(struct NetIfaceStruct *iface, byte *packet, size_t len)
+static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
+static int numNetInterfaces = 0;
+
+NETWORK ipv4_new_iface(NET_IFACE_TYPE type, byte id)
+{
+    if (numNetInterfaces < NET_NUM_INTERFACES)
+    {
+        netInterfaces[numNetInterfaces].type = type;
+        netInterfaces[numNetInterfaces].id = id;
+        netInterfaces[numNetInterfaces].flags = 0;
+        netInterfaces[numNetInterfaces].queueFront = 0;
+        netInterfaces[numNetInterfaces].queueRear = -1;
+        netInterfaces[numNetInterfaces].queueItems = 0;
+        
+        return numNetInterfaces ++;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+int ipv4_insert(NETWORK net, byte *packet, size_t len)
 {
     if ((packet[0] & 0xf0) != 0x40)
     {
@@ -45,6 +68,7 @@ int ipv4_insert(struct NetIfaceStruct *iface, byte *packet, size_t len)
     core_copy(buff, packet, len);
     
     // Store packet in the queue
+    struct NetIfaceStruct *iface = ipv4_network(net);
     ipv4_enqueue(iface, buff);
     
     if (packet[6] & 0x20)
@@ -75,8 +99,10 @@ int ipv4_insert(struct NetIfaceStruct *iface, byte *packet, size_t len)
     return 0;
 }
 
-int ipv4_retrieve(struct NetIfaceStruct *iface, byte **packet, size_t *len)
+int ipv4_retrieve(NETWORK net, byte **packet, size_t *len)
 {
+    struct NetIfaceStruct *iface = ipv4_network(net);
+    
     if (!ipv4_is_empty(iface))
     {
         byte *buff = (byte *)ipv4_dequeue(iface);
@@ -89,5 +115,17 @@ int ipv4_retrieve(struct NetIfaceStruct *iface, byte **packet, size_t *len)
     else
     {
         return ERR_CODE_IPBUFFEREMPTY;
+    }
+}
+
+struct NetIfaceStruct *ipv4_network(NETWORK net)
+{
+    if (net < numNetInterfaces)
+    {
+        return &netInterfaces[net];
+    }
+    else
+    {
+        return NULL;
     }
 }

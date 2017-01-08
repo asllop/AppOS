@@ -6,7 +6,6 @@
 #include <term/term.h>
 #include <term/drivers/term_serial/term_serial.h>
 #include <net/ipv4/ipv4.h>
-#include <net/ipv4/ipv4_internal.h>
 
 #include "utils.h"
 
@@ -35,14 +34,14 @@ void main(__unused int argc, __unused char **argv)
     // Init SLIP in serial port 1
     PORT slip = 1;
     
-    struct NetIfaceStruct *slipIface = slip_init(slip);
+    NETWORK net = slip_init(slip);
     
     if (termID == -1)
     {
         core_fatal("Term serial driver failed to init");
     }
     
-    if (!slipIface)
+    if (net == (NETWORK)-1)
     {
         core_fatal("Error initializing SLIP Network Interface");
     }
@@ -63,7 +62,7 @@ void main(__unused int argc, __unused char **argv)
         term_puts(termID, itoa(sz, var_str, 10));
         term_puts(termID, "\n");
         
-        int res = ipv4_insert(slipIface, inBuff, sz);
+        int res = ipv4_insert(net, inBuff, sz);
         
         if (res < 0)
         {
@@ -75,9 +74,5 @@ void main(__unused int argc, __unused char **argv)
         {
             term_puts(termID, "Correct IP packet\n");
         }
-        
-        term_puts(termID, "Packet buffer size = ");
-        term_puts(termID, itoa(ipv4_size(slipIface), var_str, 10));
-        term_puts(termID, "\n");
     }
 }
