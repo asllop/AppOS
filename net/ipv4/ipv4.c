@@ -1,16 +1,8 @@
-/*
- 
- int ipv4_insert(byte *packet, size_t len)
- Crea una nova entrada a la llista enllaçada de paquets. Retorna 0 si Ok o negatiu si error.
- 
- int ipv4_retrieve(byte **packet, size_t *len)
- Obte el seguent packet IP de la cua. Coloca els punters corresponents del buffer. Retorna 0 si Ok o negatiu si error.
- 
- */
-
 #include <net/net.h>
 #include <net/net_utils/net_utils.h>
 #include <net/ipv4/ipv4_internal.h>
+#include <mem/mem.h>
+
 // TEST:
 #include <app/utils.h>
 #include <sys/sys.h>
@@ -43,31 +35,59 @@ int ipv4_insert(struct NetIfaceStruct *iface, byte *packet, size_t len)
         return ERR_CODE_BADIPCHECKSUM;
     }
     
+    // Copy packet from temporal storage into a new buffer
+    void *buff = core_malloc(len);
+    if (!buff)
+    {
+        return ERR_CODE_NOMEMFORIPPACKET;
+    }
+    
+    core_copy(buff, packet, len);
+    
+    // Store packet in the queue
+    ipv4_enqueue(iface, buff);
+    
     if (packet[6] & 0x20)
     {
-        // TODO: more fragments
+        core_log("More fragments\n");
         
         if (!ipv4_is_fragmented(iface))
         {
-            // TODO: start fragments
+            core_log("Start fragmenting\n");
+
             ipv4_start_fragments(iface);
         }
     }
     else
     {
-        // TODO: no fragments after
+        core_log("NO more fragments\n");
         
         if (ipv4_is_fragmented(iface))
         {
-            // TODO: finished collecting fragments, reorder and put into linked list
+            core_log("End fragmenting\n");
+            
             ipv4_end_fragments(iface);
+            
+            // TODO: check fragments arrived, order and identification (must be the same in all fragments)
         }
     }
     
     return 0;
 }
 
-// TODO: get the first IP packet in the buffer
-int ipv4_retrieve(byte **packet, size_t *len)
+int ipv4_retrieve(struct NetIfaceStruct *iface, byte **packet, size_t *len)
 {
+    if (!ipv4_is_empty(iface))
+    {
+        byte *buff = (byte *)ipv4_dequeue(iface);
+        uint16_t totalLen = buff[2] << 8 | buff[3];
+        *packet = buff;
+        *len = (size_t)totalLen;
+        
+        return 0;
+    }
+    else
+    {
+        return ERR_CODE_IPBUFFEREMPTY;
+    }
 }

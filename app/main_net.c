@@ -6,6 +6,7 @@
 #include <term/term.h>
 #include <term/drivers/term_serial/term_serial.h>
 #include <net/ipv4/ipv4.h>
+#include <net/ipv4/ipv4_internal.h>
 
 #include "utils.h"
 
@@ -46,13 +47,15 @@ void main(__unused int argc, __unused char **argv)
         core_fatal("Error initializing SLIP Network Interface");
     }
     
-    byte *buff = (byte *)core_malloc(10000);
+    // MTU of SLIP interfaces in Linux use to be 300 bytes aprox, so 500 is far enough
+    byte *inBuff = (byte *)core_malloc(500);
+    int buffSz = core_size(inBuff);
     
     term_puts(termID, "Waiting packets...\n");
     
     while (1)
     {
-        int sz = slip_recv(slip, buff, 10000);
+        int sz = slip_recv(slip, inBuff, buffSz);
         
         // TODO: print data received
         
@@ -60,7 +63,7 @@ void main(__unused int argc, __unused char **argv)
         term_puts(termID, itoa(sz, var_str, 10));
         term_puts(termID, "\n");
         
-        int res = ipv4_insert(slipIface, buff, sz);
+        int res = ipv4_insert(slipIface, inBuff, sz);
         
         if (res < 0)
         {
@@ -72,5 +75,9 @@ void main(__unused int argc, __unused char **argv)
         {
             term_puts(termID, "Correct IP packet\n");
         }
+        
+        term_puts(termID, "Packet buffer size = ");
+        term_puts(termID, itoa(ipv4_size(slipIface), var_str, 10));
+        term_puts(termID, "\n");
     }
 }

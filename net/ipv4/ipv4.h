@@ -5,5 +5,6 @@
 #include <net/net.h>
 
 int                         ipv4_insert(struct NetIfaceStruct *iface, byte *packet, size_t len);
+int                         ipv4_retrieve(struct NetIfaceStruct *iface, byte **packet, size_t *len);
 
 #endif
