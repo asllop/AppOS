@@ -4,14 +4,11 @@
 #include <appos.h>
 #include <net/net.h>
 
-void                        *ipv4_peek(struct NetIfaceStruct *iface);
-byte                        ipv4_is_empty(struct NetIfaceStruct *iface);
-byte                        ipv4_is_full(struct NetIfaceStruct *iface);
-int                         ipv4_size(struct NetIfaceStruct *iface);
-void                        ipv4_enqueue(struct NetIfaceStruct *iface, void *data);
-void                        *ipv4_dequeue(struct NetIfaceStruct *iface);
-byte                        ipv4_is_fragmented(struct NetIfaceStruct *iface);
-void                        ipv4_start_fragments(struct NetIfaceStruct *iface);
-void                        ipv4_end_fragments(struct NetIfaceStruct *iface);
+void                        *ipv4_peek(struct NetQueueStruct *queue, void **bufQueue, unsigned short offset);
+byte                        ipv4_is_empty(struct NetQueueStruct *queue);
+byte                        ipv4_is_full(struct NetQueueStruct *queue);
+int                         ipv4_size(struct NetQueueStruct *queue);
+void                        ipv4_enqueue(struct NetQueueStruct *queue, void **bufQueue, void *data);
+void                        *ipv4_dequeue(struct NetQueueStruct *queue, void **bufQueue);
 
 #endif

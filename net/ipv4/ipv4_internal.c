@@ -1,63 +1,48 @@
 #include <net/ipv4/ipv4_internal.h>
 
-void *ipv4_peek(struct NetIfaceStruct *iface)
+void *ipv4_peek(struct NetQueueStruct *queue, void **bufQueue, unsigned short offset)
 {
-    return iface->packetQueue[iface->queueFront];
+    return bufQueue[queue->front - offset];
 }
 
-byte ipv4_is_empty(struct NetIfaceStruct *iface)
+byte ipv4_is_empty(struct NetQueueStruct *queue)
 {
-    return iface->queueItems == 0;
+    return queue->items == 0;
 }
 
-byte ipv4_is_full(struct NetIfaceStruct *iface)
+byte ipv4_is_full(struct NetQueueStruct *queue)
 {
-    return iface->queueItems == NET_BUFFER_SLOTS;
+    return queue->items == NET_BUFFER_SLOTS;
 }
 
-int ipv4_size(struct NetIfaceStruct *iface)
+int ipv4_size(struct NetQueueStruct *queue)
 {
-    return iface->queueItems;
+    return queue->items;
 }
 
-void ipv4_enqueue(struct NetIfaceStruct *iface, void *data)
+void ipv4_enqueue(struct NetQueueStruct *queue, void **bufQueue, void *data)
 {
-    if (!ipv4_is_full(iface))
+    if (!ipv4_is_full(queue))
     {
-        if (iface->queueRear == NET_BUFFER_SLOTS - 1)
+        if (queue->rear == NET_BUFFER_SLOTS - 1)
         {
-            iface->queueRear = -1;
+            queue->rear = -1;
         }
         
-        iface->packetQueue[++ iface->queueRear] = data;
-        iface->queueItems ++;
+        bufQueue[++ queue->rear] = data;
+        queue->items ++;
     }
 }
 
-void *ipv4_dequeue(struct NetIfaceStruct *iface)
+void *ipv4_dequeue(struct NetQueueStruct *queue, void **bufQueue)
 {
-    void *data = iface->packetQueue[iface->queueFront ++];
+    void *data = bufQueue[queue->front ++];
     
-    if (iface->queueFront == NET_BUFFER_SLOTS)
+    if (queue->front == NET_BUFFER_SLOTS)
     {
-        iface->queueFront = 0;
+        queue->front = 0;
     }
     
-    iface->queueItems --;
+    queue->items --;
     return data;
-}
-
-byte ipv4_is_fragmented(struct NetIfaceStruct *iface)
-{
-    return iface->flags & NET_FLAG_FRAGMENT;
-}
-
-void ipv4_start_fragments(struct NetIfaceStruct *iface)
-{
-    iface->flags = iface->flags | NET_FLAG_FRAGMENT;
-}
-
-void ipv4_end_fragments(struct NetIfaceStruct *iface)
-{
-    iface->flags = iface->flags & ~NET_FLAG_FRAGMENT;
 }

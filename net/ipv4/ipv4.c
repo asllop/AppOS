@@ -18,9 +18,9 @@ NETWORK ipv4_new_iface(NET_IFACE_TYPE type, byte id)
         netInterfaces[numNetInterfaces].type = type;
         netInterfaces[numNetInterfaces].id = id;
         netInterfaces[numNetInterfaces].flags = 0;
-        netInterfaces[numNetInterfaces].queueFront = 0;
-        netInterfaces[numNetInterfaces].queueRear = -1;
-        netInterfaces[numNetInterfaces].queueItems = 0;
+        netInterfaces[numNetInterfaces].queue.front = 0;
+        netInterfaces[numNetInterfaces].queue.rear = -1;
+        netInterfaces[numNetInterfaces].queue.items = 0;
         
         return numNetInterfaces ++;
     }
@@ -69,31 +69,21 @@ int ipv4_insert(NETWORK net, byte *packet, size_t len)
     
     // Store packet in the queue
     struct NetIfaceStruct *iface = ipv4_network(net);
-    ipv4_enqueue(iface, buff);
+    ipv4_enqueue(&iface->queue, iface->packetQueue, buff);
+    
+    // TODO: sistema de fragments
+    // 1- Per cada paquet fragmentat, crear una nova stack, usant el seu identificador de paquet.
+    // 2- Quan arribi un fragment nou amb aquell ID, el fiquem al seu reassembly_stack
+    // 3- Quan arribI l'ultim fragment, reordenem, si falta algun paquet, esperem un timer a veure si n'arriba cap altre
+    // 4- Si el paquet esta complet, el passem a la cua principal de paquets. Si passa el timer i no ho tenim tot, descartem.
     
     if (packet[6] & 0x20)
     {
         core_log("More fragments\n");
-        
-        if (!ipv4_is_fragmented(iface))
-        {
-            core_log("Start fragmenting\n");
-
-            ipv4_start_fragments(iface);
-        }
     }
     else
     {
         core_log("NO more fragments\n");
-        
-        if (ipv4_is_fragmented(iface))
-        {
-            core_log("End fragmenting\n");
-            
-            ipv4_end_fragments(iface);
-            
-            // TODO: check fragments arrived, order and identification (must be the same in all fragments)
-        }
     }
     
     return 0;
@@ -103,9 +93,9 @@ int ipv4_retrieve(NETWORK net, byte **packet, size_t *len)
 {
     struct NetIfaceStruct *iface = ipv4_network(net);
     
-    if (!ipv4_is_empty(iface))
+    if (!ipv4_is_empty(&iface->queue))
     {
-        byte *buff = (byte *)ipv4_dequeue(iface);
+        byte *buff = (byte *)ipv4_dequeue(&iface->queue, iface->packetQueue);
         uint16_t totalLen = buff[2] << 8 | buff[3];
         *packet = buff;
         *len = (size_t)totalLen;

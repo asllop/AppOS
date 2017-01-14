@@ -21,20 +21,25 @@ typedef enum
 #define NET_NUM_INTERFACES  1
 #endif
 
-#if NET_NUM_INTERFACES > 254
-#error NET_NUM_INTERFACES must be smaller than 255
+#if NET_NUM_INTERFACES > 254 || NET_NUM_INTERFACES < 0
+#error NET_NUM_INTERFACES must be between 0 and 254
 #endif
 
 #define NET_FLAG_FRAGMENT   (1 << 0)
+
+struct NetQueueStruct
+{
+    int                     front;
+    int                     rear;
+    int                     items;
+};
 
 struct NetIfaceStruct
 {
     NET_IFACE_TYPE          type;
     byte                    id;
     byte                    flags;
-    int                     queueFront;
-    int                     queueRear;
-    int                     queueItems;
+    struct NetQueueStruct   queue;
     void                    *packetQueue[NET_BUFFER_SLOTS];
 };
 

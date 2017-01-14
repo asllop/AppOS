@@ -122,7 +122,7 @@ extern void main_task();
 
 void setup_stack(void *stackPointer)
 {
-    // User main task stack as current stack
+    // Use main task stack as current stack
     
     asm("cli");
     
