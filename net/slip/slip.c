@@ -4,6 +4,7 @@
 #include <net/slip/slip.h>
 #include <net/slip/slip_internal.h>
 #include <mem/mem.h>
+#include <net/net.h>
 #include <net/ipv4/ipv4.h>
 
 /* SLIP special character codes
@@ -15,7 +16,7 @@
 
 NETWORK slip_init(PORT port)
 {
-    return ipv4_new_iface(NET_IFACE_TYPE_SLIP, (byte)port);
+    return net_create(NET_IFACE_TYPE_SLIP, (byte)port);
 }
 
 /* SEND_PACKET: sends a packet of length "len", starting at

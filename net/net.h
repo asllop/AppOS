@@ -43,4 +43,7 @@ struct NetIfaceStruct
     void                    *packetQueue[NET_BUFFER_SLOTS];
 };
 
+NETWORK                     net_create(NET_IFACE_TYPE type, byte id);
+struct NetIfaceStruct       *net_iface(NETWORK net);
+
 #endif

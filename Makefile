@@ -27,6 +27,7 @@ OBJECTS= \
     term/term.o \
     term/drivers/term_serial/term_serial.o \
     term/ansi.o \
+    net/net.o \
     net/slip/slip.o \
     net/slip/slip_internal.o \
     net/ipv4/ipv4.o \
