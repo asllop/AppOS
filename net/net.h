@@ -17,6 +17,10 @@ typedef enum
 #define NET_BUFFER_SLOTS    128
 #endif
 
+#ifndef NET_FRAGMENT_SLOTS
+#define NET_FRAGMENT_SLOTS  32
+#endif
+
 #ifndef NET_NUM_INTERFACES
 #define NET_NUM_INTERFACES  1
 #endif
@@ -25,7 +29,8 @@ typedef enum
 #error NET_NUM_INTERFACES must be between 0 and 254
 #endif
 
-#define NET_FLAG_FRAGMENT   (1 << 0)
+#define NET_FRAGS_PRIMARY   (1 << 0)
+#define NET_FRAGS_SECONDARY (1 << 1)
 
 struct NetQueueStruct
 {
@@ -41,6 +46,12 @@ struct NetIfaceStruct
     byte                    flags;
     struct NetQueueStruct   queue;
     void                    *packetQueue[NET_BUFFER_SLOTS];
+    uint16_t                primaryFragsID;
+    byte                    primaryFragsItems;
+    void                    *primaryFrags[NET_FRAGMENT_SLOTS];
+    uint16_t                secondaryFragsID;
+    byte                    secondaryFragsItems;
+    void                    *secondaryFrags[NET_FRAGMENT_SLOTS];
 };
 
 NETWORK                     net_create(NET_IFACE_TYPE type, byte id);

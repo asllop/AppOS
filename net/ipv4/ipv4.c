@@ -10,6 +10,8 @@
 
 int ipv4_insert(NETWORK net, byte *packet, size_t len)
 {
+    struct NetIfaceStruct *iface = net_iface(net);
+    
     if ((packet[0] & 0xf0) != 0x40)
     {
         return ERR_CODE_BADIPVERSION;
@@ -45,23 +47,45 @@ int ipv4_insert(NETWORK net, byte *packet, size_t len)
     
     core_copy(buff, packet, len);
     
-    // Store packet in the queue
-    struct NetIfaceStruct *iface = net_iface(net);
-    ipv4_enqueue(&iface->queue, iface->packetQueue, buff);
-    
     // TODO: sistema de fragments
     // 1- Per cada paquet fragmentat, crear una nova stack, usant el seu identificador de paquet.
     // 2- Quan arribi un fragment nou amb aquell ID, el fiquem al seu reassembly_stack
     // 3- Quan arribI l'ultim fragment, reordenem, si falta algun paquet, esperem un timer a veure si n'arriba cap altre
     // 4- Si el paquet esta complet, el passem a la cua principal de paquets. Si passa el timer i no ho tenim tot, descartem.
     
+    uint16_t packetID = packet[4] << 8 | packet[5];
+    
     if (packet[6] & 0x20)
     {
+        // More fragments
         core_log("More fragments\n");
+        
+        if (ipv4_fragment_present(iface, packetID))
+        {
+            ipv4_add_existing_fragment(iface, packetID, buff);
+        }
+        else
+        {
+            ipv4_add_new_fragment(iface, packetID, buff);
+        }
     }
     else
     {
+        // No more fragments
         core_log("NO more fragments\n");
+        
+        if (ipv4_fragment_present(iface, packetID))
+        {
+            // This is the last fragment
+            ipv4_add_existing_fragment(iface, packetID, buff);
+            
+            // TODO: check fragments, reorder, and move to packet queue and reset fragment queue, flags, etc
+        }
+        else
+        {
+            // No previuous fragments, store packet in the queue
+            ipv4_enqueue(&iface->queue, iface->packetQueue, buff);
+        }
     }
     
     return 0;

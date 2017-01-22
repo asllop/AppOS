@@ -10,5 +10,8 @@ byte                        ipv4_is_full(struct NetQueueStruct *queue);
 int                         ipv4_size(struct NetQueueStruct *queue);
 void                        ipv4_enqueue(struct NetQueueStruct *queue, void **bufQueue, void *data);
 void                        *ipv4_dequeue(struct NetQueueStruct *queue, void **bufQueue);
+byte                        ipv4_fragment_present(struct NetIfaceStruct *iface, uint16_t packetID);
+byte                        ipv4_add_existing_fragment(struct NetIfaceStruct *iface, uint16_t packetID, void *packet);
+byte                        ipv4_add_new_fragment(struct NetIfaceStruct *iface, uint16_t packetID, void *packet);
 
 #endif
