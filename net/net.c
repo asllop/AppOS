@@ -10,9 +10,9 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
         netInterfaces[numNetInterfaces].type = type;
         netInterfaces[numNetInterfaces].id = id;
         netInterfaces[numNetInterfaces].flags = 0;
-        netInterfaces[numNetInterfaces].queue.front = 0;
-        netInterfaces[numNetInterfaces].queue.rear = -1;
-        netInterfaces[numNetInterfaces].queue.items = 0;
+        netInterfaces[numNetInterfaces].front = 0;
+        netInterfaces[numNetInterfaces].rear = -1;
+        netInterfaces[numNetInterfaces].items = 0;
         
         return numNetInterfaces ++;
     }

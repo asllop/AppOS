@@ -32,11 +32,11 @@ typedef enum
 #define NET_FRAGS_PRIMARY   (1 << 0)
 #define NET_FRAGS_SECONDARY (1 << 1)
 
-struct NetQueueStruct
+struct NetFragStruct
 {
-    int                     front;
-    int                     rear;
-    int                     items;
+    uint16_t                fragID;
+    byte                    fragItems;
+    void                    *fragQueue[NET_FRAGMENT_SLOTS];
 };
 
 struct NetIfaceStruct
@@ -44,14 +44,12 @@ struct NetIfaceStruct
     NET_IFACE_TYPE          type;
     byte                    id;
     byte                    flags;
-    struct NetQueueStruct   queue;
+    int                     front;
+    int                     rear;
+    int                     items;
     void                    *packetQueue[NET_BUFFER_SLOTS];
-    uint16_t                primaryFragsID;
-    byte                    primaryFragsItems;
-    void                    *primaryFrags[NET_FRAGMENT_SLOTS];
-    uint16_t                secondaryFragsID;
-    byte                    secondaryFragsItems;
-    void                    *secondaryFrags[NET_FRAGMENT_SLOTS];
+    struct NetFragStruct    fragOne;
+    struct NetFragStruct    fragTwo;
 };
 
 NETWORK                     net_create(NET_IFACE_TYPE type, byte id);

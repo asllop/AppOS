@@ -47,44 +47,62 @@ int ipv4_insert(NETWORK net, byte *packet, size_t len)
     
     core_copy(buff, packet, len);
     
-    // TODO: sistema de fragments
-    // 1- Per cada paquet fragmentat, crear una nova stack, usant el seu identificador de paquet.
-    // 2- Quan arribi un fragment nou amb aquell ID, el fiquem al seu reassembly_stack
-    // 3- Quan arribI l'ultim fragment, reordenem, si falta algun paquet, esperem un timer a veure si n'arriba cap altre
-    // 4- Si el paquet esta complet, el passem a la cua principal de paquets. Si passa el timer i no ho tenim tot, descartem.
-    
     uint16_t packetID = packet[4] << 8 | packet[5];
     
     if (packet[6] & 0x20)
     {
         // More fragments
-        core_log("More fragments\n");
+        
+        // TODO: what if fragOne and fragTwo are both in use? Must discard one (the oldest)
         
         if (ipv4_fragment_present(iface, packetID))
         {
+            core_log("Add new fragment\n");
+            
             ipv4_add_existing_fragment(iface, packetID, buff);
         }
         else
         {
+            core_log("Start Fragmenting\n");
+            
             ipv4_add_new_fragment(iface, packetID, buff);
         }
     }
     else
     {
         // No more fragments
-        core_log("NO more fragments\n");
         
         if (ipv4_fragment_present(iface, packetID))
         {
+            core_log("End Fragmenting\n");
+            
             // This is the last fragment
             ipv4_add_existing_fragment(iface, packetID, buff);
             
-            // TODO: check fragments, reorder, and move to packet queue and reset fragment queue, flags, etc
+            // Check fragments, reorder, and move to packet queue and reset fragment queue, flags, etc
+            ipv4_sort_fragments(iface, packetID);
+            
+            
+            
+            // TEST : print offsets
+            char var_str[10];
+            struct NetFragStruct *frag = &iface->fragOne;
+            for (int i = 0 ; i < frag->fragItems ; i++)
+            {
+                byte *packetI = (byte *)frag->fragQueue[i];
+                uint16_t offsetPI = (packetI[6] & 0x1f) << 8 | packetI[7];
+                
+                core_log("Offset = ");
+                core_log(itoa(offsetPI, var_str, 10));
+                core_log("\n");
+            }
         }
         else
         {
+            core_log("Not fragmented package\n");
+            
             // No previuous fragments, store packet in the queue
-            ipv4_enqueue(&iface->queue, iface->packetQueue, buff);
+            ipv4_enqueue(iface, buff);
         }
     }
     
@@ -95,9 +113,9 @@ int ipv4_retrieve(NETWORK net, byte **packet, size_t *len)
 {
     struct NetIfaceStruct *iface = net_iface(net);
     
-    if (!ipv4_is_empty(&iface->queue))
+    if (!ipv4_is_empty(iface))
     {
-        byte *buff = (byte *)ipv4_dequeue(&iface->queue, iface->packetQueue);
+        byte *buff = (byte *)ipv4_dequeue(iface);
         uint16_t totalLen = buff[2] << 8 | buff[3];
         *packet = buff;
         *len = (size_t)totalLen;
