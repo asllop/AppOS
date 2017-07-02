@@ -22,6 +22,7 @@ void                        core_fatal(char *msg);
 int                         core_lock(MUTEX mutex);
 int                         core_unlock(MUTEX mutex);
 byte                        core_mutex(MUTEX mutex);
+void                        core_version(VERSION *major, VERSION *minor, VERSION *build);
 
 /* Architecture dependant functions */
 

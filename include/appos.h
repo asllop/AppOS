@@ -53,6 +53,7 @@ typedef unsigned long long      TIME;
 typedef unsigned char           NETWORK;
 typedef long                    time_t;
 typedef unsigned char           byte;
+typedef uint16_t                VERSION;
 
 #endif
 

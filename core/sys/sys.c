@@ -62,3 +62,10 @@ byte core_mutex(MUTEX mutex)
     
     return (*lock == currentCnt);
 }
+
+void core_version(VERSION *major, VERSION *minor, VERSION *build)
+{
+    *major = 0;
+    *minor = 0;
+    *build = 0;
+}
