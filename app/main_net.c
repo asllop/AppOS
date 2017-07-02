@@ -14,7 +14,7 @@ void main(__unused int argc, __unused char **argv)
 	char var_str[20];
     
     // Draw Background
-    console_put_data(0x1b, 176, 80*25, 0);
+    console_put_data(0x1b, (char)176, 80*25, 0);
 	console_put_string(0x4f, " NET TEST ", 34, 1);
     
     // Setup serial ports 0 and 1
@@ -48,7 +48,7 @@ void main(__unused int argc, __unused char **argv)
     
     // MTU of SLIP interfaces in Linux use to be 300 bytes aprox, so 500 is far enough
     byte *inBuff = (byte *)core_malloc(500);
-    int buffSz = core_size(inBuff);
+    int buffSz = (int)core_size(inBuff);
     
     term_puts(termID, "Waiting packets...\n");
     
