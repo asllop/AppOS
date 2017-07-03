@@ -26,6 +26,12 @@
 #define __unused            __attribute__((unused))
 #endif
 
+// Versioning rules: http://semver.org/
+
+#define VERSION_MAJOR       0
+#define VERSION_MINOR       0
+#define VERSION_BUILD       0
+
 typedef enum
 {
     ERR_CODE_TASKCNTOVR     = -512,
@@ -53,7 +59,6 @@ typedef unsigned long long      TIME;
 typedef unsigned char           NETWORK;
 typedef long                    time_t;
 typedef unsigned char           byte;
-typedef uint16_t                VERSION;
 
 #endif
 
