@@ -4,7 +4,7 @@
 #include <appos.h>
 #include <net/net.h>
 
-int                         ipv4_insert(NETWORK net, byte *packet, size_t len);
-int                         ipv4_retrieve(NETWORK net, byte **packet, size_t *len);
+int                         ipv4_receive(NETWORK net, byte *packet, size_t len);
+int                         ipv4_send(NETWORK net, byte **packet, size_t *len);
 
 #endif

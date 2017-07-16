@@ -43,6 +43,7 @@ struct NetIfaceStruct
 {
     NET_IFACE_TYPE          type;
     byte                    id;
+    uint16_t                mtu;
     byte                    flags;
     int                     front;
     int                     rear;

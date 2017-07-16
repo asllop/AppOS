@@ -9,6 +9,30 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
     {
         netInterfaces[numNetInterfaces].type = type;
         netInterfaces[numNetInterfaces].id = id;
+        
+        switch (type) {
+            case NET_IFACE_TYPE_SLIP:
+                netInterfaces[numNetInterfaces].mtu = 296;
+                break;
+
+            case NET_IFACE_TYPE_PPP:
+                netInterfaces[numNetInterfaces].mtu = 1492;
+                break;
+                
+            case NET_IFACE_TYPE_ETH:
+            case NET_IFACE_TYPE_WIFI:
+                netInterfaces[numNetInterfaces].mtu = 1500;
+                break;
+                
+            case NET_IFACE_TYPE_BT:
+                netInterfaces[numNetInterfaces].mtu = 672;
+                break;
+                
+            default:
+                netInterfaces[numNetInterfaces].mtu = 576;
+                break;
+        }
+        
         netInterfaces[numNetInterfaces].flags = 0;
         netInterfaces[numNetInterfaces].front = 0;
         netInterfaces[numNetInterfaces].rear = -1;

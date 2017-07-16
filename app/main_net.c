@@ -62,7 +62,7 @@ void main(__unused int argc, __unused char **argv)
         term_puts(termID, itoa(sz, var_str, 10));
         term_puts(termID, "\n");
         
-        int res = ipv4_insert(net, inBuff, sz);
+        int res = ipv4_receive(net, inBuff, sz);
         
         if (res < 0)
         {

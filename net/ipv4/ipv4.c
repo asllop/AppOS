@@ -8,7 +8,7 @@
 #include <app/utils.h>
 #include <sys/sys.h>
 
-int ipv4_insert(NETWORK net, byte *packet, size_t len)
+int ipv4_receive(NETWORK net, byte *packet, size_t len)
 {
     struct NetIfaceStruct *iface = net_iface(net);
     
@@ -109,8 +109,10 @@ int ipv4_insert(NETWORK net, byte *packet, size_t len)
     return 0;
 }
 
-int ipv4_retrieve(NETWORK net, byte **packet, size_t *len)
+int ipv4_send(NETWORK net, byte **packet, size_t *len)
 {
+    // TODO: rework, completely wrong
+    
     struct NetIfaceStruct *iface = net_iface(net);
     
     if (!ipv4_is_empty(iface))
