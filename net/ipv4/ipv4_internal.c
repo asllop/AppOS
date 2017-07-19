@@ -13,41 +13,35 @@ struct NetIncomingList *ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t 
     return NULL;
 }
 
-// TODO: use "ipv4_packet_list" everywhere
-
 byte ipv4_exist_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
-    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
-    {
-        if (iface->incomingSlots[i].packetID == packetID) return YES;
-    }
+    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
     
-    return NO;
+    return incomList != NULL;
 }
 
 void *ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size)
 {
-    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    
+    if (incomList)
     {
-        if (iface->incomingSlots[i].packetID == packetID)
+        struct NetIncomingFrag *newFrag = (struct NetIncomingFrag *)core_malloc(sizeof(struct NetIncomingFrag));
+        
+        if (newFrag)
         {
-            struct NetIncomingFrag *newFrag = (struct NetIncomingFrag *)core_malloc(sizeof(struct NetIncomingFrag));
+            newFrag->packet = buff;
+            newFrag->size = size;
             
-            if (newFrag)
+            if (incomList->last)
             {
-                newFrag->packet = buff;
-                newFrag->size = size;
-                
-                if (iface->incomingSlots[i].last)
-                {
-                    iface->incomingSlots[i].last->next = newFrag;
-                }
-                
-                newFrag->prev = iface->incomingSlots[i].last;
-                newFrag->next = NULL;
-                iface->incomingSlots[i].last = newFrag;
-                iface->incomingSlots[i].numFragments ++;
+                incomList->last->next = newFrag;
             }
+            
+            newFrag->prev = incomList->last;
+            newFrag->next = NULL;
+            incomList->last = newFrag;
+            incomList->numFragments ++;
             
             return newFrag;
         }
@@ -58,21 +52,20 @@ void *ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *b
 
 byte ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size)
 {
-    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    struct NetIncomingList *incomList = ipv4_packet_list(iface, 0);
+    
+    if (incomList)
     {
-        if (iface->incomingSlots[i].packetID == 0)
-        {
-            iface->incomingSlots[i].packetID = packetID;
-            iface->incomingSlots[i].numFragments = 0;
-            iface->incomingSlots[i].first = NULL;
-            iface->incomingSlots[i].last = NULL;
-            iface->incomingSlots[i].closed = 0;
-            
-            void *firstFrag = ipv4_add_fragment(iface, packetID, buff, size);
-            iface->incomingSlots[i].first = firstFrag;
-            
-            return YES;
-        }
+        incomList->packetID = packetID;
+        incomList->numFragments = 0;
+        incomList->first = NULL;
+        incomList->last = NULL;
+        incomList->closed = 0;
+        
+        void *firstFrag = ipv4_add_fragment(iface, packetID, buff, size);
+        incomList->first = firstFrag;
+        
+        return YES;
     }
     
     return NO;
@@ -80,28 +73,28 @@ byte ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, by
 
 void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
-    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    
+    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    
+    if (incomList)
     {
-        if (iface->incomingSlots[i].packetID == packetID)
+        struct NetIncomingFrag *nextBuff = incomList->first->next;
+        struct NetIncomingFrag *freeBuff = incomList->first;
+        
+        incomList->packetID = 0;
+        
+        for (int i = 0 ; i < incomList->numFragments ; i ++)
         {
-            struct NetIncomingFrag *nextBuff = iface->incomingSlots[i].first->next;
-            struct NetIncomingFrag *freeBuff = iface->incomingSlots[i].first;
-            
-            iface->incomingSlots[i].packetID = 0;
-            
-            for (int i = 0 ; i < iface->incomingSlots[i].numFragments ; i ++)
+            if (freeBuff)
             {
-                if (freeBuff)
-                {
-                    core_free(freeBuff);
-                }
-                
-                freeBuff = nextBuff;
-                
-                if (nextBuff)
-                {
-                    nextBuff = nextBuff->next;
-                }
+                core_free(freeBuff);
+            }
+            
+            freeBuff = nextBuff;
+            
+            if (nextBuff)
+            {
+                nextBuff = nextBuff->next;
             }
         }
     }
@@ -109,12 +102,11 @@ void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 
 void ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
-    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    
+    if (incomList)
     {
-        if (iface->incomingSlots[i].packetID == packetID)
-        {
-            iface->incomingSlots[i].closed = 1;
-        }
+        incomList->closed = 1;
     }
 }
 
