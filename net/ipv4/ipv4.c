@@ -121,41 +121,6 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             core_log("Free packet list\n");
             ipv4_free_packet_list(iface, packetID);
         }
-        
-        /*
-        if (ipv4_fragment_present(iface, packetID))
-        {
-            core_log("End Fragmenting\n");
-            
-            // This is the last fragment
-            ipv4_add_existing_fragment(iface, packetID, buff);
-            
-            // Check fragments, reorder, and move to packet queue and reset fragment queue, flags, etc
-            ipv4_sort_fragments(iface, packetID);
-            
-            
-            
-            // TEST : print offsets
-            char var_str[10];
-            struct NetFragStruct *frag = &iface->fragOne;
-            for (int i = 0 ; i < frag->fragItems ; i++)
-            {
-                byte *packetI = (byte *)frag->fragQueue[i];
-                uint16_t offsetPI = (packetI[6] & 0x1f) << 8 | packetI[7];
-                
-                core_log("Offset = ");
-                core_log(itoa(offsetPI, var_str, 10));
-                core_log("\n");
-            }
-        }
-        else
-        {
-            core_log("Not fragmented package\n");
-            
-            // No previuous fragments, store packet in the queue
-            ipv4_enqueue(iface, buff);
-        }
-         */
     }
     
     return 0;
@@ -165,22 +130,4 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
 void ipv4_send(NETWORK net, byte *packet, size_t len)
 {
     // TODO: according to network MTU, fragment packet, create corresponding IP headers and put them into the Outgoing queue
-    
-    /*
-    struct NetIfaceStruct *iface = net_iface(net);
-    
-    if (!ipv4_is_empty(iface))
-    {
-        byte *buff = (byte *)ipv4_dequeue(iface);
-        uint16_t totalLen = buff[2] << 8 | buff[3];
-        *packet = buff;
-        *len = (size_t)totalLen;
-        
-        return 0;
-    }
-    else
-    {
-        return ERR_CODE_IPBUFFEREMPTY;
-    }
-     */
 }
