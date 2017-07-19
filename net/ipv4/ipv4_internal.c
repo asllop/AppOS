@@ -118,6 +118,44 @@ void ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
     }
 }
 
+void ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    
+    // TODO: sort fragments by its offset field (sort a linked list)
+    
+    if (incomList)
+    {
+        
+    }
+}
+
+byte ipv4_check_packet(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    
+    ipv4_sort_fragments(iface, packetID);
+    
+    if (incomList)
+    {
+        struct NetIncomingFrag *packet = incomList->first;
+        struct NetIncomingFrag *nextPacket = packet->next;
+        uint16_t realDataSize = 0;
+        
+        while (packet != NULL && nextPacket != NULL)
+        {
+            realDataSize += packet->size - ipv4_packet_header_len(packet->packet);
+            
+            if (ipv4_packet_offset(nextPacket->packet) * 8 != realDataSize) return NO;
+            
+            packet = nextPacket;
+            nextPacket = packet->next;
+        }
+    }
+    
+    return YES;
+}
+
 /*
 byte ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID)
 {

@@ -17,7 +17,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
         return ERR_CODE_BADIPVERSION;
     }
     
-    byte hlen = (buffer[0] & 0xf) * 4;
+    byte hlen = ipv4_packet_header_len(buffer);
     
     if (hlen < 20)
     {
@@ -59,7 +59,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             
             ipv4_add_fragment(iface, packetID, packet, (uint16_t)len);
             
-            // TODO: check if we have all fragments already there (reorder and close)
+            // TODO: check if we have all fragments already there (reorder and close) -> necessary only in case arrived last frag and someone is missing
         }
         else
         {
@@ -84,8 +84,28 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             
             ipv4_close_packet_list(iface, packetID);
             
-            // TODO: check if we have all fragments already there (reorder and close)
+            if (ipv4_check_packet(iface, packetID))
+            {
+                core_log("Packet Check OK\n");
+            }
+            else
+            {
+                // TODO: some fragment is missing, discard all?
+                core_log("Packet Check ERROR\n");
+            }
+        }
+        else
+        {
+            core_log("Not fragmented package\n");
             
+            ipv4_create_packet_list(iface, packetID, packet, (uint16_t)len);
+            
+            ipv4_close_packet_list(iface, packetID);
+        }
+        
+        // TEST:
+        if (ipv4_packet_list(iface, packetID)->closed)
+        {
             // TEST : print offsets
             char var_str[10];
             struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
@@ -105,19 +125,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
                     frag = frag->next;
                 }
             }
-        }
-        else
-        {
-            core_log("Not fragmented package\n");
             
-            ipv4_create_packet_list(iface, packetID, packet, (uint16_t)len);
-            
-            ipv4_close_packet_list(iface, packetID);
-        }
-        
-        // TEST:
-        if (ipv4_packet_list(iface, packetID)->closed)
-        {
             core_log("Free packet list\n");
             ipv4_free_packet_list(iface, packetID);
         }
