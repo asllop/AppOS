@@ -1,5 +1,124 @@
 #include <net/ipv4/ipv4_internal.h>
+#include <mem/mem.h>
 
+// Incoming Internal Functions
+
+struct NetIncomingList *ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    {
+        if (iface->incomingSlots[i].packetID == packetID) return &iface->incomingSlots[i];
+    }
+    
+    return NULL;
+}
+
+// TODO: use "ipv4_packet_list" everywhere
+
+byte ipv4_exist_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    {
+        if (iface->incomingSlots[i].packetID == packetID) return YES;
+    }
+    
+    return NO;
+}
+
+void *ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size)
+{
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    {
+        if (iface->incomingSlots[i].packetID == packetID)
+        {
+            struct NetIncomingFrag *newFrag = (struct NetIncomingFrag *)core_malloc(sizeof(struct NetIncomingFrag));
+            
+            if (newFrag)
+            {
+                newFrag->packet = buff;
+                newFrag->size = size;
+                
+                if (iface->incomingSlots[i].last)
+                {
+                    iface->incomingSlots[i].last->next = newFrag;
+                }
+                
+                newFrag->prev = iface->incomingSlots[i].last;
+                newFrag->next = NULL;
+                iface->incomingSlots[i].last = newFrag;
+                iface->incomingSlots[i].numFragments ++;
+            }
+            
+            return newFrag;
+        }
+    }
+    
+    return NULL;
+}
+
+byte ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size)
+{
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    {
+        if (iface->incomingSlots[i].packetID == 0)
+        {
+            iface->incomingSlots[i].packetID = packetID;
+            iface->incomingSlots[i].numFragments = 0;
+            iface->incomingSlots[i].first = NULL;
+            iface->incomingSlots[i].last = NULL;
+            iface->incomingSlots[i].closed = 0;
+            
+            void *firstFrag = ipv4_add_fragment(iface, packetID, buff, size);
+            iface->incomingSlots[i].first = firstFrag;
+            
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
+void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    {
+        if (iface->incomingSlots[i].packetID == packetID)
+        {
+            struct NetIncomingFrag *nextBuff = iface->incomingSlots[i].first->next;
+            struct NetIncomingFrag *freeBuff = iface->incomingSlots[i].first;
+            
+            iface->incomingSlots[i].packetID = 0;
+            
+            for (int i = 0 ; i < iface->incomingSlots[i].numFragments ; i ++)
+            {
+                if (freeBuff)
+                {
+                    core_free(freeBuff);
+                }
+                
+                freeBuff = nextBuff;
+                
+                if (nextBuff)
+                {
+                    nextBuff = nextBuff->next;
+                }
+            }
+        }
+    }
+}
+
+void ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    {
+        if (iface->incomingSlots[i].packetID == packetID)
+        {
+            iface->incomingSlots[i].closed = 1;
+        }
+    }
+}
+
+/*
 void *ipv4_peek(struct NetIfaceStruct *iface, unsigned short offset)
 {
     return iface->packetQueue[iface->front - offset];
@@ -158,7 +277,7 @@ byte ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID)
         }
     }
     
-    // TODO: check for gaps, els offsets son del paquet original, per tant cal sumar la mina del header IP de cada fragment
+    // TODO: check for gaps, els offsets son del paquet original, per tant cal sumar la mida del header IP de cada fragment
     
     // TODO: if all ok, move to main queue
     
@@ -166,3 +285,4 @@ byte ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID)
     
     return YES;
 }
+*/

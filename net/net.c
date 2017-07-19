@@ -33,10 +33,14 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
                 break;
         }
         
-        netInterfaces[numNetInterfaces].flags = 0;
-        netInterfaces[numNetInterfaces].front = 0;
-        netInterfaces[numNetInterfaces].rear = -1;
-        netInterfaces[numNetInterfaces].items = 0;
+        for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+        {
+            netInterfaces[numNetInterfaces].incomingSlots[i] = (struct NetIncomingList) {
+                .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = 0
+            };
+        }
+        
+        // TODO: setup outgoing slots and other iface properties
         
         return numNetInterfaces ++;
     }

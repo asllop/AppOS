@@ -13,12 +13,8 @@ typedef enum
     
 } NET_IFACE_TYPE;
 
-#ifndef NET_BUFFER_SLOTS
-#define NET_BUFFER_SLOTS    128
-#endif
-
-#ifndef NET_FRAGMENT_SLOTS
-#define NET_FRAGMENT_SLOTS  32
+#ifndef NET_NUM_INCOMING_SLOTS
+#define NET_NUM_INCOMING_SLOTS  5
 #endif
 
 #ifndef NET_NUM_INTERFACES
@@ -29,14 +25,22 @@ typedef enum
 #error NET_NUM_INTERFACES must be between 0 and 254
 #endif
 
-#define NET_FRAGS_PRIMARY   (1 << 0)
-#define NET_FRAGS_SECONDARY (1 << 1)
-
-struct NetFragStruct
+struct NetIncomingFrag
 {
-    uint16_t                fragID;
-    byte                    fragItems;
-    void                    *fragQueue[NET_FRAGMENT_SLOTS];
+    struct NetIncomingFrag  *next;
+    struct NetIncomingFrag  *prev;
+    byte                    *packet;
+    uint16_t                size;
+};
+
+// TODO: add timestamp of last arrived packet for timeout
+struct NetIncomingList
+{
+    uint16_t                packetID;
+    uint16_t                numFragments;
+    struct NetIncomingFrag  *first;
+    struct NetIncomingFrag  *last;
+    byte                    closed;
 };
 
 struct NetIfaceStruct
@@ -44,13 +48,9 @@ struct NetIfaceStruct
     NET_IFACE_TYPE          type;
     byte                    id;
     uint16_t                mtu;
-    byte                    flags;
-    int                     front;
-    int                     rear;
-    int                     items;
-    void                    *packetQueue[NET_BUFFER_SLOTS];
-    struct NetFragStruct    fragOne;
-    struct NetFragStruct    fragTwo;
+    struct NetIncomingList  incomingSlots[NET_NUM_INCOMING_SLOTS];
+    
+    // TODO: add outgoing slots
 };
 
 NETWORK                     net_create(NET_IFACE_TYPE type, byte id);

@@ -7,6 +7,10 @@
 #define MAX_NUM_BLOCKS      1
 #endif
 
+// TODO IMPROVEMENT: Create multiple blocks of memory, each one with different SEGMENT_SIZE,
+// and allocate memory on a block with a SEGMENT_SIZE close to buffer size.
+// This way we are wasting less memory.
+
 #ifndef SEGMENT_SIZE
 #define SEGMENT_SIZE        256
 #endif

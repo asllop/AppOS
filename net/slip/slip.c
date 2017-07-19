@@ -147,7 +147,6 @@ int slip_recv(PORT port, byte *p, int len)
             {
                 if (received < len)
                     p[received++] = c;
-                // TODO: else, buffer overflow condition
             }
         }
     }
