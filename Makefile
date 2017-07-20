@@ -33,6 +33,7 @@ OBJECTS= \
     net/ipv4/ipv4.o \
     net/ipv4/ipv4_internal.o \
     net/net_utils/net_utils.o \
+    lib/NQCLib/NQCLib.o \
     app/utils.o \
 	app/main_net.o
 

@@ -3,7 +3,7 @@
 #include <sys/sys.h>
 #include <term/drivers/term_serial/term_serial.h>
 #include <term/term.h>
-
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 static TERM termID;

@@ -2,6 +2,7 @@
 #include <task/task.h>
 #include <event/event.h>
 #include <sys/sys.h>
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 void counter_foo(int line)

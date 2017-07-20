@@ -4,6 +4,7 @@
 #include <sys/sys.h>
 #include <serial/serial.h>
 #include <term/ansi.h>
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 #define ESC "\x1b["

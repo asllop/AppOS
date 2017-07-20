@@ -6,7 +6,7 @@
 #include <term/term.h>
 #include <term/drivers/term_serial/term_serial.h>
 #include <net/ipv4/ipv4.h>
-
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 void main(__unused int argc, __unused char **argv)

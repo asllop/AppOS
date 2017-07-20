@@ -3,9 +3,9 @@
 #include <net/ipv4/ipv4.h>
 #include <net/ipv4/ipv4_internal.h>
 #include <mem/mem.h>
+#include <lib/NQCLib/NQCLib.h>
 
 // TEST:
-#include <app/utils.h>
 #include <sys/sys.h>
 
 int ipv4_receive(NETWORK net, byte *buffer, size_t len)
@@ -137,5 +137,9 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
 // TODO: need more options to create the IP packet: protocol
 void ipv4_send(NETWORK net, byte *packet, size_t len)
 {
+    struct NetIfaceStruct *iface = net_iface(net);
+    
     // TODO: according to network MTU, fragment packet, create corresponding IP headers and put them into the Outgoing queue
 }
+
+// TODO: ipv4_build_packet(byte *data, size_t len, destIP, orgIP, protocol)

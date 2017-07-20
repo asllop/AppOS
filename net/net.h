@@ -47,6 +47,7 @@ struct NetIfaceStruct
 {
     NET_IFACE_TYPE          type;
     byte                    id;
+    byte                    address[4];
     uint16_t                mtu;
     struct NetIncomingList  incomingSlots[NET_NUM_INCOMING_SLOTS];
     

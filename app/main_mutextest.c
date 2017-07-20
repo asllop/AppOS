@@ -4,6 +4,7 @@
 #include <task/task.h>
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 void cnt0_task()

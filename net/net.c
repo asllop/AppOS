@@ -3,6 +3,7 @@
 static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
 static int numNetInterfaces = 0;
 
+// TODO: include interface address as argument (IP), string, need function to parse address
 NETWORK net_create(NET_IFACE_TYPE type, byte id)
 {
     if (numNetInterfaces < NET_NUM_INTERFACES)
@@ -42,6 +43,8 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
         
         // TODO: setup outgoing slots and other iface properties
         
+        // TODO: setup local address
+        
         return numNetInterfaces ++;
     }
     else
@@ -59,5 +62,26 @@ struct NetIfaceStruct *net_iface(NETWORK net)
     else
     {
         return NULL;
+    }
+}
+
+void net_parse_address(char *addr_str, byte address[])
+{
+    char num[3];
+    
+    for (int i = 0 ; addr_str[i] != '\0' ; i ++)
+    {
+        if (addr_str[i] == '.') break;
+        
+        num[i] = addr_str[i];
+    }
+
+    // TODO: convert "num" to real number
+    
+    for (int i = 0 ; addr_str[i] != '\0' ; i ++)
+    {
+        if (addr_str[i] == '.') break;
+        
+        num[i] = addr_str[i];
     }
 }
