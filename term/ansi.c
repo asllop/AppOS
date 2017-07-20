@@ -1,72 +1,9 @@
 #include <term/ansi.h>
 #include <mem/mem.h>
+#include <lib/NQCLib/NQCLib.h>
 
 static char *ESC_str = "\x1b[";
 
-// Rewrite some standard functions to avoid libC dependency
-
-char *ansi_itoa(int i, char *b)
-{
-    char const digit[] = "0123456789";
-    char *p = b;
-    
-    if (i < 0)
-    {
-        *p++ = '-';
-        i *= -1;
-    }
-    
-    int shifter = i;
-    
-    do
-    {
-        // Move to where representation ends
-        ++p;
-        shifter = shifter / 10;
-    }
-    while (shifter);
-    
-    *p = '\0';
-    
-    do
-    {
-        // Move back, inserting digits as u go
-        *--p = digit[i % 10];
-        i = i / 10;
-    }
-    while (i);
-    
-    return b;
-}
-
-int ansi_atoi(char *str)
-{
-    int res = 0; // Initialize result
-    
-    // Iterate through all characters of input string and
-    // update result
-    for (int i = 0; str[i] != '\0'; ++i)
-        res = res * 10 + str[i] - '0';
-    
-    // return result.
-    return res;
-}
-
-size_t ansi_strlen(const char *str)
-{
-    size_t i;
-    
-    for (i = 0 ; str[i] != 0 ; i++)
-    {
-        // Limit
-        if (i > 1000)
-        {
-            break;
-        }
-    }
-    
-    return i;
-}
 
 char *ansi_set_cursor(char *cmd, int line, int column)
 {
@@ -78,18 +15,18 @@ char *ansi_set_cursor(char *cmd, int line, int column)
     index += 2;
     
     // Line
-    ansi_itoa(line, tmp);
-    core_copy(cmd + index, tmp, ansi_strlen(tmp));
-    index += ansi_strlen(tmp);
+    itoa(line, tmp, 10);
+    core_copy(cmd + index, tmp, strlen(tmp));
+    index += strlen(tmp);
     
     // Separator (;)
     core_copy(cmd + index, ";", 1);
     index += 1;
     
     // Column
-    ansi_itoa(column, tmp);
-    core_copy(cmd + index, tmp, ansi_strlen(tmp));
-    index += ansi_strlen(tmp);
+    itoa(column, tmp, 10);
+    core_copy(cmd + index, tmp, strlen(tmp));
+    index += strlen(tmp);
     
     // End
     cmd[index] = 'H';
@@ -111,9 +48,9 @@ char *ansi_set_gfx_mode(char *cmd, int *modes, int num)
     // Modes
     for (int i = 0 ; i < num ; i++)
     {
-        ansi_itoa(modes[i], tmp);
-        core_copy(cmd + index, tmp, ansi_strlen(tmp));
-        index += ansi_strlen(tmp);
+        itoa(modes[i], tmp, 10);
+        core_copy(cmd + index, tmp, strlen(tmp));
+        index += strlen(tmp);
         
         // Separator (;)
         if (i != num - 1)
@@ -227,8 +164,8 @@ bool ansi_parse_report(char *cmd, int *line, int *column)
         }
     }
     
-    *line = ansi_atoi(cmd + index);
-    index += ansi_strlen(cmd + index);
+    *line = atoi(cmd + index);
+    index += strlen(cmd + index);
     index ++;       // ';' place
     
     // Find command letter 'R'
@@ -246,7 +183,7 @@ bool ansi_parse_report(char *cmd, int *line, int *column)
         }
     }
     
-    *column = ansi_atoi(cmd + index);
+    *column = atoi(cmd + index);
     
     return YES;
 }

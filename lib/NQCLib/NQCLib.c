@@ -1,7 +1,7 @@
 #include <appos.h>
 #include <lib/NQCLib/NQCLib.h>
 
-char *itoa(long long int value, char *str, int base)
+char *itoa(int value, char *str, int base)
 {
     char *rc;
     char *ptr;
@@ -36,7 +36,21 @@ char *itoa(long long int value, char *str, int base)
         *low++ = *ptr;
         *ptr-- = tmp;
     }
+    
     return rc;
+}
+
+int atoi(const char *str)
+{
+    int res = 0; // Initialize result
+    
+    // Iterate through all characters of input string and
+    // update result
+    for (int i = 0; str[i] != '\0'; ++i)
+        res = res * 10 + str[i] - '0';
+    
+    // return result.
+    return res;
 }
 
 size_t strlen(const char *str)
@@ -46,7 +60,7 @@ size_t strlen(const char *str)
     for (i = 0 ; str[i] != 0 ; i++)
     {
         // Limit
-        if (i > 10000)
+        if (i > 100000)
         {
             break;
         }

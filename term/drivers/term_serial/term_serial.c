@@ -1,20 +1,21 @@
 #include <term/term_internal.h>
 #include <term/term.h>
 #include <term/ansi.h>
+#include <lib/NQCLib/NQCLib.h>
 #include "term_serial.h"
 
 void term_serial_text(int customID, TERM_COLOR color)
 {
     char cmd[10];
     ansi_set_gfx_mode(cmd, (int[]){color + 30}, 1);
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    serial_send((PORT)customID, (byte *)cmd, strlen(cmd));
 }
 
 void term_serial_background(int customID, TERM_COLOR color)
 {
     char cmd[10];
     ansi_set_gfx_mode(cmd, (int[]){color + 40}, 1);
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    serial_send((PORT)customID, (byte *)cmd, strlen(cmd));
 }
 
 void term_serial_where(int customID, int *x, int *y)
@@ -22,7 +23,7 @@ void term_serial_where(int customID, int *x, int *y)
     char cmd[10];
     
     ansi_report_cursor(cmd);
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    serial_send((PORT)customID, (byte *)cmd, strlen(cmd));
     
     int i = 0;
     while (true) {
@@ -47,7 +48,7 @@ void term_serial_position(int customID, int x, int y)
 {
     char cmd[12];
     ansi_set_cursor(cmd, y + 1, x + 1);
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    serial_send((PORT)customID, (byte *)cmd, strlen(cmd));
 }
 
 void term_serial_resolution(int customID, int *w, int *h)
@@ -75,7 +76,7 @@ void term_serial_cursor(int customID, bool visible)
         ansi_hide_cursor(cmd);
     }
     
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    serial_send((PORT)customID, (byte *)cmd, strlen(cmd));
 }
 
 void term_serial_reset(int customID)
@@ -83,7 +84,7 @@ void term_serial_reset(int customID)
     char cmd[10];
     
     ansi_clear_screen(cmd);
-    serial_send((PORT)customID, (byte *)cmd, ansi_strlen(cmd));
+    serial_send((PORT)customID, (byte *)cmd, strlen(cmd));
     term_serial_position(customID, 0, 0);
 }
 

@@ -3,10 +3,6 @@
 
 #include <appos.h>
 
-char                        *ansi_itoa(int i, char *b);
-int                         ansi_atoi(char *str);
-size_t                      ansi_strlen(const char *str);
-
 char                        *ansi_set_cursor(char *cmd, int line, int column);
 char                        *ansi_set_gfx_mode(char *cmd, int *modes, int num);
 char                        *ansi_clear_screen(char *cmd);
