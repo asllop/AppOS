@@ -46,6 +46,9 @@ void main(__unused int argc, __unused char **argv)
         core_fatal("Error initializing SLIP Network Interface");
     }
     
+    // Hardcoded IP, set on Linux point-to-point SLIP connection
+    net_parse_ipv4("192.168.1.2", net_iface(net)->address);
+    
     // MTU of SLIP interfaces in Linux use to be 300 bytes aprox, so 500 is far enough
     byte *inBuff = (byte *)core_malloc(500);
     int buffSz = (int)core_size(inBuff);

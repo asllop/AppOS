@@ -4,7 +4,6 @@
 static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
 static int numNetInterfaces = 0;
 
-// TODO: include interface address as argument (IP), string, need function to parse address
 NETWORK net_create(NET_IFACE_TYPE type, byte id)
 {
     if (numNetInterfaces < NET_NUM_INTERFACES)
@@ -43,8 +42,6 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
         }
         
         // TODO: setup outgoing slots and other iface properties
-        
-        // TODO: setup local address
         
         return numNetInterfaces ++;
     }
