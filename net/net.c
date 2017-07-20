@@ -1,4 +1,5 @@
 #include <net/net.h>
+#include <lib/NQCLib/NQCLib.h>
 
 static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
 static int numNetInterfaces = 0;
@@ -65,23 +66,36 @@ struct NetIfaceStruct *net_iface(NETWORK net)
     }
 }
 
-void net_parse_address(char *addr_str, byte address[])
+void net_parse_ipv4(char *addr_str, byte address[])
 {
-    char num[3];
+    // Parse an IP address: AAA.BBB.CCC.DDD
+    char num[4];
+    int index = 0;
     
-    for (int i = 0 ; addr_str[i] != '\0' ; i ++)
+    for (int ipIndex = 0 ; ipIndex < 4 ; ipIndex ++)
     {
-        if (addr_str[i] == '.') break;
+        // Parse component of IP address
+        for (int i = 0 ; i < 4 ; i ++)
+        {
+            // End Of String
+            if (addr_str[index] == '\0')
+            {
+                break;
+            }
+            
+            // Found end component
+            if (addr_str[index] == '.')
+            {
+                index ++;
+                break;
+            }
+            
+            num[i] = addr_str[index];
+            num[i + 1] = 0;
+            
+            index ++;
+        }
         
-        num[i] = addr_str[i];
-    }
-
-    // TODO: convert "num" to real number
-    
-    for (int i = 0 ; addr_str[i] != '\0' ; i ++)
-    {
-        if (addr_str[i] == '.') break;
-        
-        num[i] = addr_str[i];
+        address[ipIndex] = (byte)atoi(num);
     }
 }

@@ -56,5 +56,6 @@ struct NetIfaceStruct
 
 NETWORK                     net_create(NET_IFACE_TYPE type, byte id);
 struct NetIfaceStruct       *net_iface(NETWORK net);
+void                        net_parse_ipv4(char *addr_str, byte address[]);
 
 #endif
