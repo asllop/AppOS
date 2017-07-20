@@ -1,10 +1,10 @@
 #ifndef NQCLIB_CONFIG_H
 #define	NQCLIB_CONFIG_H
 
-// Comment out que functions you don't need
+// Comment out the functions you don't need
 
-#define ITOA
-#define ATOI
-#define STRLEN
+#define NQC_ITOA
+#define NQC_ATOI
+#define NQC_STRLEN
 
 #endif
