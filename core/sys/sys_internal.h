@@ -10,6 +10,8 @@
 
 typedef unsigned int        LOCK;
 
+// TODO: rename internal functions to add "sys_" or "mutex_" prefix
+
 void                        core_init();
 void                        mutex_init();
 LOCK                        *get_lock(MUTEX mutex);

@@ -4,6 +4,8 @@
 #include <appos.h>
 #include <serial/serial.h>
 
+// TODO: rename internal functions to add "serial_" prefix
+
 /* Architecture dependant functions */
 
 byte                        is_data_ready(PORT port);

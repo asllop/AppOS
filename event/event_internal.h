@@ -26,6 +26,8 @@ struct QueueStruct
     unsigned int            elements;
 };
 
+// TODO: rename internal functions to add "event_" prefix
+
 void                        event_init();
 bool                        enqueue_event(EVENT code, struct EventStruct *event);
 bool                        dequeue_event(EVENT code, struct EventStruct *event);

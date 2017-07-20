@@ -23,6 +23,8 @@ struct BlockStruct
 
 typedef uint16_t            SEGMENT;
 
+// TODO: rename internal functions to add "mem_" prefix
+
 void                        mem_init();
 struct BlockStruct          *get_blocks(byte *num);
 void                        internal_free(void *buf);

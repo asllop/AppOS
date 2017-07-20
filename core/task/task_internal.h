@@ -35,6 +35,8 @@ struct TaskStruct
 
 extern TIME                 systemTimestamp;
 
+// TODO: rename internal functions to add "task_" prefix
+
 void                        task_init();
 struct TaskStruct           *empty_slot();
 struct TaskStruct           *prev_used_slot(struct TaskStruct *slot);
