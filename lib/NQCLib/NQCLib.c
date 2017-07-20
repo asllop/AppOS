@@ -1,6 +1,7 @@
 #include <appos.h>
 #include <lib/NQCLib/NQCLib.h>
 
+#ifdef ITOA
 char *itoa(int value, char *str, int base)
 {
     char *rc;
@@ -39,7 +40,9 @@ char *itoa(int value, char *str, int base)
     
     return rc;
 }
+#endif
 
+#ifdef ATOI
 int atoi(const char *str)
 {
     int res = 0; // Initialize result
@@ -52,7 +55,9 @@ int atoi(const char *str)
     // return result.
     return res;
 }
+#endif
 
+#ifdef STRLEN
 size_t strlen(const char *str)
 {
     size_t i;
@@ -68,3 +73,4 @@ size_t strlen(const char *str)
     
     return i;
 }
+#endif
