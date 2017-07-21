@@ -203,26 +203,3 @@ size_t core_avail(MEM_TYPE memtype)
             return 0;
     }
 }
-
-// If ARCH_MEM is defined, means there is an architecture dependant definition, that is supposed to speed up the process.
-#ifndef ARCH_MEM
-int core_copy(void *to, void *from, size_t size)
-{
-    for (size_t i = 0 ; i < size ; i++)
-    {
-        ((unsigned char *)to)[i] = ((unsigned char *)from)[i];
-    }
-
-    return 0;
-}
-
-int core_set(void *to, unsigned char value, size_t size)
-{
-    for (size_t i = 0 ; i < size ; i++)
-    {
-        ((unsigned char *)to)[i] = value;
-    }
-    
-    return 0;
-}
-#endif

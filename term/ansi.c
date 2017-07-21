@@ -11,21 +11,21 @@ char *ansi_set_cursor(char *cmd, int line, int column)
     int index = 0;
     
     // ESC
-    core_copy(cmd + index, ESC_str, 2);
+    memcpy(cmd + index, ESC_str, 2);
     index += 2;
     
     // Line
     itoa(line, tmp, 10);
-    core_copy(cmd + index, tmp, strlen(tmp));
+    memcpy(cmd + index, tmp, strlen(tmp));
     index += strlen(tmp);
     
     // Separator (;)
-    core_copy(cmd + index, ";", 1);
+    memcpy(cmd + index, ";", 1);
     index += 1;
     
     // Column
     itoa(column, tmp, 10);
-    core_copy(cmd + index, tmp, strlen(tmp));
+    memcpy(cmd + index, tmp, strlen(tmp));
     index += strlen(tmp);
     
     // End
@@ -42,20 +42,20 @@ char *ansi_set_gfx_mode(char *cmd, int *modes, int num)
     int index = 0;
     
     // ESC
-    core_copy(cmd + index, ESC_str, 2);
+    memcpy(cmd + index, ESC_str, 2);
     index += 2;
     
     // Modes
     for (int i = 0 ; i < num ; i++)
     {
         itoa(modes[i], tmp, 10);
-        core_copy(cmd + index, tmp, strlen(tmp));
+        memcpy(cmd + index, tmp, strlen(tmp));
         index += strlen(tmp);
         
         // Separator (;)
         if (i != num - 1)
         {
-            core_copy(cmd + index, ";", 1);
+            memcpy(cmd + index, ";", 1);
             index += 1;
         }
     }
@@ -73,11 +73,11 @@ char *ansi_clear_screen(char *cmd)
     int index = 0;
     
     // ESC
-    core_copy(cmd + index, ESC_str, 2);
+    memcpy(cmd + index, ESC_str, 2);
     index += 2;
     
     // Command
-    core_copy(cmd + index, "2J", 2);
+    memcpy(cmd + index, "2J", 2);
     index += 2;
     
     // End
@@ -91,11 +91,11 @@ char *ansi_hide_cursor(char *cmd)
     int index = 0;
     
     // ESC
-    core_copy(cmd + index, ESC_str, 2);
+    memcpy(cmd + index, ESC_str, 2);
     index += 2;
     
     // Command
-    core_copy(cmd + index, "?25l", 4);
+    memcpy(cmd + index, "?25l", 4);
     index += 4;
     
     // End
@@ -109,11 +109,11 @@ char *ansi_show_cursor(char *cmd)
     int index = 0;
     
     // ESC
-    core_copy(cmd + index, ESC_str, 2);
+    memcpy(cmd + index, ESC_str, 2);
     index += 2;
     
     // Command
-    core_copy(cmd + index, "?25h", 4);
+    memcpy(cmd + index, "?25h", 4);
     index += 4;
     
     // End
@@ -127,11 +127,11 @@ char *ansi_report_cursor(char *cmd)
     int index = 0;
     
     // ESC
-    core_copy(cmd + index, ESC_str, 2);
+    memcpy(cmd + index, ESC_str, 2);
     index += 2;
     
     // Command
-    core_copy(cmd + index, "6n", 2);
+    memcpy(cmd + index, "6n", 2);
     index += 2;
     
     // End

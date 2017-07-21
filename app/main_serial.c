@@ -67,7 +67,7 @@ void main(__unused int argc, __unused char **argv)
     
     char data[5];
     
-    core_set(data, 0, 5);
+    memset(data, 0, 5);
     
     for (;;)
     {

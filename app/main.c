@@ -21,7 +21,7 @@ void counter_foo(int line)
         
         if (mem)
         {
-            core_set(mem, 0x55, memsz);
+            memset(mem, 0x55, memsz);
             console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
             core_free(mem);
             

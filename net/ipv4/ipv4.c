@@ -45,7 +45,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
         return ERR_CODE_NOMEMFORIPPACKET;
     }
     
-    core_copy(packet, buffer, len);
+    memcpy(packet, buffer, len);
     
     uint16_t packetID = packet[4] << 8 | packet[5];
     
@@ -134,12 +134,9 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
     return 0;
 }
 
-// TODO: need more options to create the IP packet: protocol
-void ipv4_send(NETWORK net, byte *packet, size_t len)
+void ipv4_send(NETWORK net, byte *data, size_t len, byte protocol, byte destination[])
 {
     struct NetIfaceStruct *iface = net_iface(net);
     
     // TODO: according to network MTU, fragment packet, create corresponding IP headers and put them into the Outgoing queue
 }
-
-// TODO: ipv4_build_packet(byte *data, size_t len, destIP, orgIP, protocol)

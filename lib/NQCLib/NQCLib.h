@@ -12,5 +12,14 @@ int                         atoi(const char *str);
 #ifdef NQC_STRLEN
 size_t                      strlen(const char *str);
 #endif
+#ifdef NQC_STRCPY
+char                        *strcpy(char *dest, const char *src);
+#endif
+#ifdef NQC_MEMCPY
+void                        *memcpy(void *destination, const void *source, size_t num);
+#endif
+#ifdef NQC_MEMSET
+void                        *memset(void *ptr, int value, size_t num);
+#endif
 
 #endif

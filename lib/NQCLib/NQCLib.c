@@ -1,4 +1,5 @@
 #include <appos.h>
+#include <mem/mem.h>
 #include <lib/NQCLib/NQCLib.h>
 
 #ifdef NQC_ITOA
@@ -62,10 +63,10 @@ size_t strlen(const char *str)
 {
     size_t i;
     
-    for (i = 0 ; str[i] != 0 ; i++)
+    for (i = 0 ; str[i] != '\0' ; i++)
     {
         // Limit
-        if (i > 100000)
+        if (i > NQC_STR_LIMIT)
         {
             break;
         }
@@ -74,3 +75,52 @@ size_t strlen(const char *str)
     return i;
 }
 #endif
+
+#ifdef NQC_STRCPY
+char *strcpy(char *dest, const char *src)
+{
+    size_t i;
+    
+    for (i = 0 ; src[i] != '\0' ; i++)
+    {
+        // Limit
+        if (i > NQC_STR_LIMIT)
+        {
+            break;
+        }
+        
+        dest[i] = src[i];
+    }
+    
+    dest[i] = '\0';
+    
+    return dest;
+}
+#endif
+
+#ifdef NQC_MEMCPY
+void *memcpy(void *dest, const void *src, size_t size)
+{
+    for (size_t i = 0 ; i < size ; i++)
+    {
+        ((unsigned char *)dest)[i] = ((unsigned char *)src)[i];
+    }
+    
+    return dest;
+}
+#endif
+
+#ifdef NQC_MEMSET
+void *memset(void *ptr, int value, size_t size)
+{
+    for (size_t i = 0 ; i < size ; i++)
+    {
+        ((unsigned char *)ptr)[i] = (unsigned char)value;
+    }
+    
+    return ptr;
+}
+#endif
+
+// TODO: add vsprintf and sprintf
+// TODO: add vsscanf and sscanf
