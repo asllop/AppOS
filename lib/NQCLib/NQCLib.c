@@ -1,3 +1,20 @@
+/*
+    Not Quite C Lib - By Andreu Santaren Llop and others (read below)
+ 
+    NQCLib is a Frankenstein library made by chopping and sticking functions from different libraries and Internet sites.
+    It's not an ANSI C Library at all, since the list of functions is not complete, but the ones included follow the standard
+    on both, its prototype and behaviour. NQCLib is not intended to replace a real standard ANSI C Lib, it was written just as
+    a helper library for AppOS, and the functions were added whenever needed during the kernel development process.
+    The interesting thing about NQCLib is its modularity and scalability, since is possible to compile only the functions
+    you really need by setting the appropriate NQCLib_config.h macros, easily adapting it to small and embedded systems.
+ 
+    The list of "donors":
+    http://clc-wiki.net/
+    http://wiki.osdev.org/
+    Andreu Santaren Llop (yes, I wrote some functions, but not many to be honest)
+ 
+ */
+
 #include <appos.h>
 #include <mem/mem.h>
 #include <lib/NQCLib/NQCLib.h>
