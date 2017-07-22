@@ -32,6 +32,7 @@ OBJECTS= \
     net/slip/slip_internal.o \
     net/ipv4/ipv4.o \
     net/ipv4/ipv4_internal.o \
+    net/udp/udp.o \
     net/net_utils/net_utils.o \
     lib/NQCLib/NQCLib.o \
     app/utils.o \

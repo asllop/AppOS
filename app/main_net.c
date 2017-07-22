@@ -6,6 +6,7 @@
 #include <term/term.h>
 #include <term/drivers/term_serial/term_serial.h>
 #include <net/ipv4/ipv4.h>
+#include <net/udp/udp.h>
 #include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
@@ -51,7 +52,8 @@ void main(__unused int argc, __unused char **argv)
     
     size_t packet_len;
     byte destIP[] = {192,168,1,1};
-    byte *packet = ipv4_build(net, (byte *)"Hola", 4, 150, destIP, &packet_len);
+    //byte *packet = ipv4_build(net, (byte *)"Hola", 4, 150, destIP, &packet_len);
+    byte *packet = udp_build(net, (byte *)"Hola", 4, destIP, 1500, 25000, &packet_len);
     
     // MTU of SLIP interfaces in Linux use to be 300 bytes aprox, so 500 is far enough
     byte *inBuff = (byte *)core_malloc(500);

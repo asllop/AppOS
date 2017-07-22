@@ -1,4 +1,4 @@
-#include "NQCLib_config.h"
+#include <lib/NQCLib/NQCLib_config.h>
 
 #ifndef NQCLIB_H
 #define	NQCLIB_H
