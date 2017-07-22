@@ -98,6 +98,29 @@ char *strcpy(char *dest, const char *src)
 }
 #endif
 
+#ifdef NQC_STRNCPY
+char *strncpy(char *dest, const char *src, size_t n)
+{
+    char *ret = dest;
+    
+    do
+    {
+        if (!n--)
+        {
+            return ret;
+        }
+    }
+    while ((*dest++ = *src++));
+    
+    while (n--)
+    {
+        *dest++ = 0;
+    }
+    
+    return ret;
+}
+#endif
+
 #ifdef NQC_MEMCPY
 void *memcpy(void *dest, const void *src, size_t size)
 {
@@ -119,6 +142,33 @@ void *memset(void *ptr, int value, size_t size)
     }
     
     return ptr;
+}
+#endif
+
+#ifdef NQC_STRNCMP
+int strncmp(const char *s1, const char *s2, size_t n)
+{
+    while (n--)
+    {
+        if (*s1++ != *s2++)
+        {
+            return *(unsigned char*)(s1 - 1) - *(unsigned char*)(s2 - 1);
+        }
+    }
+    
+    return 0;
+}
+#endif
+
+#ifdef NQC_STRCMP
+int strcmp(const char *s1, const char *s2)
+{
+    while (*s1 && (*s1 == *s2))
+    {
+        s1++ , s2++;
+    }
+    
+    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
 }
 #endif
 

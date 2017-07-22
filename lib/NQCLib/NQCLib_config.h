@@ -11,7 +11,10 @@
 #define NQC_ATOI
 #define NQC_STRLEN
 #define NQC_STRCPY
+#define NQC_STRNCPY
 #define NQC_MEMCPY
 #define NQC_MEMSET
+#define NQC_STRNCMP
+#define NQC_STRCMP
 
 #endif
