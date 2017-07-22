@@ -5,6 +5,6 @@
 #include <net/net.h>
 
 int                         ipv4_receive(NETWORK net, byte *packet, size_t len);
-void                        ipv4_send(NETWORK net, byte *data, size_t len, byte protocol, byte destination[]);
+void                        *ipv4_build(NETWORK net, byte *data, size_t len, byte protocol, byte destIP[], size_t *result_size);
 
 #endif

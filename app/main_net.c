@@ -49,6 +49,10 @@ void main(__unused int argc, __unused char **argv)
     // Hardcoded IP, set on Linux point-to-point SLIP connection
     net_parse_ipv4("192.168.1.2", net_iface(net)->address);
     
+    size_t packet_len;
+    byte destIP[] = {192,168,1,1};
+    byte *packet = ipv4_build(net, (byte *)"Hola", 4, 150, destIP, &packet_len);
+    
     // MTU of SLIP interfaces in Linux use to be 300 bytes aprox, so 500 is far enough
     byte *inBuff = (byte *)core_malloc(500);
     int buffSz = (int)core_size(inBuff);
@@ -76,6 +80,16 @@ void main(__unused int argc, __unused char **argv)
         else
         {
             term_puts(termID, "Correct IP packet\n");
+        }
+        
+        if (packet)
+        {
+            slip_send(slip, packet, (int)packet_len);
+            term_puts(termID, "Send packet...\n");
+        }
+        else
+        {
+            term_puts(termID, "Error generating packet to send\n");
         }
     }
 }

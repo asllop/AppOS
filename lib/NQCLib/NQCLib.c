@@ -123,4 +123,6 @@ void *memset(void *ptr, int value, size_t size)
 #endif
 
 // TODO: add vsprintf and sprintf
+// http://www.ai.mit.edu/projects/im/cam8/cam8/working/xv/vprintf.c
+
 // TODO: add vsscanf and sscanf

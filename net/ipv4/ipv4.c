@@ -3,6 +3,7 @@
 #include <net/ipv4/ipv4.h>
 #include <net/ipv4/ipv4_internal.h>
 #include <mem/mem.h>
+#include <task/task.h>
 #include <lib/NQCLib/NQCLib.h>
 
 // TEST:
@@ -10,6 +11,8 @@
 
 int ipv4_receive(NETWORK net, byte *buffer, size_t len)
 {
+    // TODO: use a mutex to avoid thread problems
+    
     struct NetIfaceStruct *iface = net_iface(net);
     
     if ((buffer[0] & 0xf0) != 0x40)
@@ -134,9 +137,46 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
     return 0;
 }
 
-void ipv4_send(NETWORK net, byte *data, size_t len, byte protocol, byte destination[])
+void *ipv4_build(NETWORK net, byte *data, size_t len, byte protocol, byte destIP[], size_t *result_size)
 {
     struct NetIfaceStruct *iface = net_iface(net);
     
-    // TODO: according to network MTU, fragment packet, create corresponding IP headers and put them into the Outgoing queue
+    uint16_t packet_size = len + sizeof(struct IPv4_header);
+    void *ip_packet = core_malloc(packet_size);
+    
+    if (!ip_packet) return NULL;
+    
+    struct IPv4_header *header = ip_packet;
+    byte *packet_data = ip_packet + sizeof(struct IPv4_header);
+    memcpy(packet_data, data, len);
+    
+    header->versionAndHlen = 0x45;
+    header->serviceType = 0;
+    header->totalLength[0] = (packet_size >> 8) & 0xff;
+    header->totalLength[1] = packet_size & 0xff;
+    uint16_t packetID = (uint16_t)core_timestamp();
+    header->packetID[0] = (packetID >> 8) & 0xff;
+    header->packetID[1] = packetID & 0xff;
+    header->flagsAndOffset[0] = 0;
+    header->flagsAndOffset[1] = 0;
+    header->ttl = 127;
+    header->protocol = protocol;
+    memcpy(header->source, iface->address, 4);
+    memcpy(header->destination, destIP, 4);
+    header->headerChecksum[0] = 0;
+    header->headerChecksum[1] = 0;
+    uint16_t cksum = net_checksum(ip_packet, sizeof(struct IPv4_header));
+    header->headerChecksum[0] = (cksum >> 8) & 0xff;
+    header->headerChecksum[1] = cksum & 0xff;
+    *result_size = packet_size;
+    
+    if (packet_size > iface->mtu)
+    {
+        // TODO: Create fragment of this packet
+        return ip_packet;
+    }
+    else
+    {
+        return ip_packet;
+    }
 }
