@@ -116,7 +116,7 @@ void showUsedMem()
     size_t totalMem = core_avail(MEM_TYPE_USED);
     console_put_string(0x4f, "Used Mem:", 60, 3);
     console_put_string(0x4f, "          ", 60, 4);
-    console_put_string(0x4f, itoa(totalMem, var_str, 10), 60, 4);
+    console_put_string(0x4f, ltoa(totalMem, var_str, 10), 60, 4);
 }
 
 void main(__unused int argc, __unused char **argv)
@@ -138,7 +138,7 @@ void main(__unused int argc, __unused char **argv)
     size_t p0sz = core_size(p0);
     
     core_log("P0 real size = ");
-    core_log(itoa(p0sz, var_str, 10));
+    core_log(ltoa((long)p0sz, var_str, 10));
     core_log("\n");
     
     // Create a task with priority 0 (the highest)

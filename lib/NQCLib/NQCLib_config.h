@@ -7,7 +7,8 @@
 
 // Comment out the functions you don't need
 
-#define NQC_ITOA
+#define NQC_ITOA            // Dependencies: NQC_LTOA
+#define NQC_LTOA
 #define NQC_ATOI
 #define NQC_STRLEN
 #define NQC_STRCPY
