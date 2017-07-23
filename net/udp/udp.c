@@ -6,6 +6,9 @@
 // TODO: create a udp_malloc to alloc a buffer with a space at the begginig to store IP and UDP headers, this way we save a lot of memory
 //       reallocating, copying and deallocating buffer when moving the different layers: Application->UDP->IP->Physical
 
+// SOLUTION: Use core_realloc!! Modify prototype to allow adding space after or before. This way we can use the same buffer along the
+// network stack.
+
 void *udp_build(NETWORK net, byte *data, size_t len, byte dstIP[], uint16_t dstPort, uint16_t srcPort, size_t *result_size)
 {
     uint16_t size = len + sizeof(struct UDP_header);

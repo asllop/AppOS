@@ -70,7 +70,7 @@ void *core_malloc(size_t size)
     return NULL;
 }
 
-void *core_realloc(void *buf, size_t size)
+void *core_realloc(void *buf, size_t size, REALLOC_TYPE type)
 {
     // TODO: realloc method
     return NULL;
