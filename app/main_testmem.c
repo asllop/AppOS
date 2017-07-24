@@ -253,6 +253,21 @@ void main(__unused int argc, __unused char **argv)
     core_realloc(p2, 4000, 10000, 0);
     term_puts(termID, "Realloc p2 de 4000 a 10000:\n");
     print_segs();
+
+    term_puts(termID, "\n---------------\n");
+    void *p3 = core_malloc(1500);
+    strcpy(p3, "Hola amic meu\n");
+    term_puts(termID, "Alloc new buffer 1500, p3, and copy string (hello):\n");
+    print_segs();
+    
+    term_puts(termID, "\n---------------\n");
+    void *p3_realloc = core_realloc(p3, 1500, 3000, 500);
+    term_puts(termID, "Realloc p3 de 1500 a 3000 i mou 500 bytes cap abaix:\n");
+    print_segs();
+    
+    term_puts(termID, "\nNova cadena moguda 500 bytes: ");
+    term_puts(termID, p3_realloc + 500);
+    
     
     int line = 5;
     
