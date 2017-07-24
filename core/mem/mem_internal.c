@@ -85,7 +85,7 @@ void *mem_move_offset(void *buf, size_t size, long offset)
     {
         // Move to lower address
         
-        for (long i = 0 ; i < size ; i ++)
+        for (long i = 0 ; i < (long)size ; i ++)
         {
             ((byte *)buf)[i + offset] = ((byte *)buf)[i];
         }
