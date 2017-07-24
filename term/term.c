@@ -132,10 +132,10 @@ int term_getc(TERM term)
     }
 }
 
-// TODO: add char echo
 int term_gets(TERM term, char *str, int sz)
 {
     struct TermDriverStruct *driver = get_term_driver(term);
+    
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -156,6 +156,9 @@ int term_gets(TERM term, char *str, int sz)
             
             if (ch == '\r' || ch == '\n')
             {
+                // Echo
+                driver->putc(driver->customID, ch);
+                
                 str[i] = '\0';
                 core_unlock(MUTEX_TERM);
                 return i;
@@ -165,9 +168,17 @@ int term_gets(TERM term, char *str, int sz)
                 i --;
                 if (i < 0) i = 0;
                 str[i] = '\0';
+                
+                // Echo
+                driver->putc(driver->customID, ch);
+                driver->putc(driver->customID, ' ');
+                driver->putc(driver->customID, ch);
             }
             else if (ch >= 32)
             {
+                // Echo
+                driver->putc(driver->customID, ch);
+                
                 str[i] = ch;
                 i ++;
             }

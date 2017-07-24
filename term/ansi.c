@@ -4,7 +4,6 @@
 
 static char *ESC_str = "\x1b[";
 
-
 char *ansi_set_cursor(char *cmd, int line, int column)
 {
     char tmp[5];

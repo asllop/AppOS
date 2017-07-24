@@ -36,8 +36,7 @@ OBJECTS= \
     net/net_utils/net_utils.o \
     lib/NQCLib/NQCLib.o \
     app/utils.o \
-    app/main_testmem.o
-#	app/main_net.o
+    app/main_term.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
