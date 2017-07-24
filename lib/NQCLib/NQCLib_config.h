@@ -9,6 +9,7 @@
 
 #define NQC_ITOA            // Dependencies: NQC_LTOA
 #define NQC_LTOA
+#define NQC_ULTOA
 #define NQC_ATOI
 #define NQC_STRLEN
 #define NQC_STRCPY

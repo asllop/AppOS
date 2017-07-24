@@ -9,6 +9,9 @@ char                        *itoa(int value, char *str, int base);
 #ifdef NQC_LTOA
 char                        *ltoa(long N, char *str, int base);
 #endif
+#ifdef NQC_ULTOA
+char                        *ultoa(unsigned long value, char *str, int base);
+#endif
 #ifdef NQC_ATOI
 int                         atoi(const char *str);
 #endif

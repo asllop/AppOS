@@ -12,7 +12,7 @@
 // This way we are wasting less memory.
 
 #ifndef SEGMENT_SIZE
-#define SEGMENT_SIZE        256
+#define SEGMENT_SIZE        1024
 #endif
 
 struct BlockStruct
@@ -28,6 +28,7 @@ typedef uint16_t            SEGMENT;
 void                        mem_init();
 struct BlockStruct          *get_blocks(byte *num);
 void                        internal_free(void *buf);
+void                        *mem_move_offset(void *buf, size_t size, long offset);
 
 /* Architecture dependant functions */
 

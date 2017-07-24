@@ -67,3 +67,34 @@ void internal_free(void *buf)
         }
     }
 }
+
+void *mem_move_offset(void *buf, size_t size, long offset)
+{
+    if (offset > 0)
+    {
+        // Move to higher address
+        
+        for (long i = size - 1 ; i >= 0 ; i --)
+        {
+            ((byte *)buf)[i + offset] = ((byte *)buf)[i];
+        }
+        
+        return buf + offset;
+    }
+    else if (offset < 0)
+    {
+        // Move to lower address
+        
+        for (long i = 0 ; i < size ; i ++)
+        {
+            ((byte *)buf)[i + offset] = ((byte *)buf)[i];
+        }
+        
+        return buf + offset;
+    }
+    else
+    {
+        // Don't move at all
+        return buf;
+    }
+}

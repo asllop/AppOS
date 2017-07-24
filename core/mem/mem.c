@@ -2,6 +2,7 @@
 #include <mem/mem.h>
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
+#include <lib/NQCLib/NQCLib.h>
 
 void *core_malloc(size_t size)
 {
@@ -70,10 +71,83 @@ void *core_malloc(size_t size)
     return NULL;
 }
 
-void *core_realloc(void *buf, size_t size, REALLOC_TYPE type)
+void *core_realloc(void *buf, size_t currentBufferSize, size_t newSize, long moveOffset)
 {
-    // TODO: realloc method
-    return NULL;
+    core_lock(MUTEX_MEM);
+    
+    SEGMENT currentSegmentSize = *((SEGMENT *)(buf - sizeof(SEGMENT)));
+    size_t currentSegmentPayloadSizeInBytes = ((size_t)currentSegmentSize * SEGMENT_SIZE) - sizeof(SEGMENT);
+    
+    if (currentSegmentPayloadSizeInBytes < newSize)
+    {
+        // Calculate how many additional segments we need
+        size_t additionalBytesNeeded = newSize - currentSegmentPayloadSizeInBytes;
+        SEGMENT additionalSegmentsNedded = additionalBytesNeeded / SEGMENT_SIZE;
+        if (additionalSegmentsNedded % SEGMENT_SIZE)
+        {
+            additionalSegmentsNedded ++;
+        }
+        
+        void *newBuffPointer = NULL;
+        
+        // Find needed segments after
+        void *nextSegment = (buf - sizeof(SEGMENT)) + (currentSegmentPayloadSizeInBytes + sizeof(SEGMENT));
+        
+        SEGMENT foundSegments = 0;
+        
+        while (foundSegments < additionalSegmentsNedded)
+        {
+            SEGMENT segSize = *((SEGMENT *)nextSegment);
+            
+            if (segSize == 0)
+            {
+                // Found free segment
+                foundSegments ++;
+                // Go to next segment
+                nextSegment += SEGMENT_SIZE;
+            }
+            else
+            {
+                // Used segment, finish
+                break;
+            }
+        }
+        
+        // Added segments after, update pointer to new segment (basically the same it was)
+        newBuffPointer = buf - sizeof(SEGMENT);
+        
+        // NOTE: Currently we are only reallocating in one direction (forward to a higher address). The reason is:
+        // PROBLEM
+        // IF foundSegments < additionalSegmentsNedded => Not enought segments yet, we have to find needed segments before.
+        // But we can't go back because we don't know the size of previous segments
+        // Only two solutions (with current memory system)
+        // 1. Start seeking from the beggining of block and go forward up to current segment
+        // 2. Just realloc in one direction and ignore the other.
+        // The solution 1 is too slow, so we just ignore free segments behind and scan the ones allocated in front.
+        
+        if (foundSegments < additionalSegmentsNedded)
+        {
+            // Failed, can't reallocate: try to malloc a new buffer and move?
+            core_unlock(MUTEX_MEM);
+            return NULL;
+        }
+        else
+        {
+            // Found all segments!!
+            *((SEGMENT *)newBuffPointer) += additionalSegmentsNedded;
+            newBuffPointer += sizeof(SEGMENT);
+            mem_move_offset(newBuffPointer, currentBufferSize, moveOffset);
+            core_unlock(MUTEX_MEM);
+            return newBuffPointer;
+        }
+    }
+    else
+    {
+        // Current segment is big enought to alloc "size"
+        mem_move_offset(buf, currentBufferSize, moveOffset);
+        core_unlock(MUTEX_MEM);
+        return buf;
+    }
 }
 
 void core_free(void *buf)
@@ -120,44 +194,6 @@ size_t core_avail(MEM_TYPE memtype)
             core_unlock(MUTEX_MEM);
             
             return total;
-        }
-            
-        case MEM_TYPE_FREE:
-        {
-            size_t free = 0;
-            
-            core_lock(MUTEX_MEM);
-            
-            byte numBlocks;
-            struct BlockStruct *blocks = get_blocks(&numBlocks);
-            
-            for (byte i = 0 ; i < numBlocks ; i++)
-            {
-                size_t numSegments = blocks[i].blockSize / SEGMENT_SIZE;
-                void *p = blocks[i].block;
-                size_t j = 0;
-                
-                while (j < numSegments)
-                {
-                    if (*((SEGMENT *)p) == 0)
-                    {
-                        // Empty segment
-                        j ++;
-                        free += SEGMENT_SIZE;
-                    }
-                    else
-                    {
-                        // Used segment, part of a buffer. Jump to the end of the buffer
-                        j += *((SEGMENT *)p);
-                    }
-                    
-                    p = blocks[i].block + (SEGMENT_SIZE * j);
-                }
-            }
-            
-            core_unlock(MUTEX_MEM);
-            
-            return free;
         }
             
         case MEM_TYPE_USED:
