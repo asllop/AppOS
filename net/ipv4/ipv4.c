@@ -142,13 +142,12 @@ void *ipv4_build(NETWORK net, byte *data, size_t len, byte protocol, byte destIP
     struct NetIfaceStruct *iface = net_iface(net);
     
     uint16_t packet_size = len + sizeof(struct IPv4_header);
-    void *ip_packet = core_malloc(packet_size);
+    
+    void *ip_packet = core_realloc(data, len, packet_size, sizeof(struct IPv4_header));
     
     if (!ip_packet) return NULL;
     
     struct IPv4_header *header = ip_packet;
-    byte *packet_data = ip_packet + sizeof(struct IPv4_header);
-    memcpy(packet_data, data, len);
     
     header->versionAndHlen = 0x45;
     header->serviceType = 0;
