@@ -83,7 +83,7 @@ void *core_realloc(void *buf, size_t currentBufferSize, size_t newSize, long mov
         // Calculate how many additional segments we need
         size_t additionalBytesNeeded = newSize - currentSegmentPayloadSizeInBytes;
         SEGMENT additionalSegmentsNedded = additionalBytesNeeded / SEGMENT_SIZE;
-        if (additionalSegmentsNedded % SEGMENT_SIZE)
+        if (additionalBytesNeeded % SEGMENT_SIZE)
         {
             additionalSegmentsNedded ++;
         }
@@ -127,9 +127,22 @@ void *core_realloc(void *buf, size_t currentBufferSize, size_t newSize, long mov
         
         if (foundSegments < additionalSegmentsNedded)
         {
-            // Failed, can't reallocate: try to malloc a new buffer and move?
+            // Couldn't reallocate, try to alloc a new buffer and move the data
             core_unlock(MUTEX_MEM);
-            return NULL;
+            void *newbuff = core_malloc(newSize);
+            
+            if (newbuff)
+            {
+                memcpy(newbuff, buf, currentBufferSize);
+                mem_move_offset(newbuff, currentBufferSize, moveOffset);
+                core_free(buf);
+                return newbuff;
+            }
+            else
+            {
+                // No luck, failed
+                return NULL;
+            }
         }
         else
         {

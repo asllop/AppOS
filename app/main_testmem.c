@@ -246,7 +246,7 @@ void main(__unused int argc, __unused char **argv)
     // aquest hauria de fallar
     core_realloc(p0, 7000, 10000, 0);
     
-    term_puts(termID, "Realloc p0 de 7000 a 10000 (hauria de fallar):\n");
+    term_puts(termID, "Realloc p0 de 7000 a 10000 (no pot fer realloc directe pk no hi cap, s'ha de moure el buffer):\n");
     print_segs();
     
     term_puts(termID, "\n---------------\n");
