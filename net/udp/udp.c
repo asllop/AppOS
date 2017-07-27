@@ -21,7 +21,6 @@ void *udp_build(NETWORK net, byte *data, size_t len, byte dstIP[], uint16_t dstP
         header->size[1] = size & 0xff;
         
         void *finalPacket = ipv4_build(net, packet, size, 17, dstIP, result_size);
-        core_free(packet);
         
         return finalPacket;
     }
