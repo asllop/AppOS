@@ -24,7 +24,7 @@ void event_init()
     }
 }
 
-bool enqueue_event(EVENT code, struct EventStruct *event)
+bool event_enqueue(EVENT code, struct EventStruct *event)
 {
     core_lock(MUTEX_EVENT);
     
@@ -56,7 +56,7 @@ bool enqueue_event(EVENT code, struct EventStruct *event)
     }
 }
 
-bool dequeue_event(EVENT code, struct EventStruct *event)
+bool event_dequeue(EVENT code, struct EventStruct *event)
 {
     core_lock(MUTEX_EVENT);
     
@@ -96,7 +96,7 @@ bool dequeue_event(EVENT code, struct EventStruct *event)
     }
 }
 
-struct QueueStruct *get_queue(int position)
+struct QueueStruct *event_get(int position)
 {
     if (position > MAX_EVENT_QUEUES - 1)
     {

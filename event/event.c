@@ -12,7 +12,7 @@ int event_produce(EVENT code, void *message, size_t size)
     
     struct EventStruct event = { .message = message, .size = size };
     
-    if (!enqueue_event(code, &event))
+    if (!event_enqueue(code, &event))
     {
         return ERR_CODE_EVENTFULL;
     }
@@ -29,7 +29,7 @@ void *event_consume(EVENT code, size_t *size)
     
     struct EventStruct event;
     
-    if (!dequeue_event(code, &event))
+    if (!event_dequeue(code, &event))
     {
         return NULL;
     }
@@ -41,7 +41,7 @@ void *event_consume(EVENT code, size_t *size)
 
 int event_wait(EVENT code)
 {
-    struct QueueStruct *queue = get_queue(code);
+    struct QueueStruct *queue = event_get(code);
     
     if (!queue)
     {
@@ -58,7 +58,7 @@ int event_wait(EVENT code)
 
 long event_queue(EVENT code)
 {
-    struct QueueStruct *queue = get_queue(code);
+    struct QueueStruct *queue = event_get(code);
     
     if (queue)
     {
