@@ -89,12 +89,12 @@ int serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP s
     return 0;
 }
 
-byte is_data_ready(PORT port)
+byte serial_is_data_ready(PORT port)
 {
     return inportb(port_address(port) + 5) & 1;
 }
 
-byte is_transmit_empty(PORT port)
+byte serial_is_transmit_empty(PORT port)
 {
     return inportb(port_address(port) + 5) & 0x20;
 }
