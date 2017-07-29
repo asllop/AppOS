@@ -16,7 +16,7 @@ void core_fatal(char *msg)
 
 int core_lock(MUTEX mutex)
 {
-    if (!get_scheduling())
+    if (!task_get_scheduling())
     {
         return ERR_CODE_MUTEXWHILEFORBID;
     }
@@ -38,7 +38,7 @@ int core_lock(MUTEX mutex)
 
 int core_unlock(MUTEX mutex)
 {
-    if (!get_scheduling())
+    if (!task_get_scheduling())
     {
         return ERR_CODE_MUTEXWHILEFORBID;
     }

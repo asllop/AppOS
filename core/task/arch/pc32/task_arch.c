@@ -20,7 +20,7 @@ void *push32(void *stackPointer, uint32_t value)
 }
 
 // Setup an empty context on the stack for a new task
-void context_init(struct TaskStruct *slot)
+void task_context_init(struct TaskStruct *slot)
 {
     void *currentStackPointer = slot->stack;
     
@@ -58,7 +58,7 @@ void *timer_interrupt(void *stackPointer)
     
     systemTimestamp += MILLIS_PER_TICK;
     
-    void *newStackPointer = schedule(stackPointer);
+    void *newStackPointer = task_schedule(stackPointer);
     
     // Enable NMI
     outportb(0x70, inportb(0x70) & 0x7F);
@@ -101,7 +101,7 @@ void init_pit(unsigned int freq)
     asm("sti");
 }
 
-void force_task_scheduling()
+void task_force_scheduling()
 {
     // Cal a fake timer interrupt to avoid incrementing timestamp
     asm(
@@ -111,7 +111,7 @@ void force_task_scheduling()
         );
 }
 
-void scheduler_init()
+void task_scheduler_init()
 {
     systemTimestamp = 0;
     
@@ -120,7 +120,7 @@ void scheduler_init()
 
 extern void main_task();
 
-void setup_stack(void *stackPointer)
+void task_setup_stack(void *stackPointer)
 {
     // Use main task stack as current stack
     

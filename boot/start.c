@@ -26,8 +26,8 @@ void kernel_init()
         core_fatal("Could not create Main task");
     }
     
-    struct TaskStruct *mainTaskStruct = get_task(mainTaskID);
+    struct TaskStruct *mainTaskStruct = task_get(mainTaskID);
     
     // Setup initial context for main task and run it
-    setup_stack(mainTaskStruct->stack);
+    task_setup_stack(mainTaskStruct->stack);
 }

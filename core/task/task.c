@@ -12,7 +12,7 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     core_lock(MUTEX_TASK);
     
     // Search empty slot
-    struct TaskStruct *slot = empty_slot();
+    struct TaskStruct *slot = task_empty_slot();
     
     if (!slot)
     {
@@ -37,7 +37,7 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     }
     
     // Fill it and inc task counter
-    if (inc_task_counter() == ERR_CODE_TASKCNTOVR)
+    if (task_inc_counter() == ERR_CODE_TASKCNTOVR)
     {
         // Strange error! This should never happend
         core_fatal("Task buffer or counter seems to be corrupted");
@@ -54,8 +54,8 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     slot->stack = stackBuffer + slot->stackSize;
     
     // Search prev task and next task, and fill prev/next pointers
-    slot->prev = prev_used_slot(slot);
-    slot->next = next_used_slot(slot);
+    slot->prev = task_prev_used_slot(slot);
+    slot->next = task_next_used_slot(slot);
     
     if (!slot->prev)
     {
@@ -76,13 +76,13 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     }
     
     // This is the first task
-    if (get_current_task() == NULL)
+    if (task_get_current() == NULL)
     {
-        set_current_task(slot);
+        task_set_current(slot);
     }
     
     // Initialize stack with an empty context
-    context_init(slot);
+    task_context_init(slot);
     
     core_unlock(MUTEX_TASK);
     
@@ -91,12 +91,12 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
 
 TASK core_self()
 {
-    return get_current_task()->id;
+    return task_get_current()->id;
 }
 
 int core_escalate(PRIORITY priority)
 {
-    struct TaskStruct *task = get_current_task();
+    struct TaskStruct *task = task_get_current();
     
     if (task)
     {
@@ -112,17 +112,17 @@ int core_escalate(PRIORITY priority)
 
 void core_forbid()
 {
-    set_scheduling(FALSE);
+    task_set_scheduling(FALSE);
 }
 
 void core_permit()
 {
-    set_scheduling(TRUE);
+    task_set_scheduling(TRUE);
 }
 
 TASK_STATE core_state(TASK taskid)
 {
-    struct TaskStruct *task = get_task(taskid);
+    struct TaskStruct *task = task_get(taskid);
     
     if (task)
     {
@@ -136,7 +136,7 @@ TASK_STATE core_state(TASK taskid)
 
 int core_result(TASK taskid, int *returnCode, void **bufferPointer)
 {
-    struct TaskStruct *task = get_task(taskid);
+    struct TaskStruct *task = task_get(taskid);
     
     if (task)
     {
@@ -155,7 +155,7 @@ int core_result(TASK taskid, int *returnCode, void **bufferPointer)
         
         core_lock(MUTEX_TASK);
         
-        terminate_task(task);
+        task_finalize(task);
         
         core_unlock(MUTEX_TASK);
         
@@ -169,7 +169,7 @@ int core_result(TASK taskid, int *returnCode, void **bufferPointer)
 
 void core_sleep(unsigned long millis)
 {
-    struct TaskStruct *task = get_current_task();
+    struct TaskStruct *task = task_get_current();
     
     if (millis)
     {
@@ -177,9 +177,9 @@ void core_sleep(unsigned long millis)
         
         while (task->waitUntil > core_timestamp())
         {
-            if (get_scheduling())
+            if (task_get_scheduling())
             {
-                force_task_scheduling();
+                task_force_scheduling();
             }
         }
         
@@ -189,16 +189,16 @@ void core_sleep(unsigned long millis)
     {
         task->waitUntil = 0;
         
-        if (get_scheduling())
+        if (task_get_scheduling())
         {
-            force_task_scheduling();
+            task_force_scheduling();
         }
     }
 }
 
 void core_exit(int returnCode, void *returnBuffer)
 {
-    struct TaskStruct *task = get_current_task();
+    struct TaskStruct *task = task_get_current();
     
     if (task)
     {

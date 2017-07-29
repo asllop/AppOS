@@ -36,7 +36,7 @@ void init_task_buffer()
 }
 
 // Find first empty slot
-struct TaskStruct *empty_slot()
+struct TaskStruct *task_empty_slot()
 {
     struct TaskStruct *slot;
     
@@ -54,7 +54,7 @@ struct TaskStruct *empty_slot()
     return NULL;
 }
 
-struct TaskStruct *prev_used_slot(struct TaskStruct *slot)
+struct TaskStruct *task_prev_used_slot(struct TaskStruct *slot)
 {
     if (!slot || taskCounter == 0)
     {
@@ -66,7 +66,7 @@ struct TaskStruct *prev_used_slot(struct TaskStruct *slot)
     
     for (int i = initId - 1 ; i > 0 ; i--)
     {
-        task = get_slot(i);
+        task = task_get_slot(i);
         
         if (task->state != TASK_STATE_NULL)
         {
@@ -79,7 +79,7 @@ struct TaskStruct *prev_used_slot(struct TaskStruct *slot)
     
     for (unsigned int i = initId ; i >= slot->id ; i--)
     {
-        task = get_slot(i);
+        task = task_get_slot(i);
         
         if (task->state != TASK_STATE_NULL)
         {
@@ -90,7 +90,7 @@ struct TaskStruct *prev_used_slot(struct TaskStruct *slot)
     return NULL;
 }
 
-struct TaskStruct *next_used_slot(struct TaskStruct *slot)
+struct TaskStruct *task_next_used_slot(struct TaskStruct *slot)
 {
     if (!slot || taskCounter == 0)
     {
@@ -102,7 +102,7 @@ struct TaskStruct *next_used_slot(struct TaskStruct *slot)
     
     for (int i = initId + 1 ; i <= MAX_NUM_TASK ; i++)
     {
-        task = get_slot(i);
+        task = task_get_slot(i);
         
         if (task->state != TASK_STATE_NULL)
         {
@@ -115,7 +115,7 @@ struct TaskStruct *next_used_slot(struct TaskStruct *slot)
     
     for (unsigned int i = initId ; i <= slot->id ; i++)
     {
-        task = get_slot(i);
+        task = task_get_slot(i);
         
         if (task->state != TASK_STATE_NULL)
         {
@@ -126,17 +126,17 @@ struct TaskStruct *next_used_slot(struct TaskStruct *slot)
     return NULL;
 }
 
-struct TaskStruct *get_current_task()
+struct TaskStruct *task_get_current()
 {
     return currentTask;
 }
 
-void set_current_task(struct TaskStruct *task)
+void task_set_current(struct TaskStruct *task)
 {
     currentTask = task;
 }
 
-struct TaskStruct *get_slot(TASK id)
+struct TaskStruct *task_get_slot(TASK id)
 {
     if (id < 1 || id > MAX_NUM_TASK)
     {
@@ -148,9 +148,9 @@ struct TaskStruct *get_slot(TASK id)
     }
 }
 
-struct TaskStruct *get_task(TASK id)
+struct TaskStruct *task_get(TASK id)
 {
-    struct TaskStruct *task = get_slot(id);
+    struct TaskStruct *task = task_get_slot(id);
     
     if (task)
     {
@@ -169,12 +169,12 @@ struct TaskStruct *get_task(TASK id)
     }
 }
 
-int get_task_counter()
+int task_get_counter()
 {
     return taskCounter;
 }
 
-int inc_task_counter()
+int task_inc_counter()
 {
     if (taskCounter >= MAX_NUM_TASK)
     {
@@ -186,7 +186,7 @@ int inc_task_counter()
     }
 }
 
-int dec_task_counter()
+int task_dec_counter()
 {
     if (taskCounter <= 0)
     {
@@ -198,12 +198,12 @@ int dec_task_counter()
     }
 }
 
-void set_scheduling(bool state)
+void task_set_scheduling(bool state)
 {
     isScheduling = state;
 }
 
-bool get_scheduling()
+bool task_get_scheduling()
 {
     return isScheduling;
 }
@@ -212,19 +212,19 @@ bool get_scheduling()
 void task_end_point()
 {
     core_forbid();
-    terminate_task(currentTask);
+    task_finalize(currentTask);
     core_permit();
     core_sleep(0);
     
     for(;;) {}
 }
 
-void terminate_task(struct TaskStruct *task)
+void task_finalize(struct TaskStruct *task)
 {
     if (task)
     {
         // Fill it and inc task counter
-        if (dec_task_counter() == ERR_CODE_TASKCNTUND)
+        if (task_dec_counter() == ERR_CODE_TASKCNTUND)
         {
             // Strange error! This should never happend
             core_fatal("Task buffer or counter seems to be corrupted");
@@ -250,7 +250,7 @@ void terminate_task(struct TaskStruct *task)
 }
 
 // Called by timer interrupt handler
-void *schedule(void *stackPointer)
+void *task_schedule(void *stackPointer)
 {
     if (!isScheduling)
     {
@@ -305,5 +305,5 @@ void *schedule(void *stackPointer)
 void task_init()
 {
     init_task_buffer();
-    scheduler_init();
+    task_scheduler_init();
 }

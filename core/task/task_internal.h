@@ -35,30 +35,28 @@ struct TaskStruct
 
 extern TIME                 systemTimestamp;
 
-// TODO: rename internal functions to add "task_" prefix
-
 void                        task_init();
-struct TaskStruct           *empty_slot();
-struct TaskStruct           *prev_used_slot(struct TaskStruct *slot);
-struct TaskStruct           *next_used_slot(struct TaskStruct *slot);
-struct TaskStruct           *get_current_task();
-void                        set_current_task(struct TaskStruct *task);
-struct TaskStruct           *get_slot(TASK id);
-struct TaskStruct           *get_task(TASK id);
-int                         get_task_counter();
-int                         inc_task_counter();
-int                         dec_task_counter();
-void                        set_scheduling(bool state);
-bool                        get_scheduling();
+struct TaskStruct           *task_empty_slot();
+struct TaskStruct           *task_prev_used_slot(struct TaskStruct *slot);
+struct TaskStruct           *task_next_used_slot(struct TaskStruct *slot);
+struct TaskStruct           *task_get_current();
+void                        task_set_current(struct TaskStruct *task);
+struct TaskStruct           *task_get_slot(TASK id);
+struct TaskStruct           *task_get(TASK id);
+int                         task_get_counter();
+int                         task_inc_counter();
+int                         task_dec_counter();
+void                        task_set_scheduling(bool state);
+bool                        task_get_scheduling();
 void                        task_end_point();
-void                        terminate_task(struct TaskStruct *task);
-void                        *schedule(void *stackPointer);
+void                        task_finalize(struct TaskStruct *task);
+void                        *task_schedule(void *stackPointer);
 
 /* Architecture dependant functions */
 
-void                        scheduler_init();
-void                        context_init(struct TaskStruct *slot);
-void                        force_task_scheduling();
-void                        setup_stack(void *stackPointer);
+void                        task_scheduler_init();
+void                        task_context_init(struct TaskStruct *slot);
+void                        task_force_scheduling();
+void                        task_setup_stack(void *stackPointer);
 
 #endif
