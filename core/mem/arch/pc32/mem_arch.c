@@ -91,7 +91,7 @@ void set_isr(void *isr, unsigned char vector)
     IDT[vector].offset_high = ((uint32_t)isr >> 16) & 0xFFFF;
 }
 
-int scan_blocks(struct BlockStruct *blockArray)
+int mem_scan_blocks(struct BlockStruct *blockArray)
 {
     uint32_t grub_flags = *((uint32_t *)grub_struct);
     
@@ -134,7 +134,7 @@ int scan_blocks(struct BlockStruct *blockArray)
     return 0;
 }
 
-void setup_mem()
+void mem_internal_setup()
 {
     setup_gdt();
     setup_idt();

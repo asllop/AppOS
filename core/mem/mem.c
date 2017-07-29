@@ -16,7 +16,7 @@ void *core_malloc(size_t size)
     core_lock(MUTEX_MEM);
     
     byte numBlocks;
-    struct BlockStruct *blocks = get_blocks(&numBlocks);
+    struct BlockStruct *blocks = mem_get_blocks(&numBlocks);
     
     // Add SEGMENT size to compensate the header part
     size += sizeof(SEGMENT);
@@ -167,7 +167,7 @@ void core_free(void *buf)
 {
     core_lock(MUTEX_MEM);
     
-    internal_free(buf);
+    mem_internal_free(buf);
     
     core_unlock(MUTEX_MEM);
 }
@@ -197,7 +197,7 @@ size_t core_avail(MEM_TYPE memtype)
             core_lock(MUTEX_MEM);
             
             byte numBlocks;
-            struct BlockStruct *blocks = get_blocks(&numBlocks);
+            struct BlockStruct *blocks = mem_get_blocks(&numBlocks);
             
             for (byte i = 0 ; i < numBlocks ; i++)
             {
@@ -216,7 +216,7 @@ size_t core_avail(MEM_TYPE memtype)
             core_lock(MUTEX_MEM);
             
             byte numBlocks;
-            struct BlockStruct *blocks = get_blocks(&numBlocks);
+            struct BlockStruct *blocks = mem_get_blocks(&numBlocks);
             
             for (byte i = 0 ; i < numBlocks ; i++)
             {

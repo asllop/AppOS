@@ -23,16 +23,14 @@ struct BlockStruct
 
 typedef uint16_t            SEGMENT;
 
-// TODO: rename internal functions to add "mem_" prefix
-
 void                        mem_init();
-struct BlockStruct          *get_blocks(byte *num);
-void                        internal_free(void *buf);
+struct BlockStruct          *mem_get_blocks(byte *num);
+void                        mem_internal_free(void *buf);
 void                        *mem_move_offset(void *buf, size_t size, long offset);
 
 /* Architecture dependant functions */
 
-void                        setup_mem();
-int                         scan_blocks(struct BlockStruct *blockArray);
+void                        mem_internal_setup();
+int                         mem_scan_blocks(struct BlockStruct *blockArray);
 
 #endif

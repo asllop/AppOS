@@ -268,7 +268,7 @@ void *schedule(void *stackPointer)
             if (nextTask->state == TASK_STATE_DEAD)
             {
                 // Definitively remove task
-                internal_free(nextTask->stackBuffer);
+                mem_internal_free(nextTask->stackBuffer);
                 
                 nextTask->state = TASK_STATE_NULL;
                 nextTask->stackBuffer = NULL;

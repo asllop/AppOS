@@ -8,9 +8,9 @@ static byte                 numBlocks;
 
 void mem_init()
 {
-    setup_mem();
+    mem_internal_setup();
     
-    if ((numBlocks = scan_blocks(blocks)) > 0)
+    if ((numBlocks = mem_scan_blocks(blocks)) > 0)
     {
         // Init headers for all segments (free segment)
         
@@ -33,13 +33,13 @@ void mem_init()
     }
 }
 
-struct BlockStruct *get_blocks(byte *num)
+struct BlockStruct *mem_get_blocks(byte *num)
 {
     *num = numBlocks;
     return blocks;
 }
 
-void internal_free(void *buf)
+void mem_internal_free(void *buf)
 {
     if (!buf)
     {
