@@ -23,9 +23,7 @@ struct TermDriverStruct
     int                     (*getc)(int customID);
 };
 
-// TODO: rename internal functions to add "term_" prefix
-
 TERM                        term_register(struct TermDriverStruct *driver);
-struct TermDriverStruct     *get_term_driver(TERM term);
+struct TermDriverStruct     *term_get_driver(TERM term);
 
 #endif
