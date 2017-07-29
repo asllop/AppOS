@@ -76,7 +76,7 @@ void init_cpu_ints()
     set_isr(bad_thing_isr, 18);
 }
 
-void io_init()
+void sys_io_init()
 {
     init_cpu_ints();
     init_pics();

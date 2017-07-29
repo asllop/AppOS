@@ -13,7 +13,7 @@ void console_puts(unsigned char color, const char *string, unsigned int x, unsig
     }
 }
 
-void emergency_puts(char *str)
+void sys_emergency_puts(char *str)
 {
     console_puts(0x4f, str, 0, 0);
 }

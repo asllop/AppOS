@@ -8,14 +8,15 @@ static LOCK                 counters[MUTEX_NUMBER];
 
 void core_init()
 {
-    mutex_init();
+    sys_init();
     mem_init();
-    io_init();
+    sys_io_init();
     task_init();
 }
 
-void mutex_init()
+void sys_init()
 {
+    // Setup mutex
     for (int i = 0 ; i < MUTEX_NUMBER ; i++)
     {
         locks[i] = 0;
@@ -23,18 +24,18 @@ void mutex_init()
     }
 }
 
-LOCK *get_lock(MUTEX mutex)
+LOCK *sys_get_lock(MUTEX mutex)
 {
     return &locks[mutex];
 }
 
-LOCK get_counter(MUTEX mutex)
+LOCK sys_get_counter(MUTEX mutex)
 {
     counters[mutex] ++;
     return counters[mutex];
 }
 
-LOCK current_counter(MUTEX mutex)
+LOCK sys_current_counter(MUTEX mutex)
 {
     return counters[mutex];
 }

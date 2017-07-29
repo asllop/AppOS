@@ -6,7 +6,7 @@
 
 void core_fatal(char *msg)
 {
-    emergency_puts(msg);
+    sys_emergency_puts(msg);
 #if REBOOT_ON_FATAL
     core_reboot();
 #else
@@ -23,8 +23,8 @@ int core_lock(MUTEX mutex)
     
     core_forbid();
     
-    LOCK currentCnt = get_counter(mutex);
-    LOCK *lock = get_lock(mutex);
+    LOCK currentCnt = sys_get_counter(mutex);
+    LOCK *lock = sys_get_lock(mutex);
     
     core_permit();
     
@@ -45,7 +45,7 @@ int core_unlock(MUTEX mutex)
     
     core_forbid();
     
-    LOCK *lock = get_lock(mutex);
+    LOCK *lock = sys_get_lock(mutex);
     (*lock) ++;
     
     core_permit();
@@ -57,8 +57,8 @@ int core_unlock(MUTEX mutex)
 //       due to change on mutex state performed by an other task.
 byte core_mutex(MUTEX mutex)
 {
-    LOCK currentCnt = current_counter(mutex) + 1;
-    LOCK *lock = get_lock(mutex);
+    LOCK currentCnt = sys_current_counter(mutex) + 1;
+    LOCK *lock = sys_get_lock(mutex);
     
     return (*lock == currentCnt);
 }
