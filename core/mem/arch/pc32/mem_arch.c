@@ -9,7 +9,7 @@ struct mmap_struct
     uint64_t base_addr;
     uint64_t length;
     uint32_t type;
-} __attribute__((packed));;
+} __attribute__((packed));
 
 struct gdt_entry
 {
@@ -130,7 +130,7 @@ int mem_scan_blocks(struct BlockStruct *blockArray)
         }
     }
     
-    // No memory found, we should probably abort here, but let it do at the arch independant part
+    // No memory found, we should probably abort here, but let's do it in the arch independant part
     return 0;
 }
 

@@ -20,6 +20,8 @@ void *udp_build(NETWORK net, byte *data, size_t len, byte dstIP[], uint16_t dstP
         header->size[0] = (size >> 8) & 0xff;
         header->size[1] = size & 0xff;
         
+        // TODO: should create an external entity to generate packets and decide how to proceed
+        // This way we will be able to have IPv4, IPv6 transparently
         void *finalPacket = ipv4_build(net, packet, size, 17, dstIP, result_size);
         
         return finalPacket;

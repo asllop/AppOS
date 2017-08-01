@@ -1,6 +1,7 @@
 #include <mem/mem.h>
 #include <task/task.h>
 #include <event/event.h>
+#include <event/event_internal.h>
 #include <sys/sys.h>
 #include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
@@ -89,6 +90,8 @@ void showUsedMem()
 void main(__unused int argc, __unused char **argv)
 {
 	char var_str[20];
+    
+    event_init();
     
     // Draw Background
     console_put_data(0x1b, 176, 80*25, 0);

@@ -4,7 +4,7 @@
 #include <appos.h>
 
 #ifndef MAX_NUM_BLOCKS
-#define MAX_NUM_BLOCKS      1
+#define MAX_NUM_BLOCKS      4
 #endif
 
 // TODO IMPROVEMENT: Create multiple blocks of memory, each one with different SEGMENT_SIZE,
