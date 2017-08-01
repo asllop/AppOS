@@ -63,7 +63,7 @@ void main(__unused int argc, __unused char **argv)
     // Init SLIP in serial port 1
     PORT slip = 1;
     
-    NETWORK net = slip_init(slip);
+    NETWORK net = slip_init(slip, "192.168.1.2");
     
     if (termID == -1)
     {
@@ -74,9 +74,6 @@ void main(__unused int argc, __unused char **argv)
     {
         core_fatal("Error initializing SLIP Network Interface");
     }
-    
-    // Hardcoded IP, set on Linux point-to-point SLIP connection
-    net_parse_ipv4("192.168.1.2", net_iface(net)->address);
     
     size_t packet_len;
     byte destIP[] = {192,168,1,1};
@@ -99,8 +96,6 @@ void main(__unused int argc, __unused char **argv)
     while (1)
     {
         int sz = slip_recv(slip, inBuff, buffSz);
-        
-        // TODO: print data received
         
         term_puts(termID, "Received packet of size ");
         term_puts(termID, itoa(sz, var_str, 10));

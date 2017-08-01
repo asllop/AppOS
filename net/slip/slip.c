@@ -14,9 +14,11 @@
 #define ESC_END         0xDC    /* ESC ESC_END means END data byte */
 #define ESC_ESC         0xDD    /* ESC ESC_ESC means ESC data byte */
 
-NETWORK slip_init(PORT port)
+NETWORK slip_init(PORT port, char *addr_str)
 {
-    return net_create(NET_IFACE_TYPE_SLIP, (byte)port);
+    NETWORK net = net_create(NET_IFACE_TYPE_SLIP, (byte)port);
+    net_parse_ipv4(addr_str, net_iface(net)->address);
+    return net;
 }
 
 /* SEND_PACKET: sends a packet of length "len", starting at

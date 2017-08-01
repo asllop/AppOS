@@ -45,7 +45,6 @@ void                        ipv4_close_packet_list(struct NetIfaceStruct *iface,
 void                        ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID);
 byte                        ipv4_check_packet(struct NetIfaceStruct *iface, uint16_t packetID);
 
-// Outgoing
-// TODO
+// TODO: Outgoing
 
 #endif
