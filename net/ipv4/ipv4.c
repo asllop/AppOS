@@ -11,12 +11,13 @@
 
 int ipv4_receive(NETWORK net, byte *buffer, size_t len)
 {
-    // TODO: use a mutex to avoid thread problems
+    core_lock(MUTEX_IPV4);
     
     struct NetIfaceStruct *iface = net_iface(net);
     
     if ((buffer[0] & 0xf0) != 0x40)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_BADIPVERSION;
     }
     
@@ -24,6 +25,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
     
     if (hlen < 20)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_BADIPHEADERSIZE;
     }
     
@@ -31,6 +33,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
     
     if (totalLen != len)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_BADIPPACKETSIZE;
     }
     
@@ -38,6 +41,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
     
     if (cksum)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_BADIPCHECKSUM;
     }
     
@@ -45,6 +49,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
     byte *packet = (byte *)core_malloc(len);
     if (!packet)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_NOMEMFORIPPACKET;
     }
     
@@ -71,6 +76,8 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             if (!ipv4_create_packet_list(iface, packetID, packet, (uint16_t)len))
             {
                 core_log("ERROR: couldn't find an empty packet slot");
+                
+                core_unlock(MUTEX_IPV4);
                 return ERR_CODE_NOPACKETSLOTS;
             }
         }
@@ -132,20 +139,29 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             core_log("Free packet list\n");
             ipv4_free_packet_list(iface, packetID);
         }
+        // END TEST
+        
     }
     
+    core_unlock(MUTEX_IPV4);
     return 0;
 }
 
 void *ipv4_build(NETWORK net, byte *data, size_t len, byte protocol, byte destIP[], size_t *result_size)
 {
+    core_lock(MUTEX_IPV4);
+    
     struct NetIfaceStruct *iface = net_iface(net);
     
     uint16_t packet_size = len + sizeof(struct IPv4_header);
     
     void *ip_packet = core_realloc(data, len, packet_size, sizeof(struct IPv4_header));
     
-    if (!ip_packet) return NULL;
+    if (!ip_packet)
+    {
+        core_unlock(MUTEX_IPV4);
+        return NULL;
+    }
     
     struct IPv4_header *header = ip_packet;
     
@@ -172,10 +188,12 @@ void *ipv4_build(NETWORK net, byte *data, size_t len, byte protocol, byte destIP
     if (packet_size > iface->mtu)
     {
         // TODO: Create fragment of this packet
+        core_unlock(MUTEX_IPV4);
         return ip_packet;
     }
     else
     {
+        core_unlock(MUTEX_IPV4);
         return ip_packet;
     }
 }

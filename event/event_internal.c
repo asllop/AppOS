@@ -5,6 +5,8 @@
 #include <event/event_internal.h>
 #include <task/task.h>
 
+// TODO: rework event system. Maybe using a private QueueStruct instead of a shared array of event codes?
+
 static struct QueueStruct queueArray[MAX_EVENT_QUEUES];
 
 void event_init()

@@ -3,6 +3,8 @@
 
 #include <appos.h>
 
+// TODO: only define used mutex
+
 typedef enum
 {
     MUTEX_MEM               = 0,
@@ -10,6 +12,7 @@ typedef enum
     MUTEX_EVENT,
     MUTEX_SERIAL,
     MUTEX_TERM,
+    MUTEX_IPV4,
     MUTEX_GENERIC,
     
     /* Custom mutex goes here ... */
