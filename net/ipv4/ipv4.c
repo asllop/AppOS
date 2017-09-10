@@ -100,8 +100,10 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             }
             else
             {
-                // TODO: some fragment is missing, discard all?
-                core_log("Packet Check ERROR\n");
+                // Some fragment is missing, discard all
+                ipv4_free_packet_list(iface, packetID);
+                
+                core_log("Packet Check ERROR, discard all\n");
             }
         }
         else
@@ -113,31 +115,36 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             ipv4_close_packet_list(iface, packetID);
         }
         
-        // TEST:
-        if (ipv4_packet_list(iface, packetID)->closed)
+        // TEST: PRINT PACKET LIST
+        struct NetIncomingList *packetList = ipv4_packet_list(iface, packetID);
+        
+        if (packetList)
         {
-            // TEST : print offsets
-            char var_str[10];
-            struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
-            struct NetIncomingFrag *frag = incomList->first;
-            
-            for (int i = 0 ; i < incomList->numFragments ; i++)
+            if (packetList->closed)
             {
-                if (frag)
+                // TEST : print offsets
+                char var_str[10];
+                struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+                struct NetIncomingFrag *frag = incomList->first;
+                
+                for (int i = 0 ; i < incomList->numFragments ; i++)
                 {
-                    byte *packI = (byte *)frag->packet;
-                    uint16_t offsetPI = ipv4_packet_offset(packI);
-                    
-                    core_log("Offset = ");
-                    core_log(itoa(offsetPI * 8, var_str, 10));
-                    core_log("\n");
-                    
-                    frag = frag->next;
+                    if (frag)
+                    {
+                        byte *packI = (byte *)frag->packet;
+                        uint16_t offsetPI = ipv4_packet_offset(packI);
+                        
+                        core_log("Offset = ");
+                        core_log(itoa(offsetPI * 8, var_str, 10));
+                        core_log("\n");
+                        
+                        frag = frag->next;
+                    }
                 }
+                
+                core_log("Free packet list\n");
+                ipv4_free_packet_list(iface, packetID);
             }
-            
-            core_log("Free packet list\n");
-            ipv4_free_packet_list(iface, packetID);
         }
         // END TEST
         
