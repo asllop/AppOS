@@ -10,23 +10,23 @@
 #include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
-void printPacket(TERM termID, byte *packet, size_t packet_len)
+void printPacket(TERM term, byte *packet, size_t packet_len)
 {
     char var_str[10];
     
-    term_puts(termID, "Packet len = ");
-    term_puts(termID, ltoa(packet_len, var_str, 10));
-    term_puts(termID, "\n");
+    term_puts(term, "Packet len = ");
+    term_puts(term, ltoa(packet_len, var_str, 10));
+    term_puts(term, "\n");
     
-    term_puts(termID, "Packet contents = \n");
+    term_puts(term, "Packet contents = \n");
     int linecnt = 0;
     for (int i = 0 ; i < packet_len ; i ++)
     {
-        term_puts(termID, itoa(packet[i], var_str, 16));
-        term_puts(termID, " ");
+        term_puts(term, itoa(packet[i], var_str, 16));
+        term_puts(term, " ");
         if (linecnt == 3)
         {
-            term_puts(termID, "\n");
+            term_puts(term, "\n");
             linecnt = 0;
         }
         else
@@ -35,7 +35,7 @@ void printPacket(TERM termID, byte *packet, size_t packet_len)
         }
     }
     
-    term_puts(termID, "\n");
+    term_puts(term, "\n");
 }
 
 void main(__unused int argc, __unused char **argv)
@@ -59,13 +59,12 @@ void main(__unused int argc, __unused char **argv)
     }
     
     // Init TERM in serial port 0
-    TERM termID = term_serial_init(0);
+    TERM term = term_serial_init(0);
+    
     // Init SLIP in serial port 1
-    PORT slip = 1;
+    NETWORK net = slip_init(1, "192.168.1.2");
     
-    NETWORK net = slip_init(slip, "192.168.1.2");
-    
-    if (termID == -1)
+    if (term == -1)
     {
         core_fatal("Term serial driver failed to init");
     }
@@ -85,44 +84,44 @@ void main(__unused int argc, __unused char **argv)
     //byte *packet = ipv4_build(net, (byte *)hola, hola_len, 150, destIP, &packet_len);
     byte *packet = udp_build(net, (byte *)hola, hola_len, destIP, 1500, 25000, &packet_len);
     
-    printPacket(termID, packet, packet_len);
+    printPacket(term, packet, packet_len);
     
     // MTU of SLIP interfaces in Linux use to be 300 bytes aprox, so 500 is far enough
     byte *inBuff = (byte *)core_malloc(500);
     int buffSz = (int)core_size(inBuff);
     
-    term_puts(termID, "Waiting packets...\n");
+    term_puts(term, "Waiting packets...\n");
     
     while (1)
     {
-        int sz = slip_recv(slip, inBuff, buffSz);
+        int sz = slip_recv(1, inBuff, buffSz);
         
-        term_puts(termID, "Received packet of size ");
-        term_puts(termID, itoa(sz, var_str, 10));
-        term_puts(termID, "\n");
+        term_puts(term, "Received packet of size ");
+        term_puts(term, itoa(sz, var_str, 10));
+        term_puts(term, "\n");
         
         int res = ipv4_receive(net, inBuff, sz);
         
         if (res < 0)
         {
-            term_puts(termID, "Error = ");
-            term_puts(termID, itoa(res, var_str, 10));
-            term_puts(termID, "\n");
+            term_puts(term, "Error = ");
+            term_puts(term, itoa(res, var_str, 10));
+            term_puts(term, "\n");
         }
         else
         {
-            term_puts(termID, "Correct IP packet\n");
+            term_puts(term, "Correct IP packet\n");
         }
         
         if (packet)
         {
-            term_puts(termID, "Send packet...\n");
-            printPacket(termID, packet, packet_len);
-            slip_send(slip, packet, (int)packet_len);
+            term_puts(term, "Send packet...\n");
+            printPacket(term, packet, packet_len);
+            slip_send(1, packet, (int)packet_len);
         }
         else
         {
-            term_puts(termID, "Error generating packet to send\n");
+            term_puts(term, "Error generating packet to send\n");
         }
     }
 }
