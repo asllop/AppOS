@@ -9,6 +9,8 @@
 // TEST:
 #include <sys/sys.h>
 
+static uint16_t ipv4PacketSequence = 0;
+
 int ipv4_receive(NETWORK net, byte *buffer, size_t len)
 {
     core_lock(MUTEX_IPV4);
@@ -176,9 +178,9 @@ void *ipv4_build(NETWORK net, byte *data, size_t len, byte protocol, byte destIP
     header->serviceType = 0;
     header->totalLength[0] = (packet_size >> 8) & 0xff;
     header->totalLength[1] = packet_size & 0xff;
-    uint16_t packetID = (uint16_t)core_timestamp();
-    header->packetID[0] = (packetID >> 8) & 0xff;
-    header->packetID[1] = packetID & 0xff;
+    header->packetID[0] = (ipv4PacketSequence >> 8) & 0xff;
+    header->packetID[1] = ipv4PacketSequence & 0xff;
+    ipv4PacketSequence ++;
     header->flagsAndOffset[0] = 0;
     header->flagsAndOffset[1] = 0;
     header->ttl = 127;
