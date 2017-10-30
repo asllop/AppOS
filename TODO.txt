@@ -3,7 +3,6 @@
     - Port an IP stack:
       uIP (https://github.com/adamdunkels/uip)
       lwIP (http://savannah.nongnu.org/projects/lwip/)
-    - SLIP-Serial port driver
 
  * File System
 
@@ -25,7 +24,7 @@ Si la tasca no es de tipus resident, retorna TASK_NO_RESIDENT.
 
  * USB: host controller driver and libUSB-like interface for API (or port libUSB).
 
- * Port AppOS to Arduino UNO & Leonardo (ATmega328P, ATmega32u4)
+ * Port AppOS to Arduino. Specially UNO & Leonardo (ATmega328P, ATmega32u4)
 
  * Port AppOS to RaspberryPI
 
@@ -35,6 +34,6 @@ Si la tasca no es de tipus resident, retorna TASK_NO_RESIDENT.
 
  * Implement SMP for RasPI and PC.
 
- * Console driver for term.
+ * Console (screen + keyboard) driver for term.
 
- * Interface for other ports (SPI, I2C)
+ * Interface for other serial ports (SPI, I2C). Maybe generalize "serial_" module.

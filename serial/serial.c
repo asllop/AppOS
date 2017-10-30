@@ -5,6 +5,20 @@
 
 static time_t serial_timeout_t_ms = 500;
 
+/*
+ Generalize Serial Interface: to make the serial_ interface work with other serial ports like SPI and I2C.
+ 
+ Create a set of serial_config_XYZ, where XYZ is: UART, SPI, I2C. Each of thos functions take the necessary arguments for the specific
+ port. Example:
+ 
+ serial_config_uart(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP stop, int baudrate)
+ 
+ Those functions will return a SerialConfigStruct representing a configured port. This struct will be passed as argument to serial_init,
+ to actually initialize the port.
+ The rest of functions (serial_send, serial_receive, serial_avail, serial_wait) will use this struct as arguments instead of PORT.
+ 
+ */
+
 size_t serial_send(PORT serial_port, byte *data, size_t size)
 {
     core_lock(MUTEX_SERIAL);
