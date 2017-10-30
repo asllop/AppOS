@@ -10,15 +10,10 @@ static int numNetInterfaces = 0;
  -> Domain: string amb el nom
  <- Retorna: IP o error.
  
- net_raw: crea un raw socket (implementació futura)
- -> Tipus: raw-client, raw-server
- -> Adreça: Si es socket client, es refereix a l'adreça remota, si es server, es refereix a la adreça local (per seleccionar net-iface)
- <- Retorna: socket struct
- 
  net_socket: crea un nou socket
- -> Tipus: udp-client, udp-server, tcp-client, tcp-server
+ -> Tipus: udp-client, udp-server, tcp-client, tcp-server, raw-client, raw-server
  -> Adreça: Si es socket client, es refereix a l'adreça remota, si es server, es refereix a la adreça local (per seleccionar net-iface)
- -> Port
+ -> Port (ignorat en cas de socket tipus raw)
  <- Retorna: socket struct
  
  net_listen: escolta connexions (només servidors)
