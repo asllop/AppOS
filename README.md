@@ -1,5 +1,5 @@
 # AppOS
-*"Don't search an operating system for your application, make your App the OS"*
+*"Don't use an operating system for your application, make your App the OS"*
 
 #### 1. Cross Compiler
 
