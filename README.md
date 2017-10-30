@@ -23,6 +23,8 @@ AppOS is multiplatform and designed to be easily ported. Current ports are:
 - PIC microcontrollers and dev boards (planned)
 - MSP430 and LaunchPads (planned)
 
+------
+
 #### 1. Cross Compiler
 
 To compile your AppOS, first generate a GCC cross compiler, following the instructions in [OSDev tutorial](http://wiki.osdev.org/GCC_Cross-Compiler).
