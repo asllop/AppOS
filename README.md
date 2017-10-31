@@ -10,8 +10,8 @@ Its main fields of aplication are:
 - Microcontrollers, electronics projects
 - Industrial automation
 - Embedded systems in general
-- As a (micro)kernel base for a bigger OS
-- Learning about OS development :]
+- Core of a bigger kernel / OS
+- Learning about OS development
 
 Designed to be small but scalable and modular, it could fit on a 8-bit microcontroller as well as on a full featured computer.
 
