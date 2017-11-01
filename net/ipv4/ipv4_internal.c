@@ -3,7 +3,7 @@
 
 // Incoming Internal Functions
 
-struct NetIncomingList *ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+struct NetFragList *ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
     for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
     {
@@ -15,18 +15,18 @@ struct NetIncomingList *ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t 
 
 byte ipv4_exist_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
-    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
     
     return incomList != NULL;
 }
 
 void *ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size)
 {
-    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
     
     if (incomList)
     {
-        struct NetIncomingFrag *newFrag = (struct NetIncomingFrag *)core_malloc(sizeof(struct NetIncomingFrag));
+        struct NetFrag *newFrag = (struct NetFrag *)core_malloc(sizeof(struct NetFrag));
         
         if (newFrag)
         {
@@ -52,7 +52,7 @@ void *ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *b
 
 byte ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size)
 {
-    struct NetIncomingList *incomList = ipv4_packet_list(iface, 0);
+    struct NetFragList *incomList = ipv4_packet_list(iface, 0);
     
     if (incomList)
     {
@@ -74,12 +74,12 @@ byte ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, by
 void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
     
-    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
     
     if (incomList)
     {
-        struct NetIncomingFrag *nextBuff = incomList->first->next;
-        struct NetIncomingFrag *freeBuff = incomList->first;
+        struct NetFrag *nextBuff = incomList->first->next;
+        struct NetFrag *freeBuff = incomList->first;
         
         incomList->packetID = 0;
         
@@ -102,7 +102,7 @@ void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 
 void ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
-    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
     
     if (incomList)
     {
@@ -112,7 +112,7 @@ void ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 
 void ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID)
 {
-    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
     
     // TODO: sort fragments by its offset field (sort a linked list)
     
@@ -124,14 +124,14 @@ void ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID)
 
 byte ipv4_check_packet(struct NetIfaceStruct *iface, uint16_t packetID)
 {
-    struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
     
     ipv4_sort_fragments(iface, packetID);
     
     if (incomList)
     {
-        struct NetIncomingFrag *packet = incomList->first;
-        struct NetIncomingFrag *nextPacket = packet->next;
+        struct NetFrag *packet = incomList->first;
+        struct NetFrag *nextPacket = packet->next;
         uint16_t realDataSize = 0;
         
         while (packet != NULL && nextPacket != NULL)

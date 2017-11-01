@@ -25,21 +25,21 @@ typedef enum
 #error NET_NUM_INTERFACES must be between 0 and 254
 #endif
 
-struct NetIncomingFrag
+struct NetFrag
 {
-    struct NetIncomingFrag  *next;
-    struct NetIncomingFrag  *prev;
-    byte                    *packet;
+    struct NetFrag *        next;
+    struct NetFrag *        prev;
+    byte *                  packet;
     uint16_t                size;
 };
 
 // TODO: add timestamp of last arrived packet for timeout
-struct NetIncomingList
+struct NetFragList
 {
     uint16_t                packetID;
     uint16_t                numFragments;
-    struct NetIncomingFrag  *first;
-    struct NetIncomingFrag  *last;
+    struct NetFrag *        first;
+    struct NetFrag *        last;
     byte                    closed;
 };
 
@@ -49,13 +49,13 @@ struct NetIfaceStruct
     byte                    id;
     byte                    address[4];
     uint16_t                mtu;
-    struct NetIncomingList  incomingSlots[NET_NUM_INCOMING_SLOTS];
+    struct NetFragList      incomingSlots[NET_NUM_INCOMING_SLOTS];
     
     // TODO: add outgoing slots
 };
 
 NETWORK                     net_create(NET_IFACE_TYPE type, byte id);
-struct NetIfaceStruct       *net_iface(NETWORK net);
+struct NetIfaceStruct *     net_iface(NETWORK net);
 void                        net_parse_ipv4(char *addr_str, byte address[]);
 
 #endif

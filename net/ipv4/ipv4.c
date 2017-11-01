@@ -118,7 +118,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
         }
         
         // TEST: PRINT PACKET LIST
-        struct NetIncomingList *packetList = ipv4_packet_list(iface, packetID);
+        struct NetFragList *packetList = ipv4_packet_list(iface, packetID);
         
         if (packetList)
         {
@@ -126,8 +126,8 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             {
                 // TEST : print offsets
                 char var_str[10];
-                struct NetIncomingList *incomList = ipv4_packet_list(iface, packetID);
-                struct NetIncomingFrag *frag = incomList->first;
+                struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
+                struct NetFrag *frag = incomList->first;
                 
                 for (int i = 0 ; i < incomList->numFragments ; i++)
                 {
@@ -194,15 +194,30 @@ void *ipv4_build(NETWORK net, byte *data, size_t len, byte protocol, byte destIP
     header->headerChecksum[1] = cksum & 0xff;
     *result_size = packet_size;
     
-    if (packet_size > iface->mtu)
+    core_unlock(MUTEX_IPV4);
+    return ip_packet;
+}
+
+// TODO: takes a whole IP packet and generate a list of fragments depending on the MTU
+
+struct NetFragList *ipv4_fagment(NETWORK net, byte *packet, size_t len)
+{
+    core_lock(MUTEX_IPV4);
+    
+    struct NetIfaceStruct *iface = net_iface(net);
+    
+    if (len > iface->mtu)
     {
-        // TODO: Create fragment of this packet
-        core_unlock(MUTEX_IPV4);
-        return ip_packet;
+        // Fragment
     }
     else
     {
-        core_unlock(MUTEX_IPV4);
-        return ip_packet;
+        // Don't fragment
     }
+    
+    // TODO: generate a NetFragList with fragments and return it
+    
+    core_unlock(MUTEX_IPV4);
+    
+    return NULL;
 }

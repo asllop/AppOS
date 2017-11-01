@@ -4,7 +4,7 @@
 static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
 static int numNetInterfaces = 0;
 
-/* SOCKET INTERFACE
+/* TODO: SOCKET INTERFACE
  
  net_resolve: obté IP d'un nom de domini utilitzant un DNS o una llista local tipus resolv.conf (implementació futura)
  -> Domain: string amb el nom
@@ -14,18 +14,19 @@ static int numNetInterfaces = 0;
  -> Tipus: udp-client, udp-server, tcp-client, tcp-server, raw-client, raw-server
  -> Adreça: Si es socket client, es refereix a l'adreça remota, si es server, es refereix a la adreça local (per seleccionar net-iface)
  -> Port (ignorat en cas de socket tipus raw)
+ -> Protocol: codi de protocol. Només per a RAW, a la resta de casos és ignorat.
  <- Retorna: socket struct
  
- net_listen: escolta connexions (només servidors)
+ net_listen: escolta connexions (només servidors TCP)
  -> Socket struct (pointer)
  <- Resultat: socket de client o error. A un servidor és aquest socket el que utilitzarem per fer open/close/send/receive i no el creat
               amb net_socket. Cada connexió nova rebuda generarà un nou socket que representa un client diferent.
  
- net_open: obre un socket
+ net_open: obre un socket / accepta una connexió
  -> Socket struct (pointer)
  <- Resultat: ok o error
  
- net_close: tanca un socket
+ net_close: tanca un socket / tanca una connexió
  -> Socket struct (pointer)
  <- Resultat: ok o error
  
@@ -33,6 +34,7 @@ static int numNetInterfaces = 0;
  -> Socket struct (pointer)
  -> Buffer: punter al buffer de dades
  -> Mida: mida del buffer de dades
+ -> Client: només per al costat servidor en connexions UDP i RAW. Struct que descriu el client receptor del paquet (IP, port)
  <- Resultat: mida dades enviades o 0 si error
  
  net_receive: reb dades d'un socket ja obert
@@ -40,8 +42,9 @@ static int numNetInterfaces = 0;
  -> Buffer: punter al buffer de dades
  -> Mida: mida del buffer de dades
  <- Resultat: mida dades rebudes o 0 si error
+ <- Client (punter): només per al costat servidor en connexions UDP i RAW. Struct que descriu el client emisor del paquet (IP, port)
  
- NOTA: net_listen no funciona amb servidor UDP (ni amb raw). Una possibilitat és moodificar net_send/net_receive per incloure dades del client.
+ NOTA: net_listen no funciona amb servidor UDP o RAW. Per tant net_send/net_receive utilitzen el descriptor de client només per a aquests casos (socket tipus UDP/RAW servidor). Per a la resta de casos l'argument "client descriptor" és ignorat i pot ser NULL.
  
  */
 
@@ -77,7 +80,7 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
         
         for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
         {
-            netInterfaces[numNetInterfaces].incomingSlots[i] = (struct NetIncomingList) {
+            netInterfaces[numNetInterfaces].incomingSlots[i] = (struct NetFragList) {
                 .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = 0
             };
         }
