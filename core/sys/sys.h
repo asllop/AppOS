@@ -13,6 +13,7 @@ typedef enum
     MUTEX_SERIAL,
     MUTEX_TERM,
     MUTEX_IPV4,
+    MUTEX_NET,
     MUTEX_GENERIC,
     
     /* Custom mutex goes here ... */

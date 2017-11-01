@@ -1,8 +1,19 @@
+#include <sys/sys.h>
 #include <net/net.h>
+#include <net/net_internal.h>
+#include <net/udp/udp.h>
+#include <net/ipv4/ipv4.h>
 #include <lib/NQCLib/NQCLib.h>
 
-static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
-static int numNetInterfaces = 0;
+extern uint16_t *usedPortsList;
+
+void net_init()
+{
+    for (int i = 0 ; i < NET_MAX_NUM_PORTS ; i++)
+    {
+        usedPortsList[i] = 0;
+    }
+}
 
 /* TODO: SOCKET INTERFACE
  
@@ -48,95 +59,117 @@ static int numNetInterfaces = 0;
  
  */
 
-NETWORK net_create(NET_IFACE_TYPE type, byte id)
+struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t port, byte protocol)
 {
-    if (numNetInterfaces < NET_NUM_INTERFACES)
+    if (type == NET_SOCKET_TYPE_UDPCLIENT || type == NET_SOCKET_TYPE_UDPSERVER)
     {
-        netInterfaces[numNetInterfaces].type = type;
-        netInterfaces[numNetInterfaces].id = id;
-        
-        switch (type) {
-            case NET_IFACE_TYPE_SLIP:
-                netInterfaces[numNetInterfaces].mtu = 296;
-                break;
-
-            case NET_IFACE_TYPE_PPP:
-                netInterfaces[numNetInterfaces].mtu = 1492;
-                break;
-                
-            case NET_IFACE_TYPE_ETH:
-            case NET_IFACE_TYPE_WIFI:
-                netInterfaces[numNetInterfaces].mtu = 1500;
-                break;
-                
-            case NET_IFACE_TYPE_BT:
-                netInterfaces[numNetInterfaces].mtu = 672;
-                break;
-                
-            default:
-                netInterfaces[numNetInterfaces].mtu = 576;
-                break;
-        }
-        
-        for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
-        {
-            netInterfaces[numNetInterfaces].incomingSlots[i] = (struct NetFragList) {
-                .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = 0
-            };
-        }
-        
-        // TODO: setup outgoing slots and other iface properties
-        
-        return numNetInterfaces ++;
+        protocol = 17;
     }
-    else
+    else if (type == NET_SOCKET_TYPE_TCPCLIENT || type == NET_SOCKET_TYPE_TCPSERVER)
     {
-        return -1;
+        protocol = 6;
     }
-}
-
-struct NetIfaceStruct *net_iface(NETWORK net)
-{
-    if (net < numNetInterfaces)
-    {
-        return &netInterfaces[net];
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-void net_parse_ipv4(char *addr_str, byte address[])
-{
-    // Parse an IP address: AAA.BBB.CCC.DDD
-    char num[4];
-    int index = 0;
     
-    for (int ipIndex = 0 ; ipIndex < 4 ; ipIndex ++)
+    uint16_t localPort;
+    
+    if (type == NET_SOCKET_TYPE_UDPSERVER || type == NET_SOCKET_TYPE_RAWSERVER || type == NET_SOCKET_TYPE_TCPSERVER)
     {
-        // Parse component of IP address
-        for (int i = 0 ; i < 4 ; i ++)
-        {
-            // End Of String
-            if (addr_str[index] == '\0')
-            {
-                break;
-            }
-            
-            // Found end component
-            if (addr_str[index] == '.')
-            {
-                index ++;
-                break;
-            }
-            
-            num[i] = addr_str[index];
-            num[i + 1] = 0;
-            
-            index ++;
-        }
-        
-        address[ipIndex] = (byte)atoi(num);
+        localPort = 0;
+    }
+    else
+    {
+        localPort = net_find_free_port();
+    }
+    
+    struct NetSocket socket = {
+        .type = type,
+        .protocol = protocol,
+        .port = port,
+        .localPort = localPort,
+        .state = NET_SOCKET_STATE_CLOSED,
+        // TODO: find a network that matches the "address". Now we are getting the first iface for simplicity
+        .network = 0
+    };
+    
+    memcpy(socket.address, address, 4);
+    
+    return socket;
+}
+
+int net_open(struct NetSocket *socket)
+{
+    if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
+        socket->type == NET_SOCKET_TYPE_UDPSERVER ||
+        socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
+        socket->type == NET_SOCKET_TYPE_RAWSERVER)
+    {
+        socket->state = NET_SOCKET_STATE_OPEN;
+        return 0;
+    }
+    else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
+    {
+        // TODO: implement TCP connections
+        return ERR_CODE_BADSOCKTYPE;
+    }
+    else
+    {
+        return ERR_CODE_BADSOCKTYPE;
     }
 }
+
+int net_close(struct NetSocket *socket)
+{
+    if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
+        socket->type == NET_SOCKET_TYPE_UDPSERVER ||
+        socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
+        socket->type == NET_SOCKET_TYPE_RAWSERVER)
+    {
+        socket->state = NET_SOCKET_STATE_CLOSED;
+        return 0;
+    }
+    else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
+    {
+        // TODO: implement TCP connections
+        return ERR_CODE_BADSOCKTYPE;
+    }
+    else
+    {
+        return ERR_CODE_BADSOCKTYPE;
+    }
+}
+
+size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len)
+{
+    if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
+        socket->type == NET_SOCKET_TYPE_UDPSERVER )
+    {
+        size_t resultLen = 0;
+        byte *address = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->address : client->address;
+        uint16_t dstPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->port : client->port;
+        uint16_t srcPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? client->port : socket->port;
+        byte *packet = udp_build(socket->network, data, len, address, dstPort, srcPort, &resultLen);
+        // TODO: actually send "packet"
+        return resultLen;
+    }
+    else if (socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
+             socket->type == NET_SOCKET_TYPE_RAWSERVER)
+    {
+        size_t resultLen = 0;
+        byte *address = socket->type == NET_SOCKET_TYPE_RAWCLIENT ? socket->address : client->address;
+        byte *packet = ipv4_build(socket->network, data, len, socket->protocol, address, &resultLen);
+        // TODO: actually send "packet"
+        return resultLen;
+    }
+    else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
+    {
+        // TODO: implement TCP connections
+        return 0;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+// TODO: move functions below to net_internal.c and .h
+// TODO: merge net_utils functions into net_internal

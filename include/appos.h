@@ -49,15 +49,14 @@ typedef enum
     ERR_CODE_BADIPCHECKSUM,
     ERR_CODE_NOMEMFORIPPACKET,
     ERR_CODE_IPBUFFEREMPTY,
-    ERR_CODE_NOPACKETSLOTS
+    ERR_CODE_NOPACKETSLOTS,
+    ERR_CODE_BADSOCKTYPE,
     
 } ERR_CODE;
 
 typedef unsigned int            TASK;
 typedef unsigned int            PRIORITY;
-typedef unsigned char           EVENT;
 typedef unsigned long long      TIME;
-typedef unsigned char           NETWORK;
 typedef long                    time_t;
 typedef unsigned char           byte;
 

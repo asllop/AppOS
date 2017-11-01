@@ -7,6 +7,7 @@
 #include <term/drivers/term_serial/term_serial.h>
 #include <net/ipv4/ipv4.h>
 #include <net/udp/udp.h>
+#include <net/net.h>
 #include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
@@ -45,6 +46,8 @@ void main(__unused int argc, __unused char **argv)
     // Draw Background
     console_put_data(0x1b, (char)176, 80*25, 0);
 	console_put_string(0x4f, " NET TEST ", 34, 1);
+    
+    net_init();
     
     // Setup serial ports 0 and 1
     

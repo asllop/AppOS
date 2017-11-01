@@ -1,5 +1,5 @@
 #include <net/net.h>
-#include <net/net_utils/net_utils.h>
+#include <net/net_internal.h>
 #include <net/ipv4/ipv4.h>
 #include <net/ipv4/ipv4_internal.h>
 #include <mem/mem.h>

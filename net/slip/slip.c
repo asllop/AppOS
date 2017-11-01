@@ -17,7 +17,9 @@
 NETWORK slip_init(PORT port, char *addr_str)
 {
     NETWORK net = net_create(NET_IFACE_TYPE_SLIP, (byte)port);
-    net_parse_ipv4(addr_str, net_iface(net)->address);
+    struct NetIfaceStruct *iface = net_iface(net);
+    net_parse_ipv4(addr_str, iface->address);
+    net_parse_ipv4("255.255.255.0", iface->mask);
     return net;
 }
 
