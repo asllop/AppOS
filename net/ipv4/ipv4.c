@@ -208,11 +208,11 @@ struct NetFragList *ipv4_fagment(NETWORK net, byte *packet, size_t len)
     
     if (len > iface->mtu)
     {
-        // Fragment
+        // TODO: Fragment
     }
     else
     {
-        // Don't fragment
+        // TODO: Don't fragment
     }
     
     // TODO: generate a NetFragList with fragments and return it

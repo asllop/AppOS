@@ -5,14 +5,9 @@
 #include <net/ipv4/ipv4.h>
 #include <lib/NQCLib/NQCLib.h>
 
-extern uint16_t *usedPortsList;
-
 void net_init()
 {
-    for (int i = 0 ; i < NET_MAX_NUM_PORTS ; i++)
-    {
-        usedPortsList[i] = 0;
-    }
+    // Nothing to do...
 }
 
 /* TODO: SOCKET INTERFACE
@@ -59,7 +54,7 @@ void net_init()
  
  */
 
-struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t port, byte protocol)
+struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t localPort, uint16_t remotePort, byte protocol)
 {
     if (type == NET_SOCKET_TYPE_UDPCLIENT || type == NET_SOCKET_TYPE_UDPSERVER)
     {
@@ -70,22 +65,11 @@ struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t port,
         protocol = 6;
     }
     
-    uint16_t localPort;
-    
-    if (type == NET_SOCKET_TYPE_UDPSERVER || type == NET_SOCKET_TYPE_RAWSERVER || type == NET_SOCKET_TYPE_TCPSERVER)
-    {
-        localPort = 0;
-    }
-    else
-    {
-        localPort = net_find_free_port();
-    }
-    
     struct NetSocket socket = {
         .type = type,
         .protocol = protocol,
-        .port = port,
         .localPort = localPort,
+        .remotePort = remotePort,
         .state = NET_SOCKET_STATE_CLOSED,
         // TODO: find a network that matches the "address". Now we are getting the first iface for simplicity
         .network = 0
@@ -145,8 +129,8 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     {
         size_t resultLen = 0;
         byte *address = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->address : client->address;
-        uint16_t dstPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->port : client->port;
-        uint16_t srcPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? client->port : socket->port;
+        uint16_t dstPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->remotePort : client->port;
+        uint16_t srcPort = socket->localPort;
         byte *packet = udp_build(socket->network, data, len, address, dstPort, srcPort, &resultLen);
         // TODO: actually send "packet"
         return resultLen;
@@ -170,6 +154,3 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
         return 0;
     }
 }
-
-// TODO: move functions below to net_internal.c and .h
-// TODO: merge net_utils functions into net_internal

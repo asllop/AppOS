@@ -5,34 +5,6 @@
 
 static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
 static int numNetInterfaces = 0;
-uint16_t usedPortsList[NET_MAX_NUM_PORTS];
-
-uint16_t net_find_free_port()
-{
-    core_lock(MUTEX_NET);
-    
-    for (uint16_t port = NET_MIN_CLIENT_PORT_NUMBER; port != 0; port ++)
-    {
-        if (!net_is_used_port(port))
-        {
-            return port;
-        }
-    }
-    
-    core_unlock(MUTEX_NET);
-    
-    return 0;
-}
-
-bool net_is_used_port(uint16_t port)
-{
-    for (int i = 0 ; i < NET_MAX_NUM_PORTS ; i ++)
-    {
-        if (usedPortsList[i] == port) return 1;
-    }
-    
-    return 0;
-}
 
 NETWORK net_create(NET_IFACE_TYPE type, byte id)
 {

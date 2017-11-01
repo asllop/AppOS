@@ -14,6 +14,10 @@ void core_fatal(char *msg)
 #endif
 }
 
+// TODO: Create local locks, using a variable as a reference. This way we could be more specific locking resources: ie: access to a certain global array. Insteaf of locking a whole subsystem in general.
+
+// Since a mutex needs a lock and a counter, we could use a simple struct that contains both. We could continue having general ones, maintaning an array of thos structs.
+
 int core_lock(MUTEX mutex)
 {
     if (!task_get_scheduling())

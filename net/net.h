@@ -60,8 +60,8 @@ struct NetSocket
     NET_SOCKET_TYPE         type;
     byte                    address[4];
     byte                    protocol;
-    uint16_t                port;
     uint16_t                localPort;
+    uint16_t                remotePort;
     NET_SOCKET_STATE        state;
     NETWORK                 network;
 };
