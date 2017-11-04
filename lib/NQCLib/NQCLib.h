@@ -1,4 +1,5 @@
 #include <lib/NQCLib/NQCLib_config.h>
+#include <stdarg.h>
 
 #ifndef NQCLIB_H
 #define	NQCLIB_H
@@ -35,6 +36,12 @@ int                         strncmp(const char *str1, const char *str2, size_t n
 #endif
 #ifdef NQC_STRCMP
 int                         strcmp(const char *s1, const char *s2);
+#endif
+#ifdef NQC_VSPRINTF
+int                         vsprintf(char *buf, const char *fmt, va_list args);
+#endif
+#ifdef NQC_SPRINTF
+int                         sprintf(char *buf, const char *fmt, ...);
 #endif
 
 #endif

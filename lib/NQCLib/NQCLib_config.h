@@ -18,5 +18,7 @@
 #define NQC_MEMSET
 #define NQC_STRNCMP
 #define NQC_STRCMP
+#define NQC_VSPRINTF
+#define NQC_SPRINTF         // Dependencies: NQC_VSPRINTF
 
 #endif

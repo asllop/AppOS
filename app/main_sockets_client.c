@@ -54,6 +54,8 @@ int main(__unused int argc, __unused char **argv)
         return -1;
     }
     
+    char str[100];
+    
     while (1)
     {
         core_sleep(1000);
@@ -67,13 +69,8 @@ int main(__unused int argc, __unused char **argv)
         
         net_send(&socket, NULL, (byte *)dataToSend, dataLen);
         
-        core_log("Timestamp sent: ");
-        core_log(ltoa(ts, dataToSend, 10));
-        core_log("\n");
-        
-        core_log("Used mem: ");
-        core_log(ltoa(core_avail(MEM_TYPE_USED), dataToSend, 10));
-        core_log("\n");
+        sprintf(str, "Used mem: %d - TS sent: %d\n", (int)core_avail(MEM_TYPE_USED), (int)ts);
+        core_log(str);
         
         core_free(dataToSend);
     }
