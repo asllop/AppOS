@@ -47,3 +47,13 @@ Resulting binary is stored in **build** directory.
 The easiest way is using QEMU:
 
 	$ qemu-system-i386 -kernel build/appos.elf
+
+Depending on the app configuration and resources usage, you could need to add some arguments.
+
+To redirect a serial port to stdio:
+
+	$ qemu-system-i386 -serial stdio -kernel build/appos.elf
+
+Or redirect a serial port to a virtual device serial port (in Linux):
+
+	$ qemu-system-i386 -serial pty -kernel build/appos.elf
