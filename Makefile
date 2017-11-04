@@ -22,6 +22,7 @@ OBJECTS= \
 	event/event_internal.o \
 	event/event.o \
     serial/arch/pc32/serial_arch.o \
+    serial/arch/pc32/serial_isr.o \
     serial/serial.o \
     term/term_internal.o \
     term/term.o \
@@ -36,7 +37,8 @@ OBJECTS= \
     net/udp/udp.o \
     lib/NQCLib/NQCLib.o \
     app/utils.o \
-    app/main_sockets_client.o
+	app/main_serial_int.o
+#    app/main_sockets_client.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
