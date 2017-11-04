@@ -9,6 +9,11 @@
 
 void main(__unused int argc, __unused char **argv)
 {
+    if (serial_init(0, SERIAL_DATA_8b, SERIAL_PARITY_NONE, SERIAL_STOP_1b, 9600))
+    {
+        core_fatal("Error setting up serial device 0");
+    }
+    
     // Init Term Serial driver on port 0
     TERM termID = term_serial_init(0);
     

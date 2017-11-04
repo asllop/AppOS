@@ -2,7 +2,7 @@
  Not Quite C Lib - By Andreu Santaren Llop and others (read below)
  
  NQCLib is a Frankenstein library made by chopping and sticking functions from different libraries and Internet sites.
- It's not an ANSI C Library at all, since the list of functions is not complete, but the ones included follow the standard
+ Is not an ANSI C Library at all, since the list of functions is not complete, but the ones included follow the standard
  on both, its prototype and behaviour. NQCLib is not intended to replace a real standard ANSI C Lib, it was written just as
  a helper library for AppOS, and the functions were added whenever needed during the kernel development process.
  The interesting thing about NQCLib is its modularity and scalability, since is possible to compile only the functions
@@ -234,6 +234,7 @@ int strcmp(const char *s1, const char *s2)
 }
 #endif
 
+// TODO: build our own vsprintf implementation that uses itoa, ltoa, etc, and supports all "%" commands
 #ifdef NQC_VSPRINTF
 
 #define PAD_ZEROES     (1 << 0)
