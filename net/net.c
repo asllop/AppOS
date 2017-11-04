@@ -122,17 +122,20 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
         socket->type == NET_SOCKET_TYPE_UDPSERVER )
     {
-        size_t resultLen = 0;
+        size_t udp_packetLen = 0;
         byte *address = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->address : client->address;
         uint16_t dstPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->remotePort : client->port;
         uint16_t srcPort = socket->localPort;
-        byte *packet = udp_build(socket->network, data, len, address, dstPort, srcPort, &resultLen);
-        // TODO: build IP packet here (now it's done inside the udp_build)
+        byte *upd_packet = udp_build(socket->network, data, len, address, dstPort, srcPort, &udp_packetLen);
+        size_t ip_packetLen = 0;
+        byte *ip_packet = ipv4_build(socket->network, upd_packet, udp_packetLen, 17, address, &ip_packetLen);
         // TODO: fragment packet and send fragments instead of the whole buffer as is
+        
         core_lock(MUTEX_NET);
-        net_iface_tx(socket->network, packet, resultLen);
+        net_iface_tx(socket->network, ip_packet, ip_packetLen);
         core_unlock(MUTEX_NET);
-        return resultLen;
+        
+        return ip_packetLen;
     }
     else if (socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
              socket->type == NET_SOCKET_TYPE_RAWSERVER)
@@ -141,9 +144,11 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
         byte *address = socket->type == NET_SOCKET_TYPE_RAWCLIENT ? socket->address : client->address;
         byte *packet = ipv4_build(socket->network, data, len, socket->protocol, address, &resultLen);
         // TODO: fragment packet and send fragments instead of the whole buffer as is
+        
         core_lock(MUTEX_NET);
         net_iface_tx(socket->network, packet, resultLen);
         core_unlock(MUTEX_NET);
+        
         return resultLen;
     }
     else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
