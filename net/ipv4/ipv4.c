@@ -117,6 +117,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             ipv4_close_packet_list(iface, packetID);
         }
         
+        /*
         // TEST: PRINT PACKET LIST
         struct NetFragList *packetList = ipv4_packet_list(iface, packetID);
         
@@ -149,7 +150,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             }
         }
         // END TEST
-        
+        */
     }
     
     core_unlock(MUTEX_IPV4);

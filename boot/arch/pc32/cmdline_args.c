@@ -6,6 +6,7 @@ extern void *grub_struct;
 
 static char *string_pointers[MAX_ARGS];
 
+// Read command line arguments from GRUB structure
 char **setup_cmdline(int *argcPointer)
 {
     int argc = 0;

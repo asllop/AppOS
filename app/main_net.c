@@ -47,8 +47,6 @@ void main(__unused int argc, __unused char **argv)
     console_put_data(0x1b, (char)176, 80*25, 0);
 	console_put_string(0x4f, " NET TEST ", 34, 1);
     
-    net_init();
-    
     // Setup serial ports 0 and 1
     
     if (serial_init(0, SERIAL_DATA_8b, SERIAL_PARITY_NONE, SERIAL_STOP_1b, 9600))

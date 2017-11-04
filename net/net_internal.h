@@ -8,5 +8,6 @@ NETWORK                     net_create(NET_IFACE_TYPE type, byte id);
 struct NetIfaceStruct *     net_iface(NETWORK net);
 void                        net_parse_ipv4(char *addr_str, byte address[]);
 uint16_t                    net_checksum(byte *ip, int len);
+void                        net_iface_tx(NETWORK net, byte *data, size_t len);
 
 #endif

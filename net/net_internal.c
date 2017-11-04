@@ -1,6 +1,7 @@
 #include <net/net_internal.h>
 #include <net/net.h>
 #include <sys/sys.h>
+#include <net/slip/slip.h>
 #include <lib/NQCLib/NQCLib.h>
 
 static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
@@ -116,4 +117,31 @@ uint16_t net_checksum(byte *p, int len)
     
     // One's complement
     return ~(uint16_t)(sum & 0xffff);
+}
+
+void net_iface_tx(NETWORK net, byte *data, size_t len)
+{
+    struct NetIfaceStruct *iface = net_iface(net);
+    
+    switch (iface->type) {
+        case NET_IFACE_TYPE_SLIP:
+            slip_send(iface->id, data, (int)len);
+            break;
+            
+        case NET_IFACE_TYPE_PPP:
+            // Not yet implemented
+            break;
+            
+        case NET_IFACE_TYPE_ETH:
+            // Not yet implemented
+            break;
+            
+        case NET_IFACE_TYPE_WIFI:
+            // Not yet implemented
+            break;
+            
+        case NET_IFACE_TYPE_BT:
+            // Not yet implemented
+            break;
+    }
 }

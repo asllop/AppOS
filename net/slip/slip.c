@@ -5,7 +5,7 @@
 #include <net/slip/slip_internal.h>
 #include <mem/mem.h>
 #include <net/net.h>
-#include <net/ipv4/ipv4.h>
+#include <net/net_internal.h>
 
 /* SLIP special character codes
  */

@@ -104,9 +104,10 @@ struct NetIfaceStruct
 
 // TODO: create a struct NetAddress to cover both IPv4 and IPv6 and use it instead of the "byte address[4]" array
 
-void                        net_init();
-NETWORK                     net_create(NET_IFACE_TYPE type, byte id);
-struct NetIfaceStruct *     net_iface(NETWORK net);
-void                        net_parse_ipv4(char *addr_str, byte address[]);
+struct NetSocket            net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t localPort, uint16_t remotePort, byte protocol);
+int                         net_open(struct NetSocket *socket);
+int                         net_close(struct NetSocket *socket);
+size_t                      net_send(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len);
+size_t                      net_receive(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len);
 
 #endif

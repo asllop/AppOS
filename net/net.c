@@ -5,11 +5,6 @@
 #include <net/ipv4/ipv4.h>
 #include <lib/NQCLib/NQCLib.h>
 
-void net_init()
-{
-    // Nothing to do...
-}
-
 /* TODO: SOCKET INTERFACE
  
  net_resolve: obté IP d'un nom de domini utilitzant un DNS o una llista local tipus resolv.conf (implementació futura)
@@ -132,7 +127,11 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
         uint16_t dstPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->remotePort : client->port;
         uint16_t srcPort = socket->localPort;
         byte *packet = udp_build(socket->network, data, len, address, dstPort, srcPort, &resultLen);
-        // TODO: actually send "packet"
+        // TODO: build IP packet here (now it's done inside the udp_build)
+        // TODO: fragment packet and send fragments instead of the whole buffer as is
+        core_lock(MUTEX_NET);
+        net_iface_tx(socket->network, packet, resultLen);
+        core_unlock(MUTEX_NET);
         return resultLen;
     }
     else if (socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
@@ -141,7 +140,10 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
         size_t resultLen = 0;
         byte *address = socket->type == NET_SOCKET_TYPE_RAWCLIENT ? socket->address : client->address;
         byte *packet = ipv4_build(socket->network, data, len, socket->protocol, address, &resultLen);
-        // TODO: actually send "packet"
+        // TODO: fragment packet and send fragments instead of the whole buffer as is
+        core_lock(MUTEX_NET);
+        net_iface_tx(socket->network, packet, resultLen);
+        core_unlock(MUTEX_NET);
         return resultLen;
     }
     else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
@@ -153,4 +155,10 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     {
         return 0;
     }
+}
+
+// TODO: cal veure com combinem això amb l'arribada de les dades per la capa fisica (slip_recv)
+size_t net_receive(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len)
+{
+    return 0;
 }
