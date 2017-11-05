@@ -1,5 +1,5 @@
 # AppOS
-*"Don't use an operating system for your application, make your App the OS"*
+*"Make your App the OS"*
 
 AppOS is a kernel designed to be embedded into an application, as if it were a static library.
 
