@@ -5,7 +5,7 @@ CFLAGS=-std=gnu99 -ffreestanding -O0 -Wall -Wextra -I./include -I./core -I./ -g
 OUTPUT=build/appos.elf
 OBJECTS= \
     boot/arch/pc32/kernel_boot.o \
-	boot/arch/pc32/cmdline_args.o \
+	boot/arch/pc32/cmdline.o \
 	boot/start.o \
 	core/mem/arch/pc32/mem_arch.o \
 	core/mem/mem_internal.o \
