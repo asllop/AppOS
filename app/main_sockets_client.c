@@ -7,6 +7,25 @@
 #include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
+int lprintf(const char *fmt, ...)
+{
+    va_list args;
+    int i;
+    
+    void *buf = core_malloc(500);
+    if (!buf) return 0;
+    
+    va_start(args, fmt);
+    i = vsprintf(buf, fmt, args);
+    va_end(args);
+    
+    core_log(buf);
+    
+    core_free(buf);
+    
+    return i;
+}
+
 int main(__unused int argc, __unused char **argv)
 {
     // Draw Background
@@ -44,7 +63,12 @@ int main(__unused int argc, __unused char **argv)
         return -1;
     }
     
-    char str[100];
+    lprintf("Num args = %d\n", argc);
+    
+    for (int i = 0 ; i < argc ; i ++)
+    {
+        lprintf("ARG %d = %s\n", i, argv[i]);
+    }
     
     while (1)
     {
@@ -60,8 +84,7 @@ int main(__unused int argc, __unused char **argv)
         
         net_send(&socket, NULL, (byte *)dataToSend, dataLen);
         
-        sprintf(str, "Used mem: %d - TS sent: %d\n", (int)core_avail(MEM_TYPE_USED), (int)ts);
-        core_log(str);
+        lprintf("Used mem: %d - TS sent: %d\n", (int)core_avail(MEM_TYPE_USED), (int)ts);
         
         core_free(dataToSend);
     }

@@ -98,6 +98,10 @@ int mem_scan_blocks(struct BlockStruct *blockArray)
     // mmap is present on Multiboot struct
     if (grub_flags & (1 << 6))
     {
+        // WARNING: offsets (44 and 48) are dynamic and depend on optional fields:
+        // https://www.gnu.org/software/grub/manual/multiboot/html_node/Boot-information-format.html#Boot-information-format
+        // We need to check for multiboot flags, fields present and calculate the offsets
+        
         uint32_t mmap_length = *((uint32_t *)(grub_struct + 44));
         void **p = grub_struct + 48;
         void *mmap_address = *p;

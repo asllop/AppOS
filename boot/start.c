@@ -7,16 +7,19 @@
 int                         main(int, char **);
 char                        **setup_cmdline(int *argcPointer);
 
+static int argc;
+static char **argv;
+
 void main_task()
 {
-    int argc = 0;
-    char **argv = setup_cmdline(&argc);
 	main(argc, argv);
 	core_reboot();
 }
 
 void kernel_init()
 {
+    argv = setup_cmdline(&argc);
+    
     core_init();
     
     TASK mainTaskID = core_create(main_task, 0, DEFAULT_STACK_SIZE);

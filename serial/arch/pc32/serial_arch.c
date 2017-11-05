@@ -140,7 +140,7 @@ void serial_callback(PORT port, void (*callback)())
         outportb(0x70, inportb(0x70) & 0x7F);
         asm("sti");
         
-        // End of PIC1 interrupt (enable for next interrupt)
+        // Enable PIC1 for next interrupt
         outportb(PIC1, 0x20);
     }
     else

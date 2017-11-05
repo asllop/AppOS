@@ -5,7 +5,7 @@ CFLAGS=-std=gnu99 -ffreestanding -O0 -Wall -Wextra -I./include -I./core -I./ -g
 OUTPUT=build/appos.elf
 OBJECTS= \
     boot/arch/pc32/kernel_boot.o \
-	boot/cmdline_args.o \
+	boot/arch/pc32/cmdline_args.o \
 	boot/start.o \
 	core/mem/arch/pc32/mem_arch.o \
 	core/mem/mem_internal.o \
@@ -37,8 +37,7 @@ OBJECTS= \
     net/udp/udp.o \
     lib/NQCLib/NQCLib.o \
     app/utils.o \
-	app/main_serial_int.o
-#    app/main_sockets_client.o
+    app/main_sockets_client.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

@@ -1,16 +1,19 @@
 #include <appos.h>
+#include <sys/sys.h>
 
-#define MAX_ARGS 256
+#define MAX_ARGS            16
+#define MAX_ARGS_BUF_SZ     256
 
 extern void *grub_struct;
 
 static char *string_pointers[MAX_ARGS];
+static char cmdLineBuf[MAX_ARGS_BUF_SZ];
 
 // Read command line arguments from GRUB structure
 char **setup_cmdline(int *argcPointer)
 {
     int argc = 0;
-    char **argv = 0;
+    char **argv = NULL;
 
     uint32_t grub_flags = *((uint32_t *)grub_struct);
 
@@ -18,31 +21,72 @@ char **setup_cmdline(int *argcPointer)
     if (grub_flags & (1 << 2))
     {
         argv = string_pointers;
-
-        char **p = grub_struct + 16;
-        char *cmdLine = *p;
-
-        // Name of kernel file
-        string_pointers[argc] = &cmdLine[argc];
-
-        for (int i = 0 ; cmdLine[i] != '\0' ; i++)
+        
+        long offset = 4;
+        if (grub_flags & (1 << 0))
         {
-            // Found space, go for next argument
-            if (cmdLine[i] == ' ')
+            offset += 8;
+        }
+        
+        if (grub_flags & (1 << 1))
+        {
+            offset += 4;
+        }
+        
+        char **p = grub_struct + offset;
+        char *args = p[0];
+        
+        if (!args)
+        {
+            *argcPointer = 0;
+            return NULL;
+        }
+        
+        // Copy cmd line into buffer to save it from destruction
+        int bufIndex;
+        for (bufIndex = 0 ; bufIndex < MAX_ARGS_BUF_SZ ; bufIndex ++) {
+            cmdLineBuf[bufIndex] = args[bufIndex];
+        }
+        cmdLineBuf[bufIndex] = '\0';
+        
+        char *currArg = cmdLineBuf;
+        bool insideArg = YES;
+        
+        for (int i = 0 ; cmdLineBuf[i] != '\0' ; i++)
+        {
+            if (cmdLineBuf[i] == '\0')          // End of cmd line, last arg
             {
-                cmdLine[i] = '\0';
-
-                if (cmdLine[i + 1] != ' ')
+                if (insideArg)
                 {
+                    string_pointers[argc] = currArg;
+                    insideArg = NO;
                     argc ++;
-                    string_pointers[argc] = &cmdLine[i + 1];
                 }
             }
-
-            if (argc >= MAX_ARGS) break;
+            else if (cmdLineBuf[i] == ' ')      // Space, end of arg
+            {
+                if (insideArg)
+                {
+                    string_pointers[argc] = currArg;
+                    cmdLineBuf[i] = '\0';
+                    insideArg = NO;
+                    argc ++;
+                }
+            }
+            else                                // Any other char
+            {
+                if (!insideArg)
+                {
+                    currArg = &cmdLineBuf[i];
+                    insideArg = YES;
+                }
+            }
         }
-
-        argc ++;
+        
+        if (insideArg)
+        {
+            string_pointers[argc++] = currArg;
+        }
     }
 
     *argcPointer = argc;

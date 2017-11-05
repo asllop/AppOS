@@ -8,7 +8,7 @@ static time_t serial_timeout_t_ms = 500;
 /*
  TODO:
  
- Generalize Serial Interface: to make the serial_ interface work with other serial ports like SPI and I2C.
+ Generalize Serial API: to make the serial_ module work with other hw interfaces like SPI and I2C.
  
  Create a set of serial_config_XYZ, where XYZ is: UART, SPI, I2C. Each of thos functions take the necessary arguments for the specific
  port. Example:
