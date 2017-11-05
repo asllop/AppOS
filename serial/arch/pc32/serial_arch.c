@@ -12,7 +12,7 @@ void serial_rx_isr()
     // Disable NMI
     outportb(0x70, inportb(0x70) | 0x80);
     
-    serial_rx_callback();
+    if (serial_rx_callback) serial_rx_callback();
     
     // Enable NMI
     outportb(0x70, inportb(0x70) & 0x7F);
@@ -85,6 +85,8 @@ unsigned char port_parity(SERIAL_PARITY parity)
 
 int serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP stop, int baudrate)
 {
+    serial_rx_callback = NULL;
+    
     if (115200 % baudrate != 0 || baudrate <= 0)
     {
         return ERR_CODE_BADSERIALCONFIG;
@@ -110,31 +112,52 @@ int serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP s
 
 void serial_callback(PORT port, void (*callback)())
 {
-    // Disable interrupts
-    outportb(0x70, inportb(0x70) | 0x80);
-    asm("cli");
-    
-    serial_rx_callback = callback;
-    
-    if (port == 0 || port == 2)
+    if (callback)
     {
-        // Enable interrupt for IRQ4
-        set_isr(serial_isr, PIC1_IRQ(4));
-        outportb(PIC1 + 1,(inportb(PIC1 + 1) & 0xEF));
+        // Disable interrupts
+        outportb(0x70, inportb(0x70) | 0x80);
+        asm("cli");
+        
+        serial_rx_callback = callback;
+        
+        if (port == 0 || port == 2)
+        {
+            // Enable interrupt for IRQ4
+            set_isr(serial_isr, PIC1_IRQ(4));
+            outportb(PIC1 + 1,(inportb(PIC1 + 1) & 0xEF));
+        }
+        else if (port == 1 || port == 3)
+        {
+            // Enable interrupt for IRQ3
+            set_isr(serial_isr, PIC1_IRQ(3));
+            outportb(PIC1 + 1,(inportb(PIC1 + 1) & 0xF7));
+        }
+        
+        unsigned int port_addr = port_address(port);
+        outportb(port_addr + 1, 0x01);                          // Enable port interrupts for data available
+        
+        // Enable interrupts
+        outportb(0x70, inportb(0x70) & 0x7F);
+        asm("sti");
+        
+        // End of PIC1 interrupt (enable for next interrupt)
+        outportb(PIC1, 0x20);
     }
-    else if (port == 1 || port == 3)
+    else
     {
-        // Enable interrupt for IRQ3
-        set_isr(serial_isr, PIC1_IRQ(3));
-        outportb(PIC1 + 1,(inportb(PIC1 + 1) & 0xF7));
+        unsigned int port_addr = port_address(port);
+        
+        if (port == 0 || port == 2)
+        {
+            outportb(port_addr + 1, 0x00);                      // Disable port interrupts
+        }
+        else if (port == 1 || port == 3)
+        {
+            outportb(port_addr + 1, 0x00);                      // Disable port interrupts
+        }
+        
+        serial_rx_callback = NULL;
     }
-    
-    unsigned int port_addr = port_address(port);
-    outportb(port_addr + 1, 0x01);                          // Enable interrupt for data available
-    
-    // Enable interrupts
-    outportb(0x70, inportb(0x70) & 0x7F);
-    asm("sti");
 }
 
 byte serial_is_data_ready(PORT port)

@@ -8,19 +8,11 @@
 #include "utils.h"
 
 PORT port = 0;
-
-void periodic_task()
-{
-    while (true)
-    {
-        core_sleep(1500);
-        core_log("Ping!\n");
-    }
-}
+int cnt = 0;
 
 void callback()
 {
-    core_log("Arribat... ");
+    core_log("Arrived byte... ");
     
     char data[5] = {0,0,0,0,0};
     
@@ -30,7 +22,27 @@ void callback()
         core_log(data);
     }
     
-    core_log("Sortim\n");
+    core_log("\n");
+}
+
+void periodic_task()
+{
+    while (true)
+    {
+        core_sleep(1500);
+        core_log("Ping!\n");
+        cnt ++;
+        if (cnt == 5)
+        {
+            core_log("Disable callback\n");
+            serial_callback(port, NULL);
+        }
+        if (cnt == 10)
+        {
+            core_log("Enable callback again\n");
+            serial_callback(port, callback);
+        }
+    }
 }
 
 int main(__unused int argc, __unused char **argv)
@@ -40,15 +52,13 @@ int main(__unused int argc, __unused char **argv)
         core_fatal("Error setting up serial device");
     }
     
-    core_log("Start Serial Callback example\n");
+    core_log("Start pressing keys...\n\n");
     
     serial_callback(port, callback);
     
-    core_log("We have configured a callback\n");
-    
     core_create(periodic_task, 0, DEFAULT_STACK_SIZE);
     
-    for (;;);
+    while (true) core_sleep(0);
     
     return 0;
 }
