@@ -1,11 +1,16 @@
-// SLIP implementation mainly stolen from the RFC1055 (https://tools.ietf.org/html/rfc1055)
+// SLIP implementation mainly taken from the RFC1055 (https://tools.ietf.org/html/rfc1055)
 // Original comments preserved.
 
 #include <net/slip/slip.h>
 #include <net/slip/slip_internal.h>
 #include <mem/mem.h>
+#include <task/task.h>
 #include <net/net.h>
 #include <net/net_internal.h>
+
+// TEST
+#include <lib/NQCLib/NQCLib.h>
+#include <sys/sys.h>
 
 /* SLIP special character codes
  */
@@ -14,12 +19,88 @@
 #define ESC_END         0xDC    /* ESC ESC_END means END data byte */
 #define ESC_ESC         0xDD    /* ESC ESC_ESC means ESC data byte */
 
+#define SLIP_CALL_BACK_BUFFER_SIZE  500         // MTU for SLIP interfaces use to be ~300, so 500 is far enought
+
+static PORT slip_port_num;
+static byte slip_input_buf[SLIP_CALL_BACK_BUFFER_SIZE];
+
+// TODO: we could use callback to activate a task, so we can wait for data until it arrives and not blocking other tasks
+// TODO: need two new task calls: core_stop(TASK) core_start(TASK) and add a new task state (TASK_STATE_STOPPED)
+
+static void slip_serial_task()
+{
+    while (1)
+    {
+        if (serial_avail(slip_port_num))
+        {
+            int bufLen = slip_recv(slip_port_num, slip_input_buf, SLIP_CALL_BACK_BUFFER_SIZE);
+            
+            if (bufLen)
+            {
+                // TODO: store read data somewhere (IP fragment)
+                
+                core_log("---> Arrived SLIP data:\n");
+                char out[5];
+                for (int i = 0 ; i < bufLen ; i++)
+                {
+                    itoa(slip_input_buf[i], out, 16);
+                    core_log(out);
+                    core_log(" ");
+                }
+                core_log("\n");
+            }
+            else {
+                core_log("Nothing read...\n");
+            }
+        }
+        else
+        {
+            core_sleep(0);
+        }
+    }
+}
+
+/*
+static void slip_serial_callback(PORT port)
+{
+    //if (!serial_avail(port)) return;
+    
+    core_log("Callback...\n");
+    
+    int bufLen = slip_recv(port, buf, SLIP_CALL_BACK_BUFFER_SIZE);
+    
+    core_log("SLIP data returned...\n");
+    
+    if (bufLen)
+    {
+        // TODO: store read data somewhere (IP fragment)
+        
+        core_log("---> Arrived SLIP data:\n");
+        char out[5];
+        for (int i = 0 ; i < bufLen ; i++)
+        {
+            itoa(buf[i], out, 16);
+            core_log(out);
+            core_log(" ");
+        }
+        core_log("\n");
+    }
+    else {
+        core_log("Nothing read...\n");
+    }
+}
+ */
+
 NETWORK slip_init(PORT port, char *addr_str)
 {
+    slip_port_num = port;
     NETWORK net = net_create(NET_IFACE_TYPE_SLIP, (byte)port);
     struct NetIfaceStruct *iface = net_iface(net);
     net_parse_ipv4(addr_str, iface->address);
     net_parse_ipv4("255.255.255.0", iface->mask);
+    core_create(slip_serial_task, 0, MIN_STACK_SIZE);
+    //serial_callback(port, slip_serial_callback);
+    
     return net;
 }
 
@@ -144,6 +225,7 @@ int slip_recv(PORT port, byte *p, int len)
                         break;
                 }
             }
+                
                 /* here we fall into the default handler and let
                  * it store the character for us
                  */

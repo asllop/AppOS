@@ -10,7 +10,7 @@
 PORT port = 0;
 int cnt = 0;
 
-void callback()
+void callback(PORT port)
 {
     core_log("Arrived byte... ");
     

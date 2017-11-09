@@ -87,7 +87,7 @@ int net_open(struct NetSocket *socket)
     }
     else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
     {
-        // TODO: implement TCP connections
+        // TCP not implemented yet
         return ERR_CODE_BADSOCKTYPE;
     }
     else
@@ -108,7 +108,7 @@ int net_close(struct NetSocket *socket)
     }
     else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
     {
-        // TODO: implement TCP connections
+        // TCP not implemented yet
         return ERR_CODE_BADSOCKTYPE;
     }
     else
@@ -153,7 +153,7 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     }
     else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
     {
-        // TODO: implement TCP connections
+        // TCP not implemented yet
         return 0;
     }
     else

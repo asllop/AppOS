@@ -23,7 +23,7 @@ static time_t serial_timeout_t_ms = 500;
 
 size_t serial_send(PORT serial_port, byte *data, size_t size)
 {
-    core_lock(MUTEX_SERIAL);
+    core_lock(MUTEX_SERIAL_TX);
     
     for (size_t i = 0 ; i < size ; i++)
     {
@@ -35,7 +35,7 @@ size_t serial_send(PORT serial_port, byte *data, size_t size)
         serial_write_byte(serial_port, data[i]);
     }
     
-    core_unlock(MUTEX_SERIAL);
+    core_unlock(MUTEX_SERIAL_TX);
     
     return size;
 }
@@ -45,7 +45,7 @@ size_t serial_receive(PORT serial_port, byte *data, size_t size)
     size_t read_bytes;
     TIME lastTimestamp = core_timestamp();
     
-    core_lock(MUTEX_SERIAL);
+    core_lock(MUTEX_SERIAL_RX);
     
     for (read_bytes = 0 ; read_bytes < size ; read_bytes++)
     {
@@ -70,7 +70,7 @@ size_t serial_receive(PORT serial_port, byte *data, size_t size)
         }
     }
     
-    core_unlock(MUTEX_SERIAL);
+    core_unlock(MUTEX_SERIAL_RX);
     
     return read_bytes;
 }

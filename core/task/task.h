@@ -9,7 +9,7 @@
 #endif
 
 #ifndef MIN_STACK_SIZE
-#define MIN_STACK_SIZE      256
+#define MIN_STACK_SIZE      128
 #endif
 
 TASK                        core_create(void (*task)(), PRIORITY priority, size_t stackSize);

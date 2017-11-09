@@ -39,7 +39,7 @@ void printPacket(TERM term, byte *packet, size_t packet_len)
     term_puts(term, "\n");
 }
 
-void main(__unused int argc, __unused char **argv)
+int main(__unused int argc, __unused char **argv)
 {
 	char var_str[20];
     
@@ -125,4 +125,6 @@ void main(__unused int argc, __unused char **argv)
             term_puts(term, "Error generating packet to send\n");
         }
     }
+    
+    return 0;
 }

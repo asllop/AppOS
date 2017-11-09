@@ -99,6 +99,8 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             if (ipv4_check_packet(iface, packetID))
             {
                 core_log("Packet Check OK\n");
+                
+                // TODO: Packet ready, return it
             }
             else
             {
@@ -115,6 +117,8 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len)
             ipv4_create_packet_list(iface, packetID, packet, (uint16_t)len);
             
             ipv4_close_packet_list(iface, packetID);
+            
+            // TODO: Packet ready, return it
         }
         
         /*

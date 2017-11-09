@@ -3,22 +3,33 @@
 #include <mem/arch/pc32/mem_arch.h>
 #include <serial/serial.h>
 
-extern void serial_isr();
+extern void serial0_isr();
+extern void serial1_isr();
 
-static void (*serial_rx_callback)();
+static void (*serial_rx_callback)(PORT);
 
-void serial_rx_isr()
+void serial_rx_isr(PORT port)
 {
     // Disable NMI
     outportb(0x70, inportb(0x70) | 0x80);
     
-    if (serial_rx_callback) serial_rx_callback();
+    if (serial_rx_callback) serial_rx_callback(port);
     
     // Enable NMI
     outportb(0x70, inportb(0x70) & 0x7F);
     
     // End of PIC1 interrupt (enable for next interrupt)
     outportb(PIC1, 0x20);
+}
+
+void serial0_rx_isr()
+{
+    serial_rx_isr(0);
+}
+
+void serial1_rx_isr()
+{
+    serial_rx_isr(1);
 }
 
 unsigned int port_address(PORT port)
@@ -104,13 +115,14 @@ int serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP s
     unsigned char port_config = port_databits(data) | port_stopbits(stop) | port_parity(parity);
     outportb(port_addr + 3, port_config);                   // Data bits, stop bits, parity
     
-    outportb(port_addr + 2, 0xC7);                          // Enable FIFO, clear them, with 14-byte threshold
+    //outportb(port_addr + 2, 0xC7);                          // Enable FIFO, clear them, with 14-byte threshold
+    outportb(port_addr + 2, 0x07);                          // Enable FIFO, clear them, with 1-byte threshold
     outportb(port_addr + 4, 0x0B);                          // IRQs enabled, RTS/DSR set
     
     return 0;
 }
 
-void serial_callback(PORT port, void (*callback)())
+void serial_callback(PORT port, void (*callback)(PORT))
 {
     if (callback)
     {
@@ -123,13 +135,13 @@ void serial_callback(PORT port, void (*callback)())
         if (port == 0 || port == 2)
         {
             // Enable interrupt for IRQ4
-            set_isr(serial_isr, PIC1_IRQ(4));
+            set_isr(serial0_isr, PIC1_IRQ(4));
             outportb(PIC1 + 1,(inportb(PIC1 + 1) & 0xEF));
         }
         else if (port == 1 || port == 3)
         {
             // Enable interrupt for IRQ3
-            set_isr(serial_isr, PIC1_IRQ(3));
+            set_isr(serial1_isr, PIC1_IRQ(3));
             outportb(PIC1 + 1,(inportb(PIC1 + 1) & 0xF7));
         }
         
@@ -146,17 +158,7 @@ void serial_callback(PORT port, void (*callback)())
     else
     {
         unsigned int port_addr = port_address(port);
-        
-        if (port == 0 || port == 2)
-        {
-            outportb(port_addr + 1, 0x00);                      // Disable port interrupts
-        }
-        else if (port == 1 || port == 3)
-        {
-            outportb(port_addr + 1, 0x00);                      // Disable port interrupts
-        }
-        
-        serial_rx_callback = NULL;
+        outportb(port_addr + 1, 0x00);                          // Disable port interrupts
     }
 }
 
