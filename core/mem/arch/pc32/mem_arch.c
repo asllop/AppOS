@@ -1,4 +1,5 @@
 #include <mem/mem_internal.h>
+#include <sys/sys.h>
 
 extern void *grub_struct;
 extern void *kernel_end;
@@ -28,16 +29,17 @@ struct gdt_reg
 } __attribute__((packed));
 
 struct idt_entry{
-    uint16_t offset_low; // offset bits 0..15
-    uint16_t selector; // a code segment selector in GDT or LDT
-    uint8_t zero;      // unused, set to 0
-    uint8_t type_attr; // type and attributes, see below
-    uint16_t offset_high; // offset bits 16..31
+    uint16_t offset_low;    // offset bits 0..15
+    uint16_t selector;      // a code segment selector in GDT or LDT
+    uint8_t zero;           // unused, set to 0
+    uint8_t type_attr;      // type and attributes, see below
+    uint16_t offset_high;   // offset bits 16..31
 } __attribute__((packed));
 
 static struct gdt_reg 		GDTR;
 static struct gdt_entry 	*GDT;
 static uint16_t				gdt_count;
+static byte                 local_GDT[40];     // Default GDT created by GRUB has 5 entries (40 bytes)
 
 static struct gdt_reg 		IDTR;
 static struct idt_entry 	IDT[256];
@@ -52,12 +54,37 @@ struct gdt_reg *get_gdtr()
 	return &GDTR;
 }
 
+void set_gdtr()
+{
+    asm(
+        "lgdt %0\n"
+        : : "m" (GDTR)
+        );
+}
+
 void setup_gdt()
 {
 	// Get the current GDT (set by GRUB)
 	get_gdtr();
-	GDT = (void *)GDTR.base;
-	gdt_count = (GDTR.limit + 1) / 8;
+    
+    if (GDTR.limit + 1 > 40)
+    {
+        core_fatal("GDT is bigger than local buffer");
+    }
+    
+    // Create a local copy and update GDTR
+    byte *org_GDT = (void *)GDTR.base;
+    
+    for (int i = 0 ; i < GDTR.limit + 1 ; i++)
+    {
+        local_GDT[i] = org_GDT[i];
+    }
+    
+    GDTR.base = (uint32_t)local_GDT;
+    GDT = (void *)GDTR.base;
+    gdt_count = (GDTR.limit + 1) / 8;
+    
+    set_gdtr();
 }
 
 void setup_idt()

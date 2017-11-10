@@ -14,7 +14,8 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
         netInterfaces[numNetInterfaces].type = type;
         netInterfaces[numNetInterfaces].id = id;
         
-        switch (type) {
+        switch (type)
+        {
             case NET_IFACE_TYPE_SLIP:
                 netInterfaces[numNetInterfaces].mtu = 296;
                 break;
@@ -123,7 +124,8 @@ void net_iface_tx(NETWORK net, byte *data, size_t len)
 {
     struct NetIfaceStruct *iface = net_iface(net);
     
-    switch (iface->type) {
+    switch (iface->type)
+    {
         case NET_IFACE_TYPE_SLIP:
             slip_send(iface->id, data, (int)len);
             break;

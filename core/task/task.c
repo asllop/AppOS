@@ -207,7 +207,7 @@ void core_exit(int returnCode, void *returnBuffer)
         task->state = TASK_STATE_FINISHED;
         
         core_sleep(0);
-        for (;;) {}
+        for (;;);
     }
 }
 

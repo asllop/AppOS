@@ -216,7 +216,7 @@ void task_end_point()
     core_permit();
     core_sleep(0);
     
-    for(;;) {}
+    for(;;);
 }
 
 void task_finalize(struct TaskStruct *task)

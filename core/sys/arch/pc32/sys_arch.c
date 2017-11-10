@@ -39,7 +39,7 @@ void core_reboot()
     core_halt();
 }
 
-// NOTE: We are not configuring the serial port, the app must do it before using core_log
+// NOTE: We are not configuring the serial port 0, the app must do it before using core_log
 void core_log(char *str)
 {
     for (int i = 0 ; str[i] != 0 ; i++)

@@ -44,7 +44,8 @@ char **setup_cmdline(int *argcPointer)
         
         // Copy cmd line into buffer to save it from destruction
         int bufIndex;
-        for (bufIndex = 0 ; bufIndex < MAX_ARGS_BUF_SZ ; bufIndex ++) {
+        for (bufIndex = 0 ; bufIndex < MAX_ARGS_BUF_SZ ; bufIndex ++)
+        {
             cmdLineBuf[bufIndex] = args[bufIndex];
         }
         cmdLineBuf[bufIndex] = '\0';

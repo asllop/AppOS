@@ -23,6 +23,9 @@ static time_t serial_timeout_t_ms = 500;
 
 size_t serial_send(PORT serial_port, byte *data, size_t size)
 {
+    // TODO: do we really need a mutex here? Try removing it
+    //       As long as the port is different, we probably won't have conflicts using this functions from various threads
+    
     core_lock(MUTEX_SERIAL_TX);
     
     for (size_t i = 0 ; i < size ; i++)
@@ -44,6 +47,9 @@ size_t serial_receive(PORT serial_port, byte *data, size_t size)
 {
     size_t read_bytes;
     TIME lastTimestamp = core_timestamp();
+    
+    // TODO: do we really need a mutex here? Try removing it
+    //       As long as the port is different, we probably won't have conflicts using this functions from various threads
     
     core_lock(MUTEX_SERIAL_RX);
     
@@ -90,8 +96,7 @@ void serial_wait(PORT serial_port)
 
 time_t serial_timeout(time_t millis)
 {
-    if (millis > 0) {
-        serial_timeout_t_ms = millis;
-    }
+    if (millis > 0) serial_timeout_t_ms = millis;
+    
     return serial_timeout_t_ms;
 }

@@ -29,7 +29,7 @@ static byte slip_input_buf[SLIP_CALL_BACK_BUFFER_SIZE];
 
 static void slip_serial_task()
 {
-    while (1)
+    for (;;)
     {
         if (serial_avail(slip_port_num))
         {
@@ -174,7 +174,7 @@ int slip_recv(PORT port, byte *p, int len)
      * Make sure not to copy them into the packet if we
      * run out of room.
      */
-    while (1)
+    for (;;)
     {
         /* get a character to process
          */

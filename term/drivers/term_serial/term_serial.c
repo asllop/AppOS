@@ -26,8 +26,10 @@ void term_serial_where(int customID, int *x, int *y)
     serial_send((PORT)customID, (byte *)cmd, strlen(cmd));
     
     int i = 0;
-    while (true) {
-        if (serial_avail((PORT)customID)) {
+    for (;;)
+    {
+        if (serial_avail((PORT)customID))
+        {
             byte ch;
             serial_receive((PORT)customID, &ch, 1);
             cmd[i++] = (char)ch;
