@@ -115,8 +115,7 @@ int serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP s
     unsigned char port_config = port_databits(data) | port_stopbits(stop) | port_parity(parity);
     outportb(port_addr + 3, port_config);                   // Data bits, stop bits, parity
     
-    //outportb(port_addr + 2, 0xC7);                          // Enable FIFO, clear them, with 14-byte threshold
-    outportb(port_addr + 2, 0x07);                          // Enable FIFO, clear them, with 1-byte threshold
+    outportb(port_addr + 2, 0xC7);                          // Enable FIFO, clear them, with 14-byte threshold
     outportb(port_addr + 4, 0x0B);                          // IRQs enabled, RTS/DSR set
     
     return 0;
