@@ -11,6 +11,7 @@ typedef enum
 {
     TASK_STATE_NULL         = 0,            // Empty slot
     TASK_STATE_RUNNING,                     // Task is running
+    TASK_STATE_STOPPED,                     // Task is stopped
     TASK_STATE_FINISHED,                    // Task has finished but there is return information ready to be read
     TASK_STATE_DEAD                         // Task is about to be removed and it's resources freed
     

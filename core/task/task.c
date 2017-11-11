@@ -153,11 +153,9 @@ int core_result(TASK taskid, int *returnCode, void **bufferPointer)
         *returnCode = task->returnCode;
         *bufferPointer = task->returnBuffer;
         
-        core_lock(MUTEX_TASK);
-        
+        core_forbid();
         task_finalize(task);
-        
-        core_unlock(MUTEX_TASK);
+        core_permit();
         
         return 0;
     }
@@ -208,6 +206,55 @@ void core_exit(int returnCode, void *returnBuffer)
         
         core_sleep(0);
         for (;;);
+    }
+}
+
+// WARNING: if task is stopped while locking a mutex, all tasks depending on that mutex will remain blocked until the task restarts
+int core_stop(TASK taskid)
+{
+    struct TaskStruct *task = task_get(taskid);
+    
+    if (task)
+    {
+        if (task->state == TASK_STATE_RUNNING)
+        {
+            core_forbid();
+            task->state = TASK_STATE_STOPPED;
+            core_permit();
+            return 0;
+        }
+        else
+        {
+            return ERR_CODE_BADTASKSTATE;
+        }
+    }
+    else
+    {
+        return ERR_CODE_NOTASKID;
+    }
+}
+
+int core_start(TASK taskid)
+{
+    struct TaskStruct *task = task_get(taskid);
+    
+    if (task)
+    {
+        if (task->state == TASK_STATE_STOPPED)
+        {
+            core_forbid();
+            task->state = TASK_STATE_RUNNING;
+            core_permit();
+            return 0;
+        }
+        else
+        {
+            return ERR_CODE_BADTASKSTATE;
+        }
+    }
+    else
+    {
+        return ERR_CODE_NOTASKID;
     }
 }
 

@@ -21,6 +21,8 @@ TASK_STATE                  core_state(TASK taskid);
 int                         core_result(TASK taskid, int *returnCode, void **bufferPointer);
 void                        core_sleep(unsigned long millis);
 void                        core_exit(int returnCode, void *returnBuffer);
+int                         core_stop(TASK taskid);
+int                         core_start(TASK taskid);
 TIME                        core_timestamp();
 
 #endif

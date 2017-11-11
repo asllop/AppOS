@@ -279,14 +279,24 @@ void *task_schedule(void *stackPointer)
                     nextTask->next->prev = nextTask->prev;
                 }
             }
-            else if (nextTask->counter == 0 && nextTask->state == TASK_STATE_RUNNING)
+            else if (nextTask->state == TASK_STATE_RUNNING)
             {
-                nextTask->counter = nextTask->priority;
-                break;
+                if (nextTask->counter == 0)
+                {
+                    // Run it
+                    nextTask->counter = nextTask->priority;
+                    break;
+                }
+                else
+                {
+                    // Dec counter and go to next task
+                    nextTask->counter --;
+                    nextTask = nextTask->next;
+                }
             }
             else
             {
-                nextTask->counter --;
+                // If task is not running or dead, it must be stopped or finished, in any case go to next task
                 nextTask = nextTask->next;
             }
         }

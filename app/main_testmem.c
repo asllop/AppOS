@@ -124,7 +124,7 @@ void print_segs()
 {
     char var_str[10];
     byte numBlocks;
-    struct BlockStruct *blocks = get_blocks(&numBlocks);
+    struct BlockStruct *blocks = mem_get_blocks(&numBlocks);
     
     for (byte i = 0 ; i < numBlocks ; i++)
     {
@@ -164,7 +164,7 @@ void print_segs()
     }
 }
 
-void main(__unused int argc, __unused char **argv)
+int main(__unused int argc, __unused char **argv)
 {
     char var_str[20];
     
@@ -197,29 +197,29 @@ void main(__unused int argc, __unused char **argv)
     //core_log("\n");
     
     // Create a task with priority 0 (the highest)
-//    core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt1_task, 5, DEFAULT_STACK_SIZE);
-//
-//    core_create(cnt2_task, 10, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt3_task, 20, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt4_task, 0, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt5_task, 5, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt6_task, 10, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt7_task, 20, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt8_task, 0, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt9_task, 5, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt10_task, 10, DEFAULT_STACK_SIZE);
-//    
-//    core_create(cnt11_task, 20, DEFAULT_STACK_SIZE);
+    core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt1_task, 5, DEFAULT_STACK_SIZE);
+
+    core_create(cnt2_task, 10, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt3_task, 20, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt4_task, 0, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt5_task, 5, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt6_task, 10, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt7_task, 20, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt8_task, 0, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt9_task, 5, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt10_task, 10, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt11_task, 20, DEFAULT_STACK_SIZE);
     
     console_put_string(0x4f, " Hello AppOS ", 34, 1);
     
@@ -304,5 +304,7 @@ void main(__unused int argc, __unused char **argv)
     console_put_string(0x4f, "End", 2, line++);
     
     // When main function reaches end, the system is restarted
-    for (;;);
+    core_exit(0, NULL);
+    
+    return 0;
 }
