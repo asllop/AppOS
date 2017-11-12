@@ -37,9 +37,9 @@ struct idt_entry{
 } __attribute__((packed));
 
 static struct gdt_reg 		GDTR;
-static struct gdt_entry 	*GDT;
 static uint16_t				gdt_count;
-static byte                 local_GDT[40];     // Default GDT created by GRUB has 5 entries (40 bytes)
+static struct gdt_entry     local_GDT[5];   // Default GDT created by GRUB has 5 entries (40 bytes)
+uint16_t                    codeSelector;
 
 static struct gdt_reg 		IDTR;
 static struct idt_entry 	IDT[256];
@@ -73,15 +73,27 @@ void setup_gdt()
     }
     
     // Create a local copy and update GDTR
-    byte *org_GDT = (void *)GDTR.base;
+    struct gdt_entry *org_GDT = (void *)GDTR.base;
+    
+    codeSelector = 0;
     
     for (int i = 0 ; i < GDTR.limit + 1 ; i++)
     {
         local_GDT[i] = org_GDT[i];
+        
+        // Found a data segment in the GDT
+        if (local_GDT[i].access == 0x9A)
+        {
+            codeSelector = i;
+        }
+    }
+    
+    if (codeSelector == 0)
+    {
+        core_fatal("No data segment!");
     }
     
     GDTR.base = (uint32_t)local_GDT;
-    GDT = (void *)GDTR.base;
     gdt_count = (GDTR.limit + 1) / 8;
     
     set_gdtr();
@@ -110,8 +122,7 @@ void setup_idt()
 void set_isr(void *isr, unsigned char vector)
 {
     IDT[vector].zero = 0;
-     // Assumes that GDT[1] has the CS and it contains the whole addressable memory and starts on 0 (normal GRUB config)
-    IDT[vector].selector = 8;
+    IDT[vector].selector = codeSelector * 8;
     // P=1, DPL=00, S=0, type=1110
     IDT[vector].type_attr = 0b10001110;
     IDT[vector].offset_low = (uint32_t)isr & 0xFFFF;
