@@ -1,22 +1,28 @@
 AppOS Code Style Guide v1.0
----------------------------
+===========================
 
 0. Preamble
+-----------
 
 The following rules only apply to AppOS kernel code itself, not to user applications.
 If something is not covered by a rule, use the Linux kernel coding style as a reference.
+In general terms the code should be clear, well commented and easy to understand.
 
 1. Variable Names
+-----------------
 
-Camel case starting with lowercase. Examples:
+Names in camel case starting with lowercase. In pointers, at least one space between askterisk and variable name. Examples:
 
 int segmentNumber;
-char *charBuffer;
-void *elementIndexList;
+char * charBuffer;
+float normalizedChangeRates[10];
+char * buf;
+struct BlockStruct * block;
 
 2. Function Names
+-----------------
 
-Snake case in lowercase. Examples:
+Names in snake case, all letters in lowercase. Examples:
 
 void do_something();
 int this_is_a_function();
@@ -32,8 +38,10 @@ serial_wait
 serial_timeout
 
 3. Blocks
+---------
 
-Open brace always in the line below block definition. In functions, name and parentesis without space, in flow control blocks, with space. Examples:
+Open brace always in the line below block definition.
+In functions, no separation between function name and parentheses. In flow control structures, one space between name and parentheses. Examples:
 
 void foo()
 {
@@ -63,7 +71,46 @@ void foo()
 	}
 }
 
-4. Defined Types and Struct Names
+Blocks with one line content can be defined in one line without braces. Examples:
+
+while (condition) do_something();
+
+if (condition) do_something();
+else do_something_else();
+
+The prefered way to define a infinite loop is the "for" statement. Examples:
+
+for (;;)
+{
+	// Do something forever...
+}
+
+// Do nothing forever
+for (;;);
+
+4. Conditions
+-------------
+
+No space between parentheses and condition.
+Multiple conditions with logic operators may be in different lines, depending on the length.
+In a "for", space between semicolon and statement.
+Examples:
+
+if (a < 10) ...
+
+for (int i = 0 ; i < cnt ; i ++) ...
+
+if (a == 0 && b == 0) ...
+
+if (structPointer->element0 == 0 ||
+	structPointer->element1 == 0 ||
+	structPointer->element2 == 0)
+{
+	...
+}
+
+5. Defined Types and Struct Names
+---------------------------------
 
 Camel case starting with capital letters. Examples:
 
@@ -72,7 +119,8 @@ struct BlockStruct { ... };
 
 This only applies to AppOS specific types, not generic ones like "bool", "byte" or "time_t".
 
-5. Typedef Enums
+6. Typedef Enums
+----------------
 
 Snake case in capital letters, using name as a prefix for values. Examples:
 
@@ -93,7 +141,8 @@ typedef enum
     
 } NET_IFACE_TYPE;
 
-6. Macros
+7. Macros
+---------
 
 Snake case in capital letters. Examples:
 
