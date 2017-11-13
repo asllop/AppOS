@@ -7,7 +7,6 @@
 #define FAKE_TIMER_INT      0xA0
 #define TIMER_FREQ_HZ       100
 #define MILLIS_PER_TICK     (1000 / TIMER_FREQ_HZ)
-#define TMP_STACK_SIZE      128 * sizeof(void *)
 
 extern void pit_isr();
 extern void fake_timer_isr();
@@ -105,7 +104,7 @@ void init_pit(unsigned int freq)
 
 void task_force_scheduling()
 {
-    // Cal a fake timer interrupt to avoid incrementing timestamp
+    // Call a fake timer interrupt to avoid incrementing timestamp
     asm(
         "int %0;"
         :

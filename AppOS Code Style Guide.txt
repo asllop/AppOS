@@ -1,0 +1,101 @@
+AppOS Code Style Guide v1.0
+---------------------------
+
+0. Preamble
+
+The following rules only apply to AppOS kernel code itself, not to user applications.
+If something is not covered by a rule, use the Linux kernel coding style as a reference.
+
+1. Variable Names
+
+Camel case starting with lowercase. Examples:
+
+int segmentNumber;
+char *charBuffer;
+void *elementIndexList;
+
+2. Function Names
+
+Snake case in lowercase. Examples:
+
+void do_something();
+int this_is_a_function();
+
+Fist word must be the module name. Examples:
+
+// Module Core
+core_sleep
+core_avail
+
+// Module Serial
+serial_wait
+serial_timeout
+
+3. Blocks
+
+Open brace always in the line below block definition. In functions, name and parentesis without space, in flow control blocks, with space. Examples:
+
+void foo()
+{
+	another_function();
+
+	if (condition)
+	{
+		while (condition)
+		{
+			for (int i = 0 ; i < cnt ; i ++)
+			{
+				switch (index)
+				{
+					case 0:
+						...
+						break;
+
+					case 1:
+						...
+						break;
+
+					default:
+						...
+				}
+			}
+		}
+	}
+}
+
+4. Defined Types and Struct Names
+
+Camel case starting with capital letters. Examples:
+
+typedef unsigned char Port;
+struct BlockStruct { ... };
+
+This only applies to AppOS specific types, not generic ones like "bool", "byte" or "time_t".
+
+5. Typedef Enums
+
+Snake case in capital letters, using name as a prefix for values. Examples:
+
+typedef enum
+{
+    MEM_TYPE_TOTAL = 0,
+    MEM_TYPE_USED
+
+} MEM_TYPE;
+
+typedef enum
+{
+    NET_IFACE_TYPE_ETH,
+    NET_IFACE_TYPE_WIFI,
+    NET_IFACE_TYPE_SLIP,
+    NET_IFACE_TYPE_PPP,
+    NET_IFACE_TYPE_BT
+    
+} NET_IFACE_TYPE;
+
+6. Macros
+
+Snake case in capital letters. Examples:
+
+#define DEFAULT_STACK_SIZE 1024
+#define	TASK_H
