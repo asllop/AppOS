@@ -4,7 +4,7 @@
 #include <sys/io/arch/pc32/io.h>
 #include <mem/arch/pc32/mem_arch.h>
 
-#define FAKE_TIMER_IRQ      PIC2_IRQ(8)
+#define FAKE_TIMER_INT      0xA0
 #define TIMER_FREQ_HZ       100
 #define MILLIS_PER_TICK     (1000 / TIMER_FREQ_HZ)
 #define TMP_STACK_SIZE      128 * sizeof(void *)
@@ -87,7 +87,7 @@ void init_pit(unsigned int freq)
     
     // Set Timer ISR
     set_isr(pit_isr, PIC1_IRQ(0));
-    set_isr(fake_timer_isr, FAKE_TIMER_IRQ);
+    set_isr(fake_timer_isr, FAKE_TIMER_INT);
 
     // Setup PIT configuration
     unsigned int counter = 1193182 / freq;  // Base clock freq == 1193181.6666 Hz, we round to 1193182
@@ -109,7 +109,7 @@ void task_force_scheduling()
     asm(
         "int %0;"
         :
-        : "i" (FAKE_TIMER_IRQ)
+        : "i" (FAKE_TIMER_INT)
         );
 }
 
