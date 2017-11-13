@@ -12,6 +12,8 @@
 extern void pit_isr();
 extern void fake_timer_isr();
 
+extern uint16_t mem_code_selector;
+
 void *push32(void *stackPointer, uint32_t value)
 {
     stackPointer -= 4;
@@ -30,9 +32,9 @@ void task_context_init(struct TaskStruct *slot)
     // This will be poped by IRET on pit_isr()
     
     // Push EFLAGS
-    currentStackPointer = push32(currentStackPointer, 0b1000000010);        // Bit 1 set (reserved), Interrupt flag set
+    currentStackPointer = push32(currentStackPointer, 0b1000000010);            // Bit 1 set (reserved), Interrupt flag set
     // Push CS
-    currentStackPointer = push32(currentStackPointer, 8);                   // Hardcoded to point at the first valid entry on GDT
+    currentStackPointer = push32(currentStackPointer, mem_code_selector * 8);   // CS selector on GDT
     // Push EIP
     currentStackPointer = push32(currentStackPointer, (uint32_t)slot->task);
     
