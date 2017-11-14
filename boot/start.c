@@ -12,8 +12,21 @@ static char **argv;
 
 void main_task()
 {
-	main(argc, argv);
-	core_reboot();
+    int ret = main(argc, argv);
+    
+    if (ret == 0)
+    {
+        // End task normally
+        return;
+    }
+    else if (ret > 0)
+    {
+        core_reboot();
+    }
+    else if (ret < 0)
+    {
+        core_halt();
+    }
 }
 
 void kernel_init()

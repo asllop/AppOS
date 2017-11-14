@@ -4,7 +4,7 @@
 #include <appos.h>
 
 #ifndef MAX_NUM_TASK
-#define MAX_NUM_TASK        10
+#define MAX_NUM_TASK        128
 #endif
 
 typedef enum
