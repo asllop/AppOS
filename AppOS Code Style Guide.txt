@@ -103,10 +103,10 @@ for (int i = 0 ; i < cnt ; i ++) ...
 if (a == 0 && b == 0) ...
 
 if (structPointer->element0 == 0 ||
-	structPointer->element1 == 0 ||
-	structPointer->element2 == 0)
+    structPointer->element1 == 0 ||
+    structPointer->element2 == 0)
 {
-	...
+    ...
 }
 
 5. Defined Types and Struct Names

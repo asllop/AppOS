@@ -43,12 +43,12 @@ char **setup_cmdline(int *argcPointer)
         }
         
         // Copy cmd line into buffer to save it from destruction
-        int bufIndex;
-        for (bufIndex = 0 ; bufIndex < MAX_ARGS_BUF_SZ ; bufIndex ++)
+        cmdLineBuf[MAX_ARGS_BUF_SZ - 1] = 0;
+        for (int bufIndex = 0 ; bufIndex < MAX_ARGS_BUF_SZ - 1 ; bufIndex ++)
         {
             cmdLineBuf[bufIndex] = args[bufIndex];
+            if (args[bufIndex] == 0) break;
         }
-        cmdLineBuf[bufIndex] = '\0';
         
         char *currArg = cmdLineBuf;
         bool insideArg = YES;

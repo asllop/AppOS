@@ -1,6 +1,5 @@
 CC=i686-elf-gcc
 AS=i686-elf-as
-#CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I./include -I./core -I./ -g
 CFLAGS=-std=gnu99 -ffreestanding -O0 -Wall -Wextra -I./include -I./core -I./ -g
 OUTPUT=build/appos.elf
 OBJECTS= \
