@@ -11,7 +11,8 @@ In general terms the code should be clear, well commented and easy to understand
 1. Variable Names
 -----------------
 
-Names in camel case starting with lowercase. In pointers, at least one space between askterisk and variable name. Examples:
+Names in camel case starting with lowercase. In pointers, at least one space between askterisk and variable name.
+Examples:
 
 int segmentNumber;
 char * charBuffer;
@@ -41,7 +42,9 @@ serial_timeout
 ---------
 
 Open brace always in the line below block definition.
-In functions, no separation between function name and parentheses. In flow control structures, one space between name and parentheses. Examples:
+In functions, no separation between function name and parentheses.
+In flow control structures, one space between name and parentheses.
+Examples:
 
 void foo()
 {
@@ -92,6 +95,7 @@ for (;;);
 -------------
 
 No space between parentheses and condition.
+One space between comparation / logic operators and the operands.
 Multiple conditions with logic operators may be in different lines, depending on the length.
 In a "for", space between semicolon and statement.
 Examples:
@@ -148,3 +152,10 @@ Snake case in capital letters. Examples:
 
 #define DEFAULT_STACK_SIZE 1024
 #define	TASK_H
+
+In general, the macros used for configuration or tunning some OS behaviour, must we enclosed into an #if,
+to allow definition from command line or external header file. Example:
+
+#ifndef MAX_NUM_TASKS
+#define MAX_NUM_TASKS 100
+#endif
