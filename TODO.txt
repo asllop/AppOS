@@ -23,13 +23,12 @@ If the task is not resident, returns ERR_TASK_NO_RESIDENT.
 
 When a resident task ends, instead of being deleted as any other task, it goes back to the state TASK_STATE_RESIDENT and is ready to receive more events.
 
- * Interface for other serial ports (SPI, I2C). Maybe generalize "serial_" module.
+ * USB: host controller driver and libUSB-like interface for API (or port libUSB).
+   - PCI interface (required for USB suport in PC32 arch)
+
+ * Interface for other serial ports (SPI & I2C), create modules "spi_" and "i2c_".
 
  * File System
-
- * PCI interface (required for USB suport in PC32 arch)
-
- * USB: host controller driver and libUSB-like interface for API (or port libUSB).
 
  * Port AppOS to Arduino. Specially UNO & Leonardo (ATmega328P, ATmega32u4)
 
@@ -46,4 +45,4 @@ When a resident task ends, instead of being deleted as any other task, it goes b
 
  * Console (screen + keyboard) driver for term (low priority)
 
- * Scratch interpreter
+ * Langs: Python, JavaScript, Scratch interpreters

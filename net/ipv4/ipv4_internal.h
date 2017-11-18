@@ -37,6 +37,7 @@ struct IPv4_header
 // Incoming
 
 struct NetFragList *        ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t packetID);
+struct NetFragList          ipv4_return_packet_list(struct NetIfaceStruct *iface, uint16_t packetID);
 byte                        ipv4_exist_packet_list(struct NetIfaceStruct *iface, uint16_t packetID);
 void *                      ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size);
 byte                        ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size);

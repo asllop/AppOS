@@ -13,6 +13,26 @@ struct NetFragList *ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t pack
     return NULL;
 }
 
+struct NetFragList ipv4_return_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    {
+        if (iface->incomingSlots[i].packetID == packetID)
+        {
+            struct NetFragList fragList = iface->incomingSlots[i];
+            iface->incomingSlots[i] = (struct NetFragList) {
+                .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = 0
+            };
+            return fragList;
+        }
+    }
+    
+    // We didn't found the packet, this should be treated as an error
+    return (struct NetFragList) {
+        .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = 0
+    };
+}
+
 byte ipv4_exist_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
     struct NetFragList *incomList = ipv4_packet_list(iface, packetID);

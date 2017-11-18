@@ -54,7 +54,14 @@ static void slip_serial_task()
                 core_log("\n---------------------------------\n");
                 
                 // WARNING: hardcoded Network 0!
-                int res = ipv4_receive(0, slip_input_buf, bufLen);
+                struct NetFragList fragList;
+                int res = ipv4_receive(0, slip_input_buf, bufLen, &fragList);
+                
+                if (res > 0)
+                {
+                    core_log("----> We have a complete packet!\n");
+                    // TODO: store fragList somewhere to be collected by user
+                }
             }
             else
             {
