@@ -11,6 +11,8 @@
 
 static uint16_t ipv4PacketSequence = 0;
 
+// TODO: if packet closed, return the NetFragList and free the slot in the NetIfaceStruct
+
 int ipv4_receive(NETWORK net, byte *buffer, size_t len)
 {
     core_lock(MUTEX_IPV4);

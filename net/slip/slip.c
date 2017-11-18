@@ -7,6 +7,7 @@
 #include <task/task.h>
 #include <net/net.h>
 #include <net/net_internal.h>
+#include <net/ipv4/ipv4.h>
 
 // TEST
 #include <lib/NQCLib/NQCLib.h>
@@ -37,33 +38,43 @@ static void slip_serial_task()
             {
                 // TODO: store read data somewhere (IP fragment)
                 
-                core_log("---> Arrived SLIP data:\n");
+                //core_log("---> Arrived SLIP data:\n");
                 char out[5];
+                core_log("Size = ");
+                itoa(bufLen, out, 10);
+                core_log(out);
+                core_log(" > ");
+                
                 for (int i = 0 ; i < bufLen ; i++)
                 {
                     itoa(slip_input_buf[i], out, 16);
                     core_log(out);
                     core_log(" ");
                 }
-                core_log("\n");
+                core_log("\n---------------------------------\n");
+                
+                // WARNING: hardcoded Network 0!
+                int res = ipv4_receive(0, slip_input_buf, bufLen);
             }
-            else {
+            else
+            {
                 core_log("Nothing read...\n");
             }
         }
         else
         {
-            core_log("- STOP SLIP receiver\n");
             // Stop task until data is available
-            core_stop(slipTaskID);
-            core_sleep(0);
+            core_stop();
         }
     }
 }
 
+// TODO: when implement resident tasks, this will be a good place to use it. Pass as argument the port so we can support multiple ports.
+// and delete "slip_port_num" global variable.
+
 static void slip_serial_callback(PORT port)
 {
-    core_log("+ START SLIP receiver\n");
+    //core_log("+ START SLIP receiver\n");
     core_start(slipTaskID);
 }
 
@@ -76,14 +87,12 @@ NETWORK slip_init(PORT port, char *addr_str)
     net_parse_ipv4(addr_str, iface->address);
     net_parse_ipv4("255.255.255.0", iface->mask);
     
-    core_forbid();
     slipTaskID = core_create(slip_serial_task, 0, MIN_STACK_SIZE);
+    
     if (!slipTaskID)
     {
         core_fatal("Couldn't create SLIP receiver task");
     }
-    core_stop(slipTaskID);
-    core_permit();
     
     serial_callback(port, slip_serial_callback);
     

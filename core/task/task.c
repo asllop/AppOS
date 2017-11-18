@@ -210,9 +210,9 @@ void core_exit(int returnCode, void *returnBuffer)
 }
 
 // WARNING: if task is stopped while locking a mutex, all tasks depending on that mutex will remain blocked until the task restarts
-int core_stop(TASK taskid)
+int core_stop()
 {
-    struct TaskStruct *task = task_get(taskid);
+    struct TaskStruct *task = task_get_current();
     
     if (task)
     {
@@ -221,6 +221,7 @@ int core_stop(TASK taskid)
             core_forbid();
             task->state = TASK_STATE_STOPPED;
             core_permit();
+            core_sleep(0);
             return 0;
         }
         else
