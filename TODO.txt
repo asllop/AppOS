@@ -1,24 +1,31 @@
 
- * Networking with support for drivers.
-    - Port an IP stack:
+ * Networking (SLIP/IP/UDP & TCP)
+      Free IP stacks:
       uIP (https://github.com/adamdunkels/uip)
       lwIP (http://savannah.nongnu.org/projects/lwip/)
 
- * File System
-
- * Interrupt system:
-CORE/TASK:
+ * Real Time system for core/task:
 
 TASK core_resident(void (*task)(void *, size_t), PRIORITY priority, size_t stackSize)
 
-Crea una tasca nova amb estat TASK_STATE_RESIDENT. A diferencia de les tasques normals, aquesta funció te dos arguments: void *buffer, size_t size
+This function creates a new task with state TASK_STATE_RESIDENT, that is ignored by the task scheduler, so it won't get CPU time.
+Unlike the normal tasks, this functions takes two arguments: void *buffer, size_t size
+A buffer of data and the size of the buffer.
 
 int core_wakeup(TASK taskID, void *buff, size_t size)
 
-Envia un event a la tasca resident. Aixo fa que la taska resident s'executi amb els dos arguments passats.
-Si tot va bé, retorna 0.
-Si la tasca ja es troba ocupada atenent un altre event, retorna TASK_BUSSY.
-Si la tasca no es de tipus resident, retorna TASK_NO_RESIDENT.
+With this other function we send an event to a resident task. By doing this, the task state changes to TASK_STATE_RESIDENT_RUNNING,
+and is executed passing to the function the arguments buff and size.
+
+It returns 0 if ok
+If the task is bussy attending a previous event (it was already in state TASK_STATE_RESIDENT_RUNNING), returns ERR_TASK_BUSSY.
+If the task is not resident, returns ERR_TASK_NO_RESIDENT.
+
+When a resident task ends, instead of being deleted as any other task, it goes back to the state TASK_STATE_RESIDENT and is ready to receive more events.
+
+ * Interface for other serial ports (SPI, I2C). Maybe generalize "serial_" module.
+
+ * File System
 
  * PCI interface (required for USB suport in PC32 arch)
 
@@ -32,8 +39,11 @@ Si la tasca no es de tipus resident, retorna TASK_NO_RESIDENT.
 
  * Port AppOS to Microchip PIC 8 & 16 bits
 
- * Implement SMP for RasPI and PC.
+ * Implement SMP
 
- * Console (screen + keyboard) driver for term.
+ * Memory Protection: implement a "supervisor" module who takes care of forbidden memory access, program memory integrity, illegal opcode execution, exceptions, etc.
+   Also create a small API to control its behaviour from the app, what do to in case of a exception (reset, halt, fallback function, etc).
 
- * Interface for other serial ports (SPI, I2C). Maybe generalize "serial_" module.
+ * Console (screen + keyboard) driver for term (low priority)
+
+ * Scratch interpreter
