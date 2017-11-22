@@ -3,7 +3,7 @@
 
 AppOS is a kernel designed to be embedded into an application, as if it were a static library.
 
-Its main fields of aplication are:
+The main fields of aplication are:
 
 - Internet of Things (IoT)
 - Standalone applications
