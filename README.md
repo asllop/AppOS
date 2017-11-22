@@ -17,7 +17,7 @@ Designed to be small but scalable and modular, it could fit on a 8-bit microcont
 
 AppOS is multiplatform and designed to be easily ported. Currently supported platforms are:
 
-- i386 compatible PC
+- PC compatibles
 - Raspberry PI (work in progress)
 - Arduino (work in progress)
 - PIC microcontrollers and dev boards (planned)
