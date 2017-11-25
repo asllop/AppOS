@@ -1,5 +1,9 @@
+# WARNING: when setting -O2 kernel stops working. Look at http://wiki.osdev.org/Optimizing#Compiler_Optimization and http://wiki.osdev.org/Volatile_(keyword)
+# Use optimization flags in the linker as well (-O2)
+
 CC=i686-elf-gcc
 AS=i686-elf-as
+#CFLAGS=-std=gnu99 -ffreestanding -Ofast -Wall -Wextra -I./include -I./core -I./ -g
 CFLAGS=-std=gnu99 -ffreestanding -O0 -Wall -Wextra -I./include -I./core -I./ -g
 OUTPUT=build/appos.elf
 OBJECTS= \
@@ -47,7 +51,7 @@ OBJECTS= \
 all: $(OBJECTS) link
 
 link:
-	$(CC) -T linker.ld -o $(OUTPUT) -ffreestanding -O2 -nostdlib $(OBJECTS) -lgcc
+	$(CC) -T linker.ld -o $(OUTPUT) -ffreestanding -nostdlib $(OBJECTS) -lgcc
 
 clean:
 	rm -f $(OBJECTS)

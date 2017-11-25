@@ -15,7 +15,7 @@
 .align 16
 stack_bottom:
 # Amount of memory for initial kernel stack
-.skip 1024
+.skip 512
 stack_top:
 
 .section .text
@@ -45,7 +45,7 @@ kernel_end: 	.long 0
 # This is useful when debugging or when you implement call tracing.
 .size _start, . - _start
 
-# It marks the end of the kernel, since in linking we ensure this sections goes at the end
+# It marks the end of the kernel, since in the linker we ensure this sections goes at the end
 .align 16
 .section .after
 section_after:

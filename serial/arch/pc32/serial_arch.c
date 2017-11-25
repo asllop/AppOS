@@ -161,12 +161,12 @@ void serial_callback(PORT port, void (*callback)(PORT))
     }
 }
 
-byte serial_is_data_ready(PORT port)
+bool serial_is_data_ready(PORT port)
 {
     return inportb(port_address(port) + 5) & 1;
 }
 
-byte serial_is_transmit_empty(PORT port)
+bool serial_is_transmit_empty(PORT port)
 {
     return inportb(port_address(port) + 5) & 0x20;
 }

@@ -26,7 +26,7 @@ int lprintf(const char *fmt, ...)
     return i;
 }
 
-int main(__unused int argc, __unused char **argv)
+int main(int argc, char **argv)
 {
     // Draw Background
     console_put_data(0x1b, (char)176, 80*25, 0);

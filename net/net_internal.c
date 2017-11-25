@@ -41,7 +41,7 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
         for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
         {
             netInterfaces[numNetInterfaces].incomingSlots[i] = (struct NetFragList) {
-                .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = 0
+                .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = false
             };
         }
         

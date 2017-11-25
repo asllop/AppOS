@@ -162,7 +162,7 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     }
 }
 
-// TODO: cal veure com combinem això amb l'arribada de les dades per la capa fisica (slip_recv)
+// TODO
 size_t net_receive(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len)
 {
     return 0;

@@ -64,6 +64,7 @@ struct NetSocket
     uint16_t                remotePort;
     NET_SOCKET_STATE        state;
     NETWORK                 network;
+    bool                    dataAvailable;
 };
 
 struct NetClient
@@ -87,7 +88,7 @@ struct NetFragList
     uint16_t                numFragments;
     struct NetFrag *        first;
     struct NetFrag *        last;
-    byte                    closed;
+    bool                    closed;
 };
 
 struct NetIfaceStruct
@@ -98,8 +99,6 @@ struct NetIfaceStruct
     byte                    mask[4];
     uint16_t                mtu;
     struct NetFragList      incomingSlots[NET_NUM_INCOMING_SLOTS];
-    
-    // TODO: add outgoing slots
 };
 
 // TODO: create a struct NetAddress to cover both IPv4 and IPv6 and use it instead of the "byte address[4]" array

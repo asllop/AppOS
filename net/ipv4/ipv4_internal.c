@@ -21,7 +21,7 @@ struct NetFragList ipv4_return_packet_list(struct NetIfaceStruct *iface, uint16_
         {
             struct NetFragList fragList = iface->incomingSlots[i];
             iface->incomingSlots[i] = (struct NetFragList) {
-                .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = 0
+                .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = false
             };
             return fragList;
         }
@@ -29,7 +29,7 @@ struct NetFragList ipv4_return_packet_list(struct NetIfaceStruct *iface, uint16_
     
     // We didn't found the packet, this should be treated as an error
     return (struct NetFragList) {
-        .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = 0
+        .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = false
     };
 }
 
@@ -80,7 +80,7 @@ byte ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, by
         incomList->numFragments = 0;
         incomList->first = NULL;
         incomList->last = NULL;
-        incomList->closed = 0;
+        incomList->closed = false;
         
         void *firstFrag = ipv4_add_fragment(iface, packetID, buff, size);
         incomList->first = firstFrag;
@@ -126,7 +126,7 @@ void ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
     
     if (incomList)
     {
-        incomList->closed = 1;
+        incomList->closed = true;
     }
 }
 

@@ -26,7 +26,7 @@ static PORT slip_port_num;
 static byte slip_input_buf[SLIP_CALL_BACK_BUFFER_SIZE];
 static TASK slipTaskID;
 
-static void slip_serial_task()
+static void slip_receiver_task()
 {
     for (;;)
     {
@@ -36,9 +36,7 @@ static void slip_serial_task()
             
             if (bufLen)
             {
-                // TODO: store read data somewhere (IP fragment)
-                
-                //core_log("---> Arrived SLIP data:\n");
+                // TEST BEGIN
                 char out[5];
                 core_log("Size = ");
                 itoa(bufLen, out, 10);
@@ -52,6 +50,7 @@ static void slip_serial_task()
                     core_log(" ");
                 }
                 core_log("\n---------------------------------\n");
+                // TEST END
                 
                 // WARNING: hardcoded Network 0!
                 struct NetFragList fragList;
@@ -61,11 +60,8 @@ static void slip_serial_task()
                 {
                     core_log("----> We have a complete packet!\n");
                     // TODO: store fragList somewhere to be collected by user
+                    
                 }
-            }
-            else
-            {
-                core_log("Nothing read...\n");
             }
         }
         else
@@ -81,7 +77,6 @@ static void slip_serial_task()
 
 static void slip_serial_callback(PORT port)
 {
-    //core_log("+ START SLIP receiver\n");
     core_start(slipTaskID);
 }
 
@@ -94,7 +89,7 @@ NETWORK slip_init(PORT port, char *addr_str)
     net_parse_ipv4(addr_str, iface->address);
     net_parse_ipv4("255.255.255.0", iface->mask);
     
-    slipTaskID = core_create(slip_serial_task, 0, MIN_STACK_SIZE);
+    slipTaskID = core_create(slip_receiver_task, 0, MIN_STACK_SIZE);
     
     if (!slipTaskID)
     {
