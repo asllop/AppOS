@@ -33,6 +33,9 @@ void                        *memcpy(void *destination, const void *source, size_
 #ifdef NQC_MEMSET
 void                        *memset(void *ptr, int value, size_t num);
 #endif
+#ifdef NQC_MEMCMP
+int                         memcmp(const void* s1, const void* s2,size_t n);
+#endif
 #ifdef NQC_STRNCMP
 int                         strncmp(const char *str1, const char *str2, size_t n);
 #endif

@@ -3,20 +3,20 @@
 
 #include <appos.h>
 
+#ifndef NET_NUM_SOCKETS
+#define NET_NUM_SOCKETS     32
+#endif
+
 #ifndef NET_NUM_INCOMING_SLOTS
 #define NET_NUM_INCOMING_SLOTS  5
 #endif
 
+#ifndef NET_INCOMING_QUEUE_SIZE
+#define NET_INCOMING_QUEUE_SIZE 5
+#endif
+
 #ifndef NET_NUM_INTERFACES
 #define NET_NUM_INTERFACES  1
-#endif
-
-#ifndef NET_MAX_NUM_PORTS
-#define NET_MAX_NUM_PORTS   10
-#endif
-
-#ifndef NET_MIN_CLIENT_PORT_NUMBER
-#define NET_MIN_CLIENT_PORT_NUMBER  32000
 #endif
 
 #if NET_NUM_INTERFACES > 254 || NET_NUM_INTERFACES < 0
@@ -55,18 +55,6 @@ typedef enum
     
 } NET_SOCKET_STATE;
 
-struct NetSocket
-{
-    NET_SOCKET_TYPE         type;
-    byte                    address[4];
-    byte                    protocol;
-    uint16_t                localPort;
-    uint16_t                remotePort;
-    NET_SOCKET_STATE        state;
-    NETWORK                 network;
-    bool                    dataAvailable;
-};
-
 struct NetClient
 {
     byte                    address[4];
@@ -101,12 +89,28 @@ struct NetIfaceStruct
     struct NetFragList      incomingSlots[NET_NUM_INCOMING_SLOTS];
 };
 
+struct NetSocket
+{
+    NET_SOCKET_TYPE         type;
+    byte                    address[4];
+    byte                    protocol;
+    uint16_t                localPort;
+    uint16_t                remotePort;
+    NET_SOCKET_STATE        state;
+    NETWORK                 network;
+    bool                    dataAvailable;
+    struct NetFragList      packetQueue[NET_INCOMING_QUEUE_SIZE];
+    int                     front;
+    int                     rear;
+    int                     packetCount;
+};
+
 // TODO: create a struct NetAddress to cover both IPv4 and IPv6 and use it instead of the "byte address[4]" array
 
 struct NetSocket            net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t localPort, uint16_t remotePort, byte protocol);
 int                         net_open(struct NetSocket *socket);
 int                         net_close(struct NetSocket *socket);
 size_t                      net_send(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len);
-size_t                      net_receive(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len);
+struct NetFragList          net_receive(struct NetSocket *socket, struct NetClient *client);
 
 #endif

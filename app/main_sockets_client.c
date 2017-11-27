@@ -7,6 +7,8 @@
 #include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
+struct NetSocket sock;
+
 int lprintf(const char *fmt, ...)
 {
     va_list args;
@@ -24,6 +26,15 @@ int lprintf(const char *fmt, ...)
     core_free(buf);
     
     return i;
+}
+
+void receiverTask()
+{
+    for (;;)
+    {
+        // TODO: receive
+        core_sleep(0);
+    }
 }
 
 int main(int argc, char **argv)
@@ -55,11 +66,23 @@ int main(int argc, char **argv)
     core_log("Start sending...\n");
     
     byte destIP[] = {192,168,1,1};
-    struct NetSocket socket = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25000, 1500, 0);
+    sock = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25000, 1500, 0);
     
-    if (net_open(&socket))
+    struct NetSocket sock2 = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25005, 1500, 0);
+    struct NetSocket sock3 = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25010, 1500, 0);
+    
+    net_open(&sock2);
+    net_open(&sock3);
+    
+    if (net_open(&sock))
     {
         core_fatal("Error opening socket");
+        return -1;
+    }
+    
+    if (!core_create(receiverTask, 0, MIN_STACK_SIZE))
+    {
+        core_fatal("Error crating receiver task");
         return -1;
     }
     
@@ -72,7 +95,7 @@ int main(int argc, char **argv)
     
     while (1)
     {
-        core_sleep(1000);
+        core_sleep(2000);
         
         char *dataToSend = core_malloc(100);
         
@@ -82,7 +105,7 @@ int main(int argc, char **argv)
         
         size_t dataLen = strlen(dataToSend);
         
-        net_send(&socket, NULL, (byte *)dataToSend, dataLen);
+        net_send(&sock, NULL, (byte *)dataToSend, dataLen);
         
         lprintf("Used mem: %d - TS sent: %d\n", (int)core_avail(MEM_TYPE_USED), (int)ts);
         

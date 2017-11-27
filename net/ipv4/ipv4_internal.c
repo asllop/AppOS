@@ -91,22 +91,18 @@ byte ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, by
     return NO;
 }
 
-void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+void ipv4_free_packet(struct NetFragList *incomList)
 {
-    
-    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
-    
     if (incomList)
     {
         struct NetFrag *nextBuff = incomList->first->next;
         struct NetFrag *freeBuff = incomList->first;
         
-        incomList->packetID = 0;
-        
         for (int i = 0 ; i < incomList->numFragments ; i ++)
         {
             if (freeBuff)
             {
+                core_free(freeBuff->packet);
                 core_free(freeBuff);
             }
             
@@ -117,7 +113,15 @@ void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
                 nextBuff = nextBuff->next;
             }
         }
+        
+        incomList->packetID = 0;
     }
+}
+
+void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
+    ipv4_free_packet(incomList);
 }
 
 void ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)

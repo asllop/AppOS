@@ -8,6 +8,7 @@
 #include <net/net.h>
 #include <net/net_internal.h>
 #include <net/ipv4/ipv4.h>
+#include <net/ipv4/ipv4_internal.h>
 
 // TEST
 #include <lib/NQCLib/NQCLib.h>
@@ -37,7 +38,7 @@ static void slip_receiver_task()
             if (bufLen)
             {
                 // TEST BEGIN
-                char out[5];
+                char out[50];
                 core_log("Size = ");
                 itoa(bufLen, out, 10);
                 core_log(out);
@@ -59,9 +60,16 @@ static void slip_receiver_task()
                 if (res > 0)
                 {
                     core_log("----> We have a complete packet!\n");
-                    // TODO: store fragList somewhere to be collected by user
                     
+                    if (!net_incomming_packet(fragList))
+                    {
+                        core_log("Free packet list...\n");
+                        ipv4_free_packet(&fragList);
+                    }
                 }
+                
+                sprintf(out, "---> USED MEM = %u\n", core_avail(MEM_TYPE_USED));
+                core_log(out);
             }
         }
         else

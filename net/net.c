@@ -1,4 +1,5 @@
 #include <sys/sys.h>
+#include <task/task.h>
 #include <net/net.h>
 #include <net/net_internal.h>
 #include <net/udp/udp.h>
@@ -66,6 +67,11 @@ struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t local
         .localPort = localPort,
         .remotePort = remotePort,
         .state = NET_SOCKET_STATE_CLOSED,
+        .dataAvailable = false,
+        .front = 0,
+        .rear = -1,
+        .packetQueue = {0},
+        .packetCount = 0,
         // TODO: find a network that matches the "address". Now we are getting the first iface for simplicity
         .network = 0
     };
@@ -77,6 +83,16 @@ struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t local
 
 int net_open(struct NetSocket *socket)
 {
+    core_lock(MUTEX_NET);
+    
+    if (!net_assign_socket(socket))
+    {
+        core_unlock(MUTEX_NET);
+        return ERR_CODE_NOSOCKETFREE;
+    }
+    
+    core_unlock(MUTEX_NET);
+    
     if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
         socket->type == NET_SOCKET_TYPE_UDPSERVER ||
         socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
@@ -98,6 +114,16 @@ int net_open(struct NetSocket *socket)
 
 int net_close(struct NetSocket *socket)
 {
+    core_lock(MUTEX_NET);
+    
+    if (!net_release_socket(socket))
+    {
+        core_unlock(MUTEX_NET);
+        return ERR_CODE_NOSOCKETFREE;
+    }
+    
+    core_unlock(MUTEX_NET);
+    
     if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
         socket->type == NET_SOCKET_TYPE_UDPSERVER ||
         socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
@@ -162,8 +188,21 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     }
 }
 
-// TODO
-size_t net_receive(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len)
+struct NetFragList net_receive(struct NetSocket *socket, struct NetClient *client)
 {
-    return 0;
+    socket->dataAvailable = false;
+    
+    if (socket->packetCount == 0)
+    {
+        while (!socket->dataAvailable)
+        {
+            core_sleep(0);
+        }
+    }
+    
+    socket->dataAvailable = false;
+    
+    // TODO: if UDP/RAW server, fill client struct
+    
+    return net_extract_packet(socket);
 }

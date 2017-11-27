@@ -1,11 +1,14 @@
 #include <net/net_internal.h>
 #include <net/net.h>
+#include <net/ipv4/ipv4_internal.h>
+#include <net/udp/udp.h>
 #include <sys/sys.h>
 #include <net/slip/slip.h>
 #include <lib/NQCLib/NQCLib.h>
 
-static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
+struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
 static int numNetInterfaces = 0;
+struct NetSocket *netRegisteredSockets[NET_NUM_SOCKETS];
 
 NETWORK net_create(NET_IFACE_TYPE type, byte id)
 {
@@ -45,7 +48,10 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
             };
         }
         
-        // TODO: setup outgoing slots and other iface properties
+        for (int i = 0 ; i < NET_NUM_SOCKETS ; i ++)
+        {
+            netRegisteredSockets[i] = NULL;
+        }
         
         return numNetInterfaces ++;
     }
@@ -146,4 +152,197 @@ void net_iface_tx(NETWORK net, byte *data, size_t len)
             // Not yet implemented
             break;
     }
+}
+
+bool net_assign_socket(struct NetSocket *socket)
+{
+    for (int sockIndex = 0 ; sockIndex < NET_NUM_SOCKETS ; sockIndex ++)
+    {
+        if (netRegisteredSockets[sockIndex] == NULL)
+        {
+            netRegisteredSockets[sockIndex] = socket;
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool net_release_socket(struct NetSocket *socket)
+{
+    for (int sockIndex = 0 ; sockIndex < NET_NUM_SOCKETS ; sockIndex ++)
+    {
+        if (netRegisteredSockets[sockIndex] == socket)
+        {
+            netRegisteredSockets[sockIndex] = NULL;
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool net_incomming_packet(struct NetFragList fragList)
+{
+    if (fragList.first->size < sizeof(struct IPv4_header))
+    {
+        core_log("Bad IP header\n");
+        // No enought space for an IPv4 header
+        return false;
+    }
+    
+    struct IPv4_header *headerIP = (struct IPv4_header *)fragList.first->packet;
+    
+    for (int sockIndex = 0 ; sockIndex < NET_NUM_SOCKETS ; sockIndex ++)
+    {
+        core_log("Next socket...\n");
+        
+        if (netRegisteredSockets[sockIndex] != NULL)
+        {
+            if (netRegisteredSockets[sockIndex]->protocol == headerIP->protocol)
+            {
+                // UDP
+                if (headerIP->protocol == 17)
+                {
+                    if (fragList.first->size < sizeof(struct UDP_header) + ipv4_packet_header_len(fragList.first->packet))
+                    {
+                        core_log("Bad UDP header\n");
+                        // No enought space for an UDP header
+                        return false;
+                    }
+                    
+                    struct UDP_header *headerUDP = (struct UDP_header *)(fragList.first->packet + ipv4_packet_header_len(fragList.first->packet));
+                    uint16_t dstPort = udp_destination_port(headerUDP);
+                    uint16_t srcPort = udp_source_port(headerUDP);
+
+                    if (netRegisteredSockets[sockIndex]->type == NET_SOCKET_TYPE_UDPCLIENT)
+                    {
+                        core_log("Found UDP Client\n");
+                        
+                        if (netRegisteredSockets[sockIndex]->localPort == dstPort &&
+                            netRegisteredSockets[sockIndex]->remotePort == srcPort)
+                        {
+                            core_log("Found UDP Client correct ports\n");
+                            
+                            if (memcmp((void *)netRegisteredSockets[sockIndex]->address, (void *)headerIP->source, 4) == 0)
+                            {
+                                core_log("--> Found UDP client socket!!!\n");
+                                
+                                // found the correct socket to attach packet
+                                if (net_insert_packet(netRegisteredSockets[sockIndex], fragList))
+                                {
+                                    netRegisteredSockets[sockIndex]->dataAvailable = true;
+                                    
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    else if (netRegisteredSockets[sockIndex]->type == NET_SOCKET_TYPE_UDPSERVER)
+                    {
+                        core_log("Found UDP Server\n");
+                        
+                        if (netRegisteredSockets[sockIndex]->localPort == dstPort)
+                        {
+                            core_log("--> Found UDP server socket!!!\n");
+                            
+                            // TODO: check only local port. Any remote port and remote IP is accepted
+                            //       and filled in a NetClient struct by net_receive
+                            if (net_insert_packet(netRegisteredSockets[sockIndex], fragList))
+                            {
+                                netRegisteredSockets[sockIndex]->dataAvailable = true;
+                                
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    core_log("No UDP packet\n");
+                }
+            }
+        }
+    }
+    
+    core_log("Not Found socket!\n");
+    
+    return false;
+}
+
+// TEST
+void printQueue(struct NetSocket *socket)
+{
+    char out[100];
+    
+    core_log("---------------------\n");
+    //sprintf(out, "Front = %d, Read = %d, Count = %d\n\n", socket->front, socket->rear, socket->packetCount);
+    for (int i = socket->front ; i < socket->front + socket->packetCount ; i ++)
+    {
+        sprintf(out, "Queue pos = %d , Packet ID = %d\n", i, socket->packetQueue[i].packetID);
+        core_log(out);
+    }
+    core_log("---------------------\n");
+}
+// ENDTEST
+
+bool net_insert_packet(struct NetSocket *socket, struct NetFragList fragList)
+{
+    bool res;
+    
+    if (socket->packetCount != NET_INCOMING_QUEUE_SIZE)
+    {
+        if (socket->rear == NET_INCOMING_QUEUE_SIZE - 1)
+        {
+            socket->rear = -1;
+        }
+        
+        socket->packetQueue[++ socket->rear] = fragList;
+        socket->packetCount ++;
+        
+        res = true;
+    }
+    else
+    {
+        res = false;
+    }
+    
+    // TEST
+    core_log("### INSERT PACKET\n");
+    printQueue(socket);
+    
+    return res;
+}
+
+struct NetFragList net_extract_packet(struct NetSocket *socket)
+{
+    if (socket->packetCount == 0)
+    {
+        return (struct NetFragList) {
+            .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = false
+        };
+    }
+    
+    struct NetFragList data = socket->packetQueue[socket->front ++];
+    
+    if (socket->front == NET_INCOMING_QUEUE_SIZE)
+    {
+        socket->front = 0;
+    }
+    
+    socket->packetCount --;
+    
+    // TEST
+    core_log("### EXTRACT PACKET\n");
+    printQueue(socket);
+    
+    return data;
 }

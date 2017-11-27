@@ -16,6 +16,7 @@
 #define NQC_STRNCPY
 #define NQC_MEMCPY
 #define NQC_MEMSET
+#define NQC_MEMCMP
 #define NQC_STRNCMP
 #define NQC_STRCMP
 #define NQC_VSPRINTF

@@ -34,18 +34,15 @@ struct IPv4_header
     
 } __attribute__((packed));
 
-// Incoming
-
 struct NetFragList *        ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t packetID);
 struct NetFragList          ipv4_return_packet_list(struct NetIfaceStruct *iface, uint16_t packetID);
 byte                        ipv4_exist_packet_list(struct NetIfaceStruct *iface, uint16_t packetID);
 void *                      ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size);
 byte                        ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size);
+void                        ipv4_free_packet(struct NetFragList *incomList);
 void                        ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID);
 void                        ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID);
 void                        ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID);
 byte                        ipv4_check_packet(struct NetIfaceStruct *iface, uint16_t packetID);
-
-// TODO: Outgoing
 
 #endif
