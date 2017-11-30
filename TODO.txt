@@ -1,34 +1,39 @@
 
  * Networking (SLIP/IP/UDP & TCP)
-      Free IP stacks:
-      uIP (https://github.com/adamdunkels/uip)
-      lwIP (http://savannah.nongnu.org/projects/lwip/)
+		Free IP stacks:
+		uIP (https://github.com/adamdunkels/uip)
+		lwIP (http://savannah.nongnu.org/projects/lwip/)
+
+ * Add user data to task's core_create:
+
+		void task_foo(void *userData, size_t len)
+		TASK core_create(void (*task)(void *, size_t), PRIORITY priority, size_t stackSize, void *userData, size_t len)
 
  * Real Time system for core/task:
 
-TASK core_resident(void (*task)(void *, size_t), PRIORITY priority, size_t stackSize)
+		TASK core_resident(void (*task)(void *, size_t), PRIORITY priority, size_t stackSize)
 
-This function creates a new task with state TASK_STATE_RESIDENT, that is ignored by the task scheduler, so it won't get CPU time.
-Unlike the normal tasks, this functions takes two arguments: void *buffer, size_t size
-A buffer of data and the size of the buffer.
+		This function creates a new task with state TASK_STATE_RESIDENT, that is ignored by the task scheduler, so it won't get CPU time.
+		Unlike the normal tasks, this functions takes two arguments: void *buffer, size_t size
+		A buffer of data and the size of the buffer.
 
-int core_wakeup(TASK taskID, void *buff, size_t size)
+		int core_wakeup(TASK taskID, void *buff, size_t size)
 
-With this other function we send an event to a resident task. By doing this, the task state changes to TASK_STATE_RESIDENT_RUNNING,
-and is executed passing to the function the arguments buff and size.
+		With this other function we send an event to a resident task. By doing this, the task state changes to TASK_STATE_RESIDENT_RUNNING,
+		and is executed passing to the function the arguments buff and size.
 
-It returns 0 if ok
-If the task is bussy attending a previous event (it was already in state TASK_STATE_RESIDENT_RUNNING), returns ERR_TASK_BUSSY.
-If the task is not resident, returns ERR_TASK_NO_RESIDENT.
+		It returns 0 if ok
+		If the task is bussy attending a previous event (it was already in state TASK_STATE_RESIDENT_RUNNING), returns ERR_TASK_BUSSY.
+		If the task is not resident, returns ERR_TASK_NO_RESIDENT.
 
-When a resident task ends, instead of being deleted as any other task, it goes back to the state TASK_STATE_RESIDENT and is ready to receive more events.
+		When a resident task ends, instead of being deleted as any other task, it goes back to the state TASK_STATE_RESIDENT and is ready to receive more events.
 
  * USB: host controller driver and libUSB-like interface for API (or port libUSB).
-   - PCI interface (required for USB suport in PC32 arch)
+		PCI interface (required for USB suport in PC32 arch)
 
  * Interface for other serial ports (SPI & I2C), create modules "spi_" and "i2c_".
 
- * File System
+ * File System module
 
  * Port AppOS to Arduino. Specially UNO & Leonardo (ATmega328P, ATmega32u4)
 
@@ -41,8 +46,9 @@ When a resident task ends, instead of being deleted as any other task, it goes b
  * Implement SMP
 
  * Memory Protection: implement a "supervisor" module who takes care of forbidden memory access, program memory integrity, illegal opcode execution, exceptions, etc.
-   Also create a small API to control its behaviour from the app, what do to in case of a exception (reset, halt, fallback function, etc).
+		Also create a small API to control its behaviour from the app, what do to in case of a exception (reset, halt, fallback function, etc). In this mode, the
+		kernel + app code resides in a read only segment, the kernel internal mem structures in a protected segment, the stack in another segment and the heap in another segment.
 
  * Console (screen + keyboard) driver for term (low priority)
 
- * Langs: Python, JavaScript, Scratch interpreters
+ * Langs: Python, JavaScript, Scratch interpreter
