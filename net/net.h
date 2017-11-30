@@ -112,5 +112,8 @@ int                         net_open(struct NetSocket *socket);
 int                         net_close(struct NetSocket *socket);
 size_t                      net_send(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len);
 struct NetFragList          net_receive(struct NetSocket *socket, struct NetClient *client);
+size_t                      net_size(struct NetFragList *fragList);
+void                        net_free(struct NetFragList *fragList);
+size_t                      net_read(struct NetFragList *fragList, size_t offset, byte *buff, size_t size);
 
 #endif

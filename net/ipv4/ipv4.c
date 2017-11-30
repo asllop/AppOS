@@ -9,7 +9,7 @@
 // TEST:
 #include <sys/sys.h>
 
-static uint16_t ipv4PacketSequence = 0;
+uint16_t                ipv4PacketSequence = 0;
 
 int ipv4_receive(NETWORK net, byte *buffer, size_t len, struct NetFragList *fragList)
 {

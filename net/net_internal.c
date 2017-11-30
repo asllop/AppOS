@@ -6,9 +6,9 @@
 #include <net/slip/slip.h>
 #include <lib/NQCLib/NQCLib.h>
 
-struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
-static int numNetInterfaces = 0;
-struct NetSocket *netRegisteredSockets[NET_NUM_SOCKETS];
+struct NetIfaceStruct   netInterfaces[NET_NUM_INTERFACES];
+int                     numNetInterfaces = 0;
+struct NetSocket *      netRegisteredSockets[NET_NUM_SOCKETS];
 
 NETWORK net_create(NET_IFACE_TYPE type, byte id)
 {

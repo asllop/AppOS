@@ -4,6 +4,9 @@
 #include <appos.h>
 #include <net/net.h>
 
+#define UDP_PROTOCOL        17
+#define TCP_PROTOCOL        6
+
 NETWORK                     net_create(NET_IFACE_TYPE type, byte id);
 struct NetIfaceStruct *     net_iface(NETWORK net);
 void                        net_parse_ipv4(char *addr_str, byte address[]);

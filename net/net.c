@@ -4,6 +4,7 @@
 #include <net/net_internal.h>
 #include <net/udp/udp.h>
 #include <net/ipv4/ipv4.h>
+#include <net/ipv4/ipv4_internal.h>
 #include <lib/NQCLib/NQCLib.h>
 
 /* TODO: SOCKET INTERFACE
@@ -54,11 +55,11 @@ struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t local
 {
     if (type == NET_SOCKET_TYPE_UDPCLIENT || type == NET_SOCKET_TYPE_UDPSERVER)
     {
-        protocol = 17;
+        protocol = UDP_PROTOCOL;
     }
     else if (type == NET_SOCKET_TYPE_TCPCLIENT || type == NET_SOCKET_TYPE_TCPSERVER)
     {
-        protocol = 6;
+        protocol = TCP_PROTOCOL;
     }
     
     struct NetSocket socket = {
@@ -205,4 +206,59 @@ struct NetFragList net_receive(struct NetSocket *socket, struct NetClient *clien
     // TODO: if UDP/RAW server, fill client struct
     
     return net_extract_packet(socket);
+}
+
+size_t net_size(struct NetFragList *fragList)
+{
+    size_t total = 0;
+    
+    struct NetFrag *nextBuff = fragList->first;
+    
+    for (int i = 0 ; i < fragList->numFragments ; i ++)
+    {
+        if (nextBuff)
+        {
+            byte ipLen = ipv4_packet_header_len(nextBuff->packet);
+            
+            switch (((struct IPv4_header *)nextBuff->packet)->protocol)
+            {
+                case UDP_PROTOCOL:
+                {
+                    total += (nextBuff->size - ipLen - 8);
+                    break;
+                }
+                    
+                case TCP_PROTOCOL:
+                {
+                    // Not implemented yet
+                    break;
+                }
+                    
+                default:
+                {
+                    // Raw packet or unsupported protocol (ICMP for example), not implemented yet
+                    break;
+                }
+            }
+            
+            nextBuff = nextBuff->next;
+        }
+        else
+        {
+            break;
+        }
+    }
+    
+    return total;
+}
+
+void net_free(struct NetFragList *fragList)
+{
+    ipv4_free_packet(fragList);
+}
+
+size_t net_read(struct NetFragList *fragList, size_t offset, byte *buff, size_t size)
+{
+    // TODO: read data (return amount of data read)
+    return 0;
 }

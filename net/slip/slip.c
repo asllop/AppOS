@@ -23,9 +23,9 @@
 
 #define SLIP_CALL_BACK_BUFFER_SIZE  500         // MTU for SLIP interfaces use to be ~300, so 500 is far enought
 
-static PORT slip_port_num;
-static byte slip_input_buf[SLIP_CALL_BACK_BUFFER_SIZE];
-static TASK slipTaskID;
+PORT                    slip_port_num;
+byte                    slip_input_buf[SLIP_CALL_BACK_BUFFER_SIZE];
+TASK                    slipTaskID;
 
 static void slip_receiver_task()
 {

@@ -28,12 +28,44 @@ int lprintf(const char *fmt, ...)
     return i;
 }
 
+void printaPacket(struct NetFragList *fragList)
+{
+    size_t len = net_size(fragList);
+    struct NetFrag *nextBuff = fragList->first;
+    
+    for (int i = 0 ; i < fragList->numFragments ; i ++)
+    {
+        if (nextBuff)
+        {
+            char out[50];
+            
+            core_log("------- PRINT FRAGMENT --------\n");
+            sprintf(out, "--- Payload Size = %d ---\n", len);
+            core_log(out);
+            
+            for (int i = 0 ; i < nextBuff->size ; i++)
+            {
+                sprintf(out, "%x ", nextBuff->packet[i]);
+                core_log(out);
+            }
+            core_log("\n------- END PRINT FRAGMENT --------\n");
+            
+            nextBuff = nextBuff->next;
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
 void receiverTask()
 {
     for (;;)
     {
-        // TODO: receive
-        core_sleep(0);
+        struct NetFragList fragList = net_receive(&sock, NULL);
+        printaPacket(&fragList);
+        net_free(&fragList);
     }
 }
 
