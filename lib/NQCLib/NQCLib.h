@@ -4,7 +4,7 @@
 #ifndef NQCLIB_H
 #define	NQCLIB_H
 
-// TODO: the most important Std C Lib functions are the ones in stdio.h, stdlib.h, string.h and math.h
+// TODO: implement the most important Std C Lib functions, that are the ones in stdio.h, stdlib.h, string.h and math.h
 
 #ifdef NQC_ITOA
 char                        *itoa(int value, char *str, int base);

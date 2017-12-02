@@ -28,5 +28,3 @@ void *udp_build(NETWORK net, byte *data, size_t len, byte dstIP[], uint16_t dstP
         return NULL;
     }
 }
-
-// TODO: udp_receive

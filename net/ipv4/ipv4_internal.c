@@ -1,4 +1,5 @@
 #include <net/ipv4/ipv4_internal.h>
+#include <net/net_internal.h>
 #include <mem/mem.h>
 
 // Incoming Internal Functions
@@ -50,6 +51,25 @@ void *ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *b
         
         if (newFrag)
         {
+            // Set de payload start index
+            newFrag->payload = ipv4_packet_header_len(buff);
+            switch (((struct IPv4_header *)buff)->protocol) {
+                case UDP_PROTOCOL: {
+                    newFrag->payload += 8;
+                    break;
+                }
+                    
+                case TCP_PROTOCOL: {
+                    // Not implemented yet
+                    break;
+                }
+                    
+                default: {
+                    // Not implemented yet (other protocols)
+                    break;
+                }
+            }
+            
             newFrag->packet = buff;
             newFrag->size = size;
             

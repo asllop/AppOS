@@ -7,7 +7,7 @@
 #include <net/ipv4/ipv4_internal.h>
 #include <lib/NQCLib/NQCLib.h>
 
-/* TODO: SOCKET INTERFACE
+/* SOCKET INTERFACE
  
  net_resolve: obté IP d'un nom de domini utilitzant un DNS o una llista local tipus resolv.conf (implementació futura)
  -> Domain: string amb el nom
@@ -218,29 +218,7 @@ size_t net_size(struct NetFragList *fragList)
     {
         if (nextBuff)
         {
-            byte ipLen = ipv4_packet_header_len(nextBuff->packet);
-            
-            switch (((struct IPv4_header *)nextBuff->packet)->protocol)
-            {
-                case UDP_PROTOCOL:
-                {
-                    total += (nextBuff->size - ipLen - 8);
-                    break;
-                }
-                    
-                case TCP_PROTOCOL:
-                {
-                    // Not implemented yet
-                    break;
-                }
-                    
-                default:
-                {
-                    // Raw packet or unsupported protocol (ICMP for example), not implemented yet
-                    break;
-                }
-            }
-            
+            total += (nextBuff->size - nextBuff->payload);
             nextBuff = nextBuff->next;
         }
         else
@@ -260,5 +238,7 @@ void net_free(struct NetFragList *fragList)
 size_t net_read(struct NetFragList *fragList, size_t offset, byte *buff, size_t size)
 {
     // TODO: read data (return amount of data read)
+    // TODO: use NetFrag->payload to skip headers and protocol related data
+    
     return 0;
 }

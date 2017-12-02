@@ -67,6 +67,7 @@ struct NetFrag
     struct NetFrag *        prev;
     byte *                  packet;
     uint16_t                size;
+    uint16_t                payload;
 };
 
 // TODO: add timestamp of last arrived packet for timeout

@@ -247,7 +247,7 @@ int strcmp(const char *s1, const char *s2)
 }
 #endif
 
-// TODO: build our own vsprintf implementation that uses itoa, ltoa, etc, and supports all "%" commands
+// NOTE: not all standard "%" commands are supported
 #ifdef NQC_VSPRINTF
 
 #define PAD_ZEROES     (1 << 0)
