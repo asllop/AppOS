@@ -19,7 +19,8 @@ AppOS is multiplatform and designed to be easily ported. Currently supported pla
 
 - PC compatibles
 - Raspberry PI (work in progress)
-- Arduino (work in progress)
+- Arduino UNO and compatibles (work in progress)
+- BBC micro:bit (planned)
 - PIC microcontrollers and dev boards (planned)
 - MSP430 and LaunchPads (planned)
 - Others on demand
