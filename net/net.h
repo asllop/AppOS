@@ -4,7 +4,7 @@
 #include <appos.h>
 
 #ifndef NET_NUM_SOCKETS
-#define NET_NUM_SOCKETS     32
+#define NET_NUM_SOCKETS     5
 #endif
 
 #ifndef NET_NUM_INCOMING_SLOTS

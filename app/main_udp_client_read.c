@@ -7,7 +7,7 @@
 #include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
-struct NetSocket sock;
+struct NetSocket sock, sock2, sock3;
 
 int lprintf(const char *fmt, ...)
 {
@@ -59,6 +59,12 @@ void printaPacket(struct NetFragList *fragList)
     }
 }
 
+/*
+ TODO: fer un sistema més simple per llegir dades d'un socket.
+ Caldria registrar una callabck que directament es crida amb el resultat de net_receive.
+ Una callback per socket.
+ */
+
 void receiverTask()
 {
     char out[50];
@@ -88,15 +94,15 @@ void receiverTask()
         }
         core_log("\n\nEnd.\n");
         
-        core_log("Read data from packet in packets of 10...\n");
+        core_log("Read data from packet in packets of 13...\n");
         
-        byte ch10[14];
+        byte ch13[14];
         for (int i = 0; i < 1000; i+=13)
         {
-            size_t szRead = net_read(&fragList, i, ch10 , 13);
+            size_t szRead = net_read(&fragList, i, ch13 , 13);
             if (szRead == 0) break;
-            ch10[szRead] = 0;
-            core_log((char *)ch10);
+            ch13[szRead] = 0;
+            core_log((char *)ch13);
         }
         core_log("\n\nEnd.\n");
         
@@ -131,16 +137,14 @@ int main(int argc, char **argv)
         core_fatal("Error initializing SLIP Network Interface");
     }
     
-    core_log("Start sending...\n");
+    core_log("Create sockets\n");
     
     byte destIP[] = {192,168,1,1};
     sock = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25000, 1500, 0);
+    sock2 = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25005, 1500, 0);
+    sock3 = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25010, 1500, 0);
     
-    struct NetSocket sock2 = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25005, 1500, 0);
-    struct NetSocket sock3 = net_socket(NET_SOCKET_TYPE_UDPCLIENT, destIP, 25010, 1500, 0);
-    
-    net_open(&sock2);
-    net_open(&sock3);
+    core_log("Open sockets\n");
     
     if (net_open(&sock))
     {
@@ -148,6 +152,19 @@ int main(int argc, char **argv)
         return -1;
     }
     
+    if (net_open(&sock2))
+    {
+        core_fatal("Error opening socket 2");
+        return -1;
+    }
+    
+    if (net_open(&sock3))
+    {
+        core_fatal("Error opening socket 3");
+        return -1;
+    }
+    
+    // TODO: hem de usar una callabck per sockets
     if (!core_create(receiverTask, 0, MIN_STACK_SIZE))
     {
         core_fatal("Error crating receiver task");
