@@ -230,20 +230,36 @@ void net_free(struct NetFragList *fragList)
 
 size_t net_read(struct NetFragList *fragList, size_t offset, byte *buff, size_t size)
 {
+    size_t realOffset = 0;
+    
     // Go to offset
     struct NetFrag *currentFrag = fragList->first;
     while (currentFrag)
     {
-        if (currentFrag->size > offset)
+        // Go to start of real data, jumping protocol headers
+        realOffset = currentFrag->payload;
+        
+        if (realOffset + offset >= currentFrag->size)
         {
-            // Offset is in current fragment
-            break;
+            // Offset is beyond current fragment
+            
+            // Substract from offset the amount of byte we are skiping
+            offset = offset - (currentFrag->size - realOffset);
+            
+            // Go to next fragment
+            currentFrag = currentFrag->next;
+            
+            if (currentFrag)
+            {
+                // Go to start of real data, jumping protocol headers
+                realOffset = currentFrag->payload;
+            }
         }
         else
         {
-            // Offset is beyond current fragment
-            offset = offset - currentFrag->size;
-            currentFrag = currentFrag->next;
+            // Offset is in current fragment
+            realOffset = realOffset + offset;
+            break;
         }
     }
     
@@ -251,12 +267,18 @@ size_t net_read(struct NetFragList *fragList, size_t offset, byte *buff, size_t 
     size_t buffIndex = 0;
     while (currentFrag)
     {
-        buff[buffIndex ++] = currentFrag->packet[offset ++];
+        buff[buffIndex ++] = currentFrag->packet[realOffset ++];
+        // Already read all bytes
         if (buffIndex >= size) break;
-        if (offset >= currentFrag->size)
+        // Reached the end uf current fragment, go to next
+        if (realOffset >= currentFrag->size)
         {
             currentFrag = currentFrag->next;
-            offset = 0;
+            if (currentFrag)
+            {
+                // Go to start of real data, jumping protocol headers
+                realOffset = currentFrag->payload;
+            }
         }
     }
     

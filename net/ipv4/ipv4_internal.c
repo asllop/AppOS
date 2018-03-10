@@ -51,22 +51,31 @@ void *ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *b
         
         if (newFrag)
         {
-            // Set de payload start index
+            // Set de payload start index (IP header)
             newFrag->payload = ipv4_packet_header_len(buff);
-            switch (((struct IPv4_header *)buff)->protocol) {
-                case UDP_PROTOCOL: {
-                    newFrag->payload += 8;
-                    break;
-                }
-                    
-                case TCP_PROTOCOL: {
-                    // Not implemented yet
-                    break;
-                }
-                    
-                default: {
-                    // Not implemented yet (other protocols)
-                    break;
+            
+            // Is first fragment, the one that contains UDP/TCP header. Update payload
+            if (!incomList->last)
+            {
+                switch (((struct IPv4_header *)buff)->protocol)
+                {
+                    case UDP_PROTOCOL:
+                    {
+                        newFrag->payload += 8;
+                        break;
+                    }
+                        
+                    case TCP_PROTOCOL:
+                    {
+                        // Not implemented yet
+                        break;
+                    }
+                        
+                    default:
+                    {
+                        // Not implemented yet (other protocols)
+                        break;
+                    }
                 }
             }
             

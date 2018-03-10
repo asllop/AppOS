@@ -65,7 +65,9 @@ void receiverTask()
     
     for (;;)
     {
+        // Get packet (list of fragments) and dettach from socket
         struct NetFragList fragList = net_receive(&sock, NULL);
+        
         core_log("RECEIVED PACKET IN CLIENT:\n");
         
         sprintf(out, "    Local Port = %d\n", sock.localPort);
@@ -73,16 +75,32 @@ void receiverTask()
         sprintf(out, "    Num Packets = %d\n", sock.packetCount);
         core_log(out);
         
-        int sz = 30;
-        net_read(&fragList, 28, (byte *)out, sz);
-        out[sz + 1] = 0;
-        core_log("Read data using net_read...\n");
-        core_log(out);
-        core_log("\n");
-        
         printaPacket(&fragList);
         
-        // In case we want to free fragment
+        core_log("Read data from packet...\n");
+        
+        byte ch[2] = {0,0};
+        for (int i = 0; i < 1000; i++)
+        {
+            size_t szRead = net_read(&fragList, i, ch , 1);
+            if (szRead == 0) break;
+            core_log((char *)ch);
+        }
+        core_log("\n\nEnd.\n");
+        
+        core_log("Read data from packet in packets of 10...\n");
+        
+        byte ch10[14];
+        for (int i = 0; i < 1000; i+=13)
+        {
+            size_t szRead = net_read(&fragList, i, ch10 , 13);
+            if (szRead == 0) break;
+            ch10[szRead] = 0;
+            core_log((char *)ch10);
+        }
+        core_log("\n\nEnd.\n");
+        
+        // Free memory of current fragment
         net_free(&fragList);
     }
 }
