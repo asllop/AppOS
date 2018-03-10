@@ -17,5 +17,6 @@ bool                        net_release_socket(struct NetSocket *socket);
 bool                        net_incomming_packet(struct NetFragList fragList);
 bool                        net_insert_packet(struct NetSocket *socket, struct NetFragList fragList);
 struct NetFragList          net_extract_packet(struct NetSocket *socket);
+void                        net_read_task();
 
 #endif

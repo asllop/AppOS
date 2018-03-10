@@ -12,7 +12,7 @@
 #define MIN_STACK_SIZE      128
 #endif
 
-TASK                        core_create(void (*task)(), PRIORITY priority, size_t stackSize);
+TASK                        core_create(void (*task)(), PRIORITY priority, size_t stackSize, void *userData);
 TASK                        core_self();
 int                         core_escalate(PRIORITY priority);
 void                        core_forbid();
@@ -24,5 +24,6 @@ void                        core_exit(int returnCode, void *returnBuffer);
 int                         core_stop();
 int                         core_start(TASK taskid);
 TIME                        core_timestamp();
+void *                      core_userdata();
 
 #endif

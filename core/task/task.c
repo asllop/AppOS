@@ -7,7 +7,7 @@
 // System timestamp is updated by the timer interrupt service routine
 TIME                        systemTimestamp;
 
-TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
+TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize, void *userData)
 {
     core_lock(MUTEX_TASK);
     
@@ -52,6 +52,7 @@ TASK core_create(void (*task)(), PRIORITY priority, size_t stackSize)
     slot->stackSize = stackSize;
     slot->stackBuffer = stackBuffer;
     slot->stack = stackBuffer + slot->stackSize;
+    slot->userData = userData;
     
     // Search prev task and next task, and fill prev/next pointers
     slot->prev = task_prev_used_slot(slot);
@@ -262,4 +263,9 @@ int core_start(TASK taskid)
 TIME core_timestamp()
 {
     return systemTimestamp;
+}
+
+void *core_userdata()
+{
+    return task_get_current()->userData;
 }

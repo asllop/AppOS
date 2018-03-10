@@ -97,7 +97,7 @@ NETWORK slip_init(PORT port, char *addr_str)
     net_parse_ipv4(addr_str, iface->address);
     net_parse_ipv4("255.255.255.0", iface->mask);
     
-    slipTaskID = core_create(slip_receiver_task, 0, MIN_STACK_SIZE);
+    slipTaskID = core_create(slip_receiver_task, 0, MIN_STACK_SIZE, NULL);
     
     if (!slipTaskID)
     {

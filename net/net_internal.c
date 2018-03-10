@@ -4,6 +4,7 @@
 #include <net/udp/udp.h>
 #include <sys/sys.h>
 #include <net/slip/slip.h>
+#include <task/task.h>
 #include <lib/NQCLib/NQCLib.h>
 
 struct NetIfaceStruct   netInterfaces[NET_NUM_INTERFACES];
@@ -345,4 +346,27 @@ struct NetFragList net_extract_packet(struct NetSocket *socket)
     printQueue(socket);
     
     return data;
+}
+
+void net_read_task()
+{
+    struct NetSocket *sock = (struct NetSocket *)core_userdata();
+    
+    for (;;)
+    {
+        core_log("net_read_task(): Wait for packet\n");
+        
+        // Get packet (list of fragments) and dettach from socket
+        struct NetFragList fragList = net_receive(sock, NULL);
+        
+        core_log("net_read_task(): Receiuved packet\n");
+        
+        // Empty fragment, socket closed -> Abort task
+        if (fragList.packetID == 0 && fragList.numFragments == 0) break;
+        
+        // Run user callback
+        sock->readCallback(sock, fragList);
+    }
+    
+    core_log("FINISHED net_read_task()");
 }

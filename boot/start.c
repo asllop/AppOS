@@ -35,7 +35,7 @@ void kernel_init()
     
     core_init();
     
-    TASK mainTaskID = core_create(main_task, 0, DEFAULT_STACK_SIZE);
+    TASK mainTaskID = core_create(main_task, 0, DEFAULT_STACK_SIZE, NULL);
     
     if (!mainTaskID)
     {

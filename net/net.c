@@ -82,7 +82,7 @@ struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t local
     return socket;
 }
 
-int net_open(struct NetSocket *socket)
+int net_open(struct NetSocket *socket, void (*readCallback)(struct NetSocket *socket, struct NetFragList packet))
 {
     core_lock(MUTEX_NET);
     
@@ -94,12 +94,15 @@ int net_open(struct NetSocket *socket)
     
     core_unlock(MUTEX_NET);
     
+    socket->readCallback = readCallback;
+    
     if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
         socket->type == NET_SOCKET_TYPE_UDPSERVER ||
         socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
         socket->type == NET_SOCKET_TYPE_RAWSERVER)
     {
         socket->state = NET_SOCKET_STATE_OPEN;
+        core_create(net_read_task, 0, 1000, (void *)socket);
         return 0;
     }
     else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
@@ -193,13 +196,28 @@ struct NetFragList net_receive(struct NetSocket *socket, struct NetClient *clien
 {
     socket->dataAvailable = false;
     
+    core_log("net_receive(): started\n");
+    
     if (socket->packetCount == 0)
     {
+        core_log("net_receive(): packetCount == 0\n");
+        
         while (!socket->dataAvailable)
         {
             core_sleep(0);
+            
+            if (socket->state == NET_SOCKET_STATE_CLOSED)
+            {
+                core_log("net_receive(): socket closed\n");
+                return (struct NetFragList) {
+                    .packetID = 0,
+                    .numFragments = 0
+                };
+            }
         }
     }
+    
+    core_log("net_receive(): return packet received\n");
     
     socket->dataAvailable = false;
     

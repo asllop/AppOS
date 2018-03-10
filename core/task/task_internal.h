@@ -32,6 +32,7 @@ struct TaskStruct
     void                    *stackBuffer;
     size_t                  stackSize;
     TIME                    waitUntil;
+    void                    *userData;
 };
 
 extern TIME                 systemTimestamp;

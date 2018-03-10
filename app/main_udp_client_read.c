@@ -59,56 +59,33 @@ void printaPacket(struct NetFragList *fragList)
     }
 }
 
-/*
- TODO: fer un sistema més simple per llegir dades d'un socket.
- Caldria registrar una callabck que directament es crida amb el resultat de net_receive.
- Una callback per socket.
- */
-
-void receiverTask()
+void readCallback(struct NetSocket *socket, struct NetFragList packet)
 {
     char out[50];
     
+    core_log("RECEIVED PACKET IN CLIENT:\n");
+    sprintf(out, "    Local Port = %d\n", socket->localPort); core_log(out);
+    sprintf(out, "    Remote Port = %d\n", socket->remotePort); core_log(out);
+    sprintf(out, "    Address = %d.%d.%d.%d\n", socket->address[0],socket->address[1],socket->address[2],socket->address[3]); core_log(out);
+    
+    core_log("Data received...\n");
+    
+    byte buff[100];
+    int offset = 0;
     for (;;)
     {
-        // Get packet (list of fragments) and dettach from socket
-        struct NetFragList fragList = net_receive(&sock, NULL);
-        
-        core_log("RECEIVED PACKET IN CLIENT:\n");
-        
-        sprintf(out, "    Local Port = %d\n", sock.localPort);
-        core_log(out);
-        sprintf(out, "    Num Packets = %d\n", sock.packetCount);
-        core_log(out);
-        
-        printaPacket(&fragList);
-        
-        core_log("Read data from packet...\n");
-        
-        byte ch[2] = {0,0};
-        for (int i = 0; i < 1000; i++)
-        {
-            size_t szRead = net_read(&fragList, i, ch , 1);
-            if (szRead == 0) break;
-            core_log((char *)ch);
-        }
-        core_log("\n\nEnd.\n");
-        
-        core_log("Read data from packet in packets of 13...\n");
-        
-        byte ch13[14];
-        for (int i = 0; i < 1000; i+=13)
-        {
-            size_t szRead = net_read(&fragList, i, ch13 , 13);
-            if (szRead == 0) break;
-            ch13[szRead] = 0;
-            core_log((char *)ch13);
-        }
-        core_log("\n\nEnd.\n");
-        
-        // Free memory of current fragment
-        net_free(&fragList);
+        size_t szRead = net_read(&packet, offset, buff , 100);
+        if (szRead == 0) break;
+        offset += szRead;
+        buff[szRead] = 0;
+        core_log((char *)buff);
     }
+
+    core_log("End.\n");
+    
+    net_free(&packet);
+    
+    core_log("After net free\n");
 }
 
 int main(int argc, char **argv)
@@ -146,30 +123,26 @@ int main(int argc, char **argv)
     
     core_log("Open sockets\n");
     
-    if (net_open(&sock))
+    if (net_open(&sock, readCallback))
     {
         core_fatal("Error opening socket");
         return -1;
     }
     
-    if (net_open(&sock2))
+    /*
+    
+    if (net_open(&sock2, readCallback))
     {
         core_fatal("Error opening socket 2");
         return -1;
     }
     
-    if (net_open(&sock3))
+    if (net_open(&sock3, readCallback))
     {
         core_fatal("Error opening socket 3");
         return -1;
     }
-    
-    // TODO: hem de usar una callabck per sockets
-    if (!core_create(receiverTask, 0, MIN_STACK_SIZE))
-    {
-        core_fatal("Error crating receiver task");
-        return -1;
-    }
+     */
     
     lprintf("Num args = %d\n", argc);
     
@@ -179,7 +152,10 @@ int main(int argc, char **argv)
     }
     
     // Wait forever
-    while (1);
+    while (1)
+    {
+        core_sleep(0);
+    }
     
     return 0;
 }
