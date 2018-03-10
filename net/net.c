@@ -214,17 +214,10 @@ size_t net_size(struct NetFragList *fragList)
     
     struct NetFrag *nextBuff = fragList->first;
     
-    for (int i = 0 ; i < fragList->numFragments ; i ++)
+    while (nextBuff)
     {
-        if (nextBuff)
-        {
-            total += (nextBuff->size - nextBuff->payload);
-            nextBuff = nextBuff->next;
-        }
-        else
-        {
-            break;
-        }
+        total += (nextBuff->size - nextBuff->payload);
+        nextBuff = nextBuff->next;
     }
     
     return total;
@@ -237,8 +230,35 @@ void net_free(struct NetFragList *fragList)
 
 size_t net_read(struct NetFragList *fragList, size_t offset, byte *buff, size_t size)
 {
-    // TODO: read data (return amount of data read)
-    // TODO: use NetFrag->payload to skip headers and protocol related data
+    // Go to offset
+    struct NetFrag *currentFrag = fragList->first;
+    while (currentFrag)
+    {
+        if (currentFrag->size > offset)
+        {
+            // Offset is in current fragment
+            break;
+        }
+        else
+        {
+            // Offset is beyond current fragment
+            offset = offset - currentFrag->size;
+            currentFrag = currentFrag->next;
+        }
+    }
     
-    return 0;
+    // Read data from offset
+    size_t buffIndex = 0;
+    while (currentFrag)
+    {
+        buff[buffIndex ++] = currentFrag->packet[offset ++];
+        if (buffIndex >= size) break;
+        if (offset >= currentFrag->size)
+        {
+            currentFrag = currentFrag->next;
+            offset = 0;
+        }
+    }
+    
+    return buffIndex;
 }

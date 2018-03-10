@@ -69,7 +69,7 @@ int ipv4_receive(NETWORK net, byte *buffer, size_t len, struct NetFragList *frag
             
             ipv4_add_fragment(iface, packetID, packet, (uint16_t)len);
             
-            // TODO: check if we have all fragments already there (reorder and close) -> necessary only in case arrived last frag and someone is missing
+            // TODO: check if we have all fragments already there (reorder and close) -> necessary only in case arrived last frag and something is missing
             
             core_unlock(MUTEX_IPV4);
             return 0;
