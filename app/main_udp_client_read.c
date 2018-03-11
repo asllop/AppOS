@@ -123,13 +123,18 @@ int main(int argc, char **argv)
     
     core_log("Open sockets\n");
     
+    // TODO:
+    /*
+     - Implementar fragmentació de sortida
+     - Implementar servidors
+     - Implementar RAW sockets (client i servidor)
+     */
+    
     if (net_open(&sock, readCallback))
     {
         core_fatal("Error opening socket");
         return -1;
     }
-    
-    /*
     
     if (net_open(&sock2, readCallback))
     {
@@ -142,7 +147,6 @@ int main(int argc, char **argv)
         core_fatal("Error opening socket 3");
         return -1;
     }
-     */
     
     lprintf("Num args = %d\n", argc);
     

@@ -3,8 +3,6 @@
 
 #include <appos.h>
 
-// TODO: only define used mutex
-
 typedef enum
 {
     MUTEX_MEM               = 0,

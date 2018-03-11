@@ -5,7 +5,7 @@
 #include <event/event_internal.h>
 #include <task/task.h>
 
-// TODO: rework event system. Maybe using a private QueueStruct instead of a shared array of event codes?
+// DEPRECATED: event system will be useless when RT tasks will be implemented.
 
 static struct QueueStruct queueArray[MAX_EVENT_QUEUES];
 
