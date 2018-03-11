@@ -22,8 +22,6 @@ OBJECTS= \
     core/task/task_internal.o \
     core/task/arch/pc32/task_arch.o \
     core/task/arch/pc32/task_isr.o \
-    event/event_internal.o \
-    event/event.o \
     serial/arch/pc32/serial_arch.o \
     serial/arch/pc32/serial_isr.o \
     serial/serial.o \

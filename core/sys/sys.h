@@ -7,7 +7,7 @@ typedef enum
 {
     MUTEX_MEM               = 0,
     MUTEX_TASK,
-    MUTEX_EVENT,
+    //MUTEX_EVENT,
     MUTEX_SERIAL_TX,
     MUTEX_SERIAL_RX,
     MUTEX_TERM,
