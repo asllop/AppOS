@@ -1,7 +1,7 @@
 # AppOS
 *"Make your App the OS"*
 
-AppOS is a kernel designed to be embedded into an application, as if it were a static library. It features a small-memory management system, preemtive & cooperative multitasking with threads, networking, events, driver abstraction layer and more.
+AppOS is a kernel designed to be embedded into an application, as if it were a static library. It features a small-memory management system, preemptive & cooperative multitasking with threads, networking, events, driver abstraction layer and more.
 
 The main fields of aplication are:
 
