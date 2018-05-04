@@ -1,14 +1,18 @@
 
- * Basic Networking: IPv4, IPv6, UDP and RAW sockets, over SLIP.
+ * Basic Networking: IPv4, UDP and RAW sockets, over SLIP.
+
+ * Fix the optimization problem
 
  * Change Mutex system: work with variables instead of SO internat slots.
 
- * Full Networking (TCP)
+ * Create tests dir with multiple programs to make stress tests.
+
+ * Port AppOS to Arduino.
+
+ * Full Networking (IPv6, TCP)
 		Free IP stacks:
 		uIP (https://github.com/adamdunkels/uip)
 		lwIP (http://savannah.nongnu.org/projects/lwip/)
-
- * Langs. some options: Python, JavaScript, Lua, Scratch, Google Blocky.
 
  * Real Time system for core/task:
 
@@ -31,12 +35,14 @@
 
  * File System module
 
+ * Port AppOS to RasPi and microbit.
+
+ * Langs: C++, Lua and Google Blocky (compiles to Lua).
+
  * USB: host controller driver and libUSB-like interface for API (or port libUSB).
 		PCI interface (required for USB suport in PC32 arch)
 
  * Interface for other serial ports (SPI & I2C), create modules "spi_" and "i2c_".
-
- * Port AppOS to multiple platforms.
 
  * Implement SMP
 
