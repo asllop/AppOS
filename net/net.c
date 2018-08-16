@@ -102,6 +102,7 @@ int net_open(struct NetSocket *socket, void (*readCallback)(struct NetSocket *so
         socket->type == NET_SOCKET_TYPE_RAWSERVER)
     {
         socket->state = NET_SOCKET_STATE_OPEN;
+        // TODO: choose a more tight (and portable) stack size than a silly "thousand"
         core_create(net_read_task, 0, 1000, (void *)socket);
         return 0;
     }
