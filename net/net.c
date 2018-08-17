@@ -152,25 +152,25 @@ int net_close(struct NetSocket *socket)
 
 size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len)
 {
+    // If data is not a malloc buff, create one
+    byte *actualBuff = data;
+    
+    if (!mem_valid_buff(data))
+    {
+        actualBuff = core_malloc(len);
+        if (actualBuff)
+        {
+            memcpy(actualBuff, data, len);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    
     if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
         socket->type == NET_SOCKET_TYPE_UDPSERVER )
     {
-        // If data is not a malloc buff, create one
-        byte *actualBuff = data;
-        
-        if (!mem_valid_buff(data))
-        {
-            actualBuff = core_malloc(len);
-            if (actualBuff)
-            {
-                memcpy(actualBuff, data, len);
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        
         size_t udp_packetLen = 0;
         byte *address = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->address : client->address;
         uint16_t dstPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->remotePort : client->port;
@@ -184,6 +184,8 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
         net_iface_tx(socket->network, ip_packet, ip_packetLen);
         core_unlock(MUTEX_NET);
         
+        core_free(actualBuff);
+        
         return ip_packetLen;
     }
     else if (socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
@@ -193,22 +195,26 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
         
         size_t resultLen = 0;
         byte *address = socket->type == NET_SOCKET_TYPE_RAWCLIENT ? socket->address : client->address;
-        byte *packet = ipv4_build(socket->network, data, len, socket->protocol, address, &resultLen);
+        byte *packet = ipv4_build(socket->network, actualBuff, len, socket->protocol, address, &resultLen);
         // TODO: fragment packet and send fragments instead of the whole buffer as is
         
         core_lock(MUTEX_NET);
         net_iface_tx(socket->network, packet, resultLen);
         core_unlock(MUTEX_NET);
         
+        core_free(actualBuff);
+        
         return resultLen;
     }
     else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
     {
         // TCP not implemented yet
+        core_free(actualBuff);
         return 0;
     }
     else
     {
+        core_free(actualBuff);
         return 0;
     }
 }

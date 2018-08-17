@@ -59,11 +59,14 @@ int main(int argc, char **argv)
         return -1;
     }
     
+    char out[100];
     // Wait forever
     for (;;)
     {
         core_sleep(2000);
         net_send(&sock, NULL, pong, strlen((char *)pong));
+        sprintf(out, "USED MEM = %u\n", core_avail(MEM_TYPE_USED));
+        core_log(out);
     }
     
     return 0;

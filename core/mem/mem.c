@@ -73,6 +73,8 @@ void *core_malloc(size_t size)
 
 void *core_realloc(void *buf, size_t currentBufferSize, size_t newSize, long moveOffset)
 {
+    if (!mem_valid_buff(buf)) return NULL;
+    
     core_lock(MUTEX_MEM);
     
     SEGMENT currentSegmentSize = *((SEGMENT *)(buf - sizeof(SEGMENT)));
@@ -165,21 +167,29 @@ void *core_realloc(void *buf, size_t currentBufferSize, size_t newSize, long mov
 
 void core_free(void *buf)
 {
-    // TODO: core_free should be reentrant, we could probably get rid of the mutex here
-    core_lock(MUTEX_MEM);
-    
-    mem_internal_free(buf);
-    
-    core_unlock(MUTEX_MEM);
+    if (mem_valid_buff(buf))
+    {
+        // TODO: core_free should be reentrant, we could probably get rid of the mutex here
+        core_lock(MUTEX_MEM);
+        mem_internal_free(buf);
+        core_unlock(MUTEX_MEM);
+    }
 }
 
 size_t core_size(void *buf)
 {
-    SEGMENT sizeSegs = *((SEGMENT *)(buf - sizeof(SEGMENT)));
-    
-    if (sizeSegs > 0)
+    if (mem_valid_buff(buf))
     {
-        return ((size_t)sizeSegs * SEGMENT_SIZE) - sizeof(SEGMENT);
+        SEGMENT sizeSegs = *((SEGMENT *)(buf - sizeof(SEGMENT)));
+        
+        if (sizeSegs > 0)
+        {
+            return ((size_t)sizeSegs * SEGMENT_SIZE) - sizeof(SEGMENT);
+        }
+        else
+        {
+            return 0;
+        }
     }
     else
     {
