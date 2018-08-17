@@ -98,3 +98,16 @@ void *mem_move_offset(void *buf, size_t size, long offset)
         return buf;
     }
 }
+
+bool mem_valid_buff(void *buf)
+{
+    for (int i = 0 ;i < numBlocks ; i++)
+    {
+        if (buf >= blocks[i].block && buf < blocks[i].block + blocks[i].blockSize)
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}

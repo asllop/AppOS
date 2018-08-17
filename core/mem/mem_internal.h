@@ -27,6 +27,7 @@ void                        mem_init();
 struct BlockStruct          *mem_get_blocks(byte *num);
 void                        mem_internal_free(void *buf);
 void                        *mem_move_offset(void *buf, size_t size, long offset);
+bool                        mem_valid_buff(void *buf);
 
 /* Architecture dependant functions */
 

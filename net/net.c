@@ -5,6 +5,8 @@
 #include <net/udp/udp.h>
 #include <net/ipv4/ipv4.h>
 #include <net/ipv4/ipv4_internal.h>
+#include <mem/mem.h>
+#include <mem/mem_internal.h>
 #include <lib/NQCLib/NQCLib.h>
 
 /* SOCKET INTERFACE
@@ -153,11 +155,27 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
         socket->type == NET_SOCKET_TYPE_UDPSERVER )
     {
+        // If data is not a malloc buff, create one
+        byte *actualBuff = data;
+        
+        if (!mem_valid_buff(data))
+        {
+            actualBuff = core_malloc(len);
+            if (actualBuff)
+            {
+                memcpy(actualBuff, data, len);
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        
         size_t udp_packetLen = 0;
         byte *address = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->address : client->address;
         uint16_t dstPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->remotePort : client->port;
         uint16_t srcPort = socket->localPort;
-        byte *upd_packet = udp_build(socket->network, data, len, address, dstPort, srcPort, &udp_packetLen);
+        byte *upd_packet = udp_build(socket->network, actualBuff, len, address, dstPort, srcPort, &udp_packetLen);
         size_t ip_packetLen = 0;
         byte *ip_packet = ipv4_build(socket->network, upd_packet, udp_packetLen, 17, address, &ip_packetLen);
         // TODO: fragment packet and send fragments instead of the whole buffer as is
@@ -171,6 +189,8 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     else if (socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
              socket->type == NET_SOCKET_TYPE_RAWSERVER)
     {
+        // TODO: If data is not a malloc buff, create one
+        
         size_t resultLen = 0;
         byte *address = socket->type == NET_SOCKET_TYPE_RAWCLIENT ? socket->address : client->address;
         byte *packet = ipv4_build(socket->network, data, len, socket->protocol, address, &resultLen);

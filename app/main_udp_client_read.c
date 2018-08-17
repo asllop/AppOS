@@ -127,6 +127,7 @@ int main(int argc, char **argv)
     /*
      - Implementar fragmentació de sortida
      - Implementar servidors
+     - Test socket close a veure si es tanca la net_read_task
      - Implementar RAW sockets (client i servidor)
      */
     
