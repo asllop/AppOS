@@ -1,13 +1,15 @@
 
  * Basic Networking: IPv4, UDP and RAW sockets, over SLIP.
 
- * Fix the optimization problem
+ * Fix the gcc optimization problem
 
- * Change Mutex system: work with variables instead of SO internat slots.
+ * Change Mutex system: work with local variables (structs) and pointers to it, instead of SO internat slots.
 
  * Create tests dir with multiple programs to make stress tests.
 
  * Port AppOS to Arduino.
+
+ * Langs: C++, Lua and Google Blocky (compiles to Lua).
 
  * Full Networking (IPv6, TCP)
 		Free IP stacks:
@@ -18,7 +20,7 @@
 
 		TASK core_resident(void (*task)(void *, size_t), PRIORITY priority, size_t stackSize)
 
-		This function creates a new task with state TASK_STATE_RESIDENT, that is ignored by the task scheduler, so it won't get CPU time.
+		This function creates a new task with statu TASK_STATE_RESIDENT, that is ignored by the task scheduler, so it won't get CPU time.
 		Unlike the normal tasks, this functions takes two arguments: void *buffer, size_t size
 		A buffer of data and the size of the buffer.
 
@@ -36,8 +38,6 @@
  * File System module
 
  * Port AppOS to RasPi and microbit.
-
- * Langs: C++, Lua and Google Blocky (compiles to Lua).
 
  * USB: host controller driver and libUSB-like interface for API (or port libUSB).
 		PCI interface (required for USB suport in PC32 arch)
