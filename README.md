@@ -6,7 +6,8 @@ AppOS is a kernel designed to be embedded into an application, as if it were a s
 The main fields of aplication are:
 
 - Internet of Things (IoT)
-- Wearable
+- Wearables
+- Firmware
 - Microcontrollers / Electronics projects
 - Embedded systems in general
 - Standalone applications
