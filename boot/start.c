@@ -16,6 +16,7 @@ void main_task()
     
     if (ret == 0)
     {
+        // TODO: it crashes. find the bug. Something in the task_setup_stack is wrong.
         // End task normally
         return;
     }

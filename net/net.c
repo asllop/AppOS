@@ -53,6 +53,7 @@
  
  */
 
+// TODO: use string and net_parse_ipv4 insteaf of byte array for IP address
 struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t localPort, uint16_t remotePort, byte protocol)
 {
     if (type == NET_SOCKET_TYPE_UDPCLIENT || type == NET_SOCKET_TYPE_UDPSERVER)
@@ -217,40 +218,6 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
         core_free(actualBuff);
         return 0;
     }
-}
-
-struct NetFragList net_receive(struct NetSocket *socket, struct NetClient *client)
-{
-    socket->dataAvailable = false;
-    
-    core_log("net_receive(): started\n");
-    
-    if (socket->packetCount == 0)
-    {
-        core_log("net_receive(): packetCount == 0\n");
-        
-        while (!socket->dataAvailable)
-        {
-            core_sleep(0);
-            
-            if (socket->state == NET_SOCKET_STATE_CLOSED)
-            {
-                core_log("net_receive(): socket closed\n");
-                return (struct NetFragList) {
-                    .packetID = 0,
-                    .numFragments = 0
-                };
-            }
-        }
-    }
-    
-    core_log("net_receive(): return packet received\n");
-    
-    socket->dataAvailable = false;
-    
-    // TODO: if UDP/RAW server, fill client struct
-    
-    return net_extract_packet(socket);
 }
 
 size_t net_size(struct NetFragList *fragList)

@@ -370,3 +370,37 @@ void net_read_task()
     
     core_log("FINISHED net_read_task()");
 }
+
+struct NetFragList net_receive(struct NetSocket *socket, struct NetClient *client)
+{
+    socket->dataAvailable = false;
+    
+    core_log("net_receive(): started\n");
+    
+    if (socket->packetCount == 0)
+    {
+        core_log("net_receive(): packetCount == 0\n");
+        
+        while (!socket->dataAvailable)
+        {
+            core_sleep(0);
+            
+            if (socket->state == NET_SOCKET_STATE_CLOSED)
+            {
+                core_log("net_receive(): socket closed\n");
+                return (struct NetFragList) {
+                    .packetID = 0,
+                    .numFragments = 0
+                };
+            }
+        }
+    }
+    
+    core_log("net_receive(): return packet received\n");
+    
+    socket->dataAvailable = false;
+    
+    // TODO: if UDP/RAW server, fill client struct
+    
+    return net_extract_packet(socket);
+}

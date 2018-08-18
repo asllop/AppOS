@@ -18,5 +18,6 @@ bool                        net_incomming_packet(struct NetFragList fragList);
 bool                        net_insert_packet(struct NetSocket *socket, struct NetFragList fragList);
 struct NetFragList          net_extract_packet(struct NetSocket *socket);
 void                        net_read_task();
+struct NetFragList          net_receive(struct NetSocket *socket, struct NetClient *client);
 
 #endif

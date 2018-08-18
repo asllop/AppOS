@@ -113,8 +113,6 @@ struct NetSocket            net_socket(NET_SOCKET_TYPE type, byte address[], uin
 int                         net_open(struct NetSocket *socket, void (*readCallback)(struct NetSocket *socket, struct NetFragList packet));
 int                         net_close(struct NetSocket *socket);
 size_t                      net_send(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len);
-// TODO: moure net_receive a net_internat
-struct NetFragList          net_receive(struct NetSocket *socket, struct NetClient *client);
 size_t                      net_size(struct NetFragList *fragList);
 void                        net_free(struct NetFragList *fragList);
 size_t                      net_read(struct NetFragList *fragList, size_t offset, byte *buff, size_t size);

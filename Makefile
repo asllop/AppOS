@@ -38,7 +38,7 @@ OBJECTS= \
     net/udp/udp.o \
     lib/NQCLib/NQCLib.o \
     app/utils.o \
-    app/main_udp_client_ping.o
+    app/main_udp_server_ping.o
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
