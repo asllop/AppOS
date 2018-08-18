@@ -5,7 +5,7 @@
 
  * Change Mutex system: work with local variables (structs) and pointers to it, instead of SO internat slots.
 
- * Revise all TODO's in the code.
+ * Examine all TODO's in the code.
 
  * Create tests dir with multiple programs to make stress tests:
    - MEM: multiples tasks amb diferents prioritats, que reserven memoria, la omplen de dades (contador) amb sleeps entre mig i després miren que tot estigui bé.
@@ -15,6 +15,13 @@
 
  * Port AppOS to Arduino.
  * Port AppOS to NRF51/52 (microbit).
+
+ * Langs: C++, Lua and Google Blocky (compiles to Lua).
+
+ * Full Networking (TCP, IPv6)
+		Free IP stacks:
+		uIP (https://github.com/adamdunkels/uip)
+		lwIP (http://savannah.nongnu.org/projects/lwip/)
 
  * Sequential Threads (SeqThr): to avoid the usage of mutex in simple cases, we could create a thread that is not concurrent with another selected one and only runs
    when the principal thread goes to sleep voluntarily. When core_sleep is called, if any SeqThr in the queue, then sleep and run it, if not, just continue normaly.
@@ -49,13 +56,6 @@ Once foo is finished, it is detached from the queue and never executed again. It
 are executed sequentialy, taken from the queue, executed and removed.
 
 Do not make it part of the Core module. Too complex.
-
- * Langs: C++, Lua and Google Blocky (compiles to Lua).
-
- * Full Networking (TCP, IPv6)
-		Free IP stacks:
-		uIP (https://github.com/adamdunkels/uip)
-		lwIP (http://savannah.nongnu.org/projects/lwip/)
 
  * Real Time system for core/task:
 
