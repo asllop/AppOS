@@ -141,5 +141,5 @@ void task_setup_stack(void *stackPointer)
     asm("jmp main_task");
     
     // We should never get here
-    core_fatal("Reached end of setup_stack");
+    core_fatal("Reached end of task_setup_stack");
 }

@@ -44,6 +44,6 @@ void kernel_init()
     
     struct TaskStruct *mainTaskStruct = task_get(mainTaskID);
     
-    // Setup initial context for main task and run it
+    // Setup initial context for main task and run it. Never returns.
     task_setup_stack(mainTaskStruct->stack);
 }

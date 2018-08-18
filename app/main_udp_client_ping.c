@@ -7,7 +7,9 @@
 #include <lib/NQCLib/NQCLib.h>
 
 struct NetSocket sock;
-byte pong[20];
+byte pong[20] = "PING\n";
+
+// NOTE: readCallback and main are different threads, so using "pong" from both places mithout a mutex could cause gliches.
 
 void readCallback(struct NetSocket *socket, struct NetFragList packet)
 {
@@ -25,7 +27,7 @@ void readCallback(struct NetSocket *socket, struct NetFragList packet)
 int main(int argc, char **argv)
 {
     // Init pong string
-    strcpy((char *)pong, "HOLA\n");
+    //strcpy((char *)pong, "PING\n");
     
     // Setup serial port 0 (used by core_log)
     if (serial_init(0, SERIAL_DATA_8b, SERIAL_PARITY_NONE, SERIAL_STOP_1b, 9600))
@@ -65,7 +67,7 @@ int main(int argc, char **argv)
     {
         core_sleep(2000);
         net_send(&sock, NULL, pong, strlen((char *)pong));
-        sprintf(out, "USED MEM = %u\n", core_avail(MEM_TYPE_USED));
+        //sprintf(out, "USED MEM = %u\n", core_avail(MEM_TYPE_USED));
         core_log(out);
     }
     

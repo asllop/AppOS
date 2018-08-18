@@ -5,13 +5,54 @@
 
  * Change Mutex system: work with local variables (structs) and pointers to it, instead of SO internat slots.
 
- * Create tests dir with multiple programs to make stress tests.
+ * Revise all TODO's in the code.
+
+ * Create tests dir with multiple programs to make stress tests:
+   - MEM: multiples tasks amb diferents prioritats, que reserven memoria, la omplen de dades (contador) amb sleeps entre mig i després miren que tot estigui bé.
+          cada cop que es fa una iteració es mira que el buffer encara sigui vàlid i tingui la mida que tenia.
+   - TASK: crear multiples tasques amb diferents prioritats, arrencar, acabar les tasques. Posar sleeps, mutex, etc.
+   - NET: crear multiples sockets, en diferents taskes, accedint al mateix i a diferents sockets. Enviant informació entre ells i a altres hosts.
 
  * Port AppOS to Arduino.
+ * Port AppOS to NRF51/52 (microbit).
+
+ * Sequential Threads (SeqThr): to avoid the usage of mutex in simple cases, we could create a thread that is not concurrent with another selected one and only runs
+   when the principal thread goes to sleep voluntarily. When core_sleep is called, if any SeqThr in the queue, then sleep and run it, if not, just continue normaly.
+   Example:
+
+// This threas has task id == ID_MAIN
+void main_thread()
+{
+   for (;;)
+   {
+      // Do stuff ...
+   
+      core_sleep(XX);
+
+      // ...
+   }
+}
+
+// Some where else...
+core_attach(ID_MAIN, foo);
+
+// Sequential Thread
+void foo()
+{
+   // Do stuff...
+   
+   // Return and End function
+}
+
+The "foo" must end in order to return the control to main_thread, because when attached and called it becomes part of the main_thread.
+Once foo is finished, it is detached from the queue and never executed again. It must be attached again to be run. If multiple attaches, the SeqThr
+are executed sequentialy, taken from the queue, executed and removed.
+
+Do not make it part of the Core module. Too complex.
 
  * Langs: C++, Lua and Google Blocky (compiles to Lua).
 
- * Full Networking (IPv6, TCP)
+ * Full Networking (TCP, IPv6)
 		Free IP stacks:
 		uIP (https://github.com/adamdunkels/uip)
 		lwIP (http://savannah.nongnu.org/projects/lwip/)
@@ -37,7 +78,7 @@
 
  * File System module
 
- * Port AppOS to RasPi and microbit.
+ * Port AppOS to RasPi.
 
  * USB: host controller driver and libUSB-like interface for API (or port libUSB).
 		PCI interface (required for USB suport in PC32 arch)
