@@ -1,17 +1,18 @@
-AppOS Code Style Guide v1.0
-===========================
+AppOS Code Style Guide
+======================
 
 0. Preamble
 -----------
 
 The following rules only apply to AppOS kernel code itself, not to user applications.
 If something is not covered by a rule, use the Linux kernel coding style as a reference.
-In general terms the code should be clear, well commented and easy to understand.
+In general terms the code should be clear and well commented.
+This guide is not the holy word, the rules explained here can be skipped, but must exist a good reason to do it so. Not just "because I don't like it".
 
 1. Variable Names
 -----------------
 
-Names in camel case starting with lowercase. In pointers, at least one space between askterisk and variable name.
+Names in camel case starting with lowercase. In pointers, at least one space between asterisk and variable name.
 Examples:
 
 int segmentNumber;
@@ -81,7 +82,7 @@ while (condition) do_something();
 if (condition) do_something();
 else do_something_else();
 
-The prefered way to define a infinite loop is the "for" statement. Examples:
+The preferred way to define a infinite loop is the "for" statement. Examples:
 
 for (;;)
 {
@@ -95,7 +96,7 @@ for (;;);
 -------------
 
 No space between parentheses and condition.
-One space between comparation / logic operators and the operands.
+One space between comparison / logic operators and the operands.
 Multiple conditions with logic operators may be in different lines, depending on the length.
 In a "for", space between semicolon and statement.
 Examples:
@@ -113,20 +114,21 @@ if (structPointer->element0 == 0 ||
     ...
 }
 
-5. Defined Types and Struct Names
+5. Structs
 ---------------------------------
 
 Camel case starting with capital letters. Examples:
 
-typedef unsigned char Port;
 struct BlockStruct { ... };
 
-This only applies to AppOS specific types, not generic ones like "bool", "byte" or "time_t".
-
-6. Typedef Enums
+6. Typedefs
 ----------------
 
-Snake case in capital letters, using name as a prefix for values. Examples:
+Snake case in capital letters. In enums, using name as a prefix for values. For simple types try to use only one word.
+This only applies to AppOS specific types, not generic ones like "bool", "byte" or "time_t".
+Examples:
+
+typedef unsigned char PORT;
 
 typedef enum
 {
@@ -153,9 +155,25 @@ Snake case in capital letters. Examples:
 #define DEFAULT_STACK_SIZE 1024
 #define	TASK_H
 
-In general, the macros used for configuration or tunning some OS behaviour, must we enclosed into an #if,
+In general, the macros used for configuration or tuning some OS behavior, must we enclosed into an #if,
 to allow definition from command line or external header file. Example:
 
 #ifndef MAX_NUM_TASKS
 #define MAX_NUM_TASKS 100
 #endif
+
+8. Modules
+----------
+
+In AppOS the features are grouped into modules. For example, "core", "term" and "net", are all modules. Each module must be well encapsulated and
+should have the minimum amount of interdependencies with other modules. The only module completely essential for the system is "core", the rest must
+be optional and will be compiled only when the user applications makes use of it. 
+
+A module can contain submodules ("core" contains "mem", "task" and "sys") but is better to make it as simple as possible. Each module must have its own
+directory in the root of the project. The recommended structure for the code is having two C files with their headers, one called "module.c / module.h"
+and the other "module_internal.c / module_internal.h". In module.[c|h] we store the public functions for that module. All those function names must start
+with the prefix "module_" and the nomes should have only two words (ie: core_sleep, core_create). In the file module_internal.[c|h] we define the internal
+not public functions, used by the public functions or by other modules. The names must also start by prefix "module_" but are not limited to 2 words.
+
+Additionally, the modules that access to direct resources of hardware or must perform actions that are not platform independent, must define a folder "arch"
+to store the architecture dependent code. Inside "arch" must exist a subdirectory for each supported architecture: "pc32", "arduino", whatever.
