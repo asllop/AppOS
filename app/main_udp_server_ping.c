@@ -6,13 +6,22 @@
 #include <net/net.h>
 #include <lib/NQCLib/NQCLib.h>
 
-byte buf[20];
-
 // TODO: get client information from socket (not filled yet) and suport multiple clients.
 // TODO: get client IP i send back a response (echo)
 
-void readCallback(struct NetSocket *socket, struct NetFragList packet)
+void readCallback(struct NetSocket *socket, struct NetFragList packet, struct NetClient client)
 {
+    byte buf[50];
+    char str[50];
+    
+    sprintf(str, "Client Info: IP = %d.%d.%d.%d Port = %d\n",
+            client.address[0],
+            client.address[1],
+            client.address[2],
+            client.address[3],
+            client.port);
+    core_log(str);
+    
     core_log("Server Received Data: ");
     
     size_t szRead = net_read(&packet, 0, buf, 20);
@@ -22,6 +31,9 @@ void readCallback(struct NetSocket *socket, struct NetFragList packet)
     core_log((char *)buf);
     
     net_free(&packet);
+    
+    char *message = "Merci Per Trucar!\n";
+    net_send(socket, &client, (byte *)message, strlen(message));
 }
 
 int main(int argc, char **argv)
@@ -48,7 +60,7 @@ int main(int argc, char **argv)
     
     core_log("Create sockets\n");
     
-    byte localIP[] = {192,168,1,2};
+    byte localIP[] = {0,0,0,0};
     struct NetSocket sock = net_socket(NET_SOCKET_TYPE_UDPSERVER, localIP, 1500, 0, 0);
     
     // Register a callback to read data comming from the socket

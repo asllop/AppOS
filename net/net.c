@@ -74,7 +74,7 @@ struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t local
         .dataAvailable = false,
         .front = 0,
         .rear = -1,
-        .packetQueue = {0},
+        .packetQueue = {{0}},
         .packetCount = 0,
         // TODO: find a network that matches the "address". Now we are getting the first iface for simplicity
         .network = 0
@@ -85,7 +85,7 @@ struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t local
     return socket;
 }
 
-int net_open(struct NetSocket *socket, void (*readCallback)(struct NetSocket *socket, struct NetFragList packet))
+int net_open(struct NetSocket *socket, void (*readCallback)(struct NetSocket *socket, struct NetFragList packet, struct NetClient client))
 {
     core_lock(MUTEX_NET);
     
@@ -106,6 +106,8 @@ int net_open(struct NetSocket *socket, void (*readCallback)(struct NetSocket *so
     {
         socket->state = NET_SOCKET_STATE_OPEN;
         // TODO: choose a more tight (and portable) stack size than a silly "thousand"
+        // simple way: create a macro. more complex way: create a setting struct modificable by user thru an API call
+        // or just add a parameter to net_open to chose the stack size, but is a bit strange.
         core_create(net_read_task, 0, 1000, (void *)socket);
         return 0;
     }
@@ -192,8 +194,6 @@ size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, 
     else if (socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
              socket->type == NET_SOCKET_TYPE_RAWSERVER)
     {
-        // TODO: If data is not a malloc buff, create one
-        
         size_t resultLen = 0;
         byte *address = socket->type == NET_SOCKET_TYPE_RAWCLIENT ? socket->address : client->address;
         byte *packet = ipv4_build(socket->network, actualBuff, len, socket->protocol, address, &resultLen);

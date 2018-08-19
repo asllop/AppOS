@@ -59,7 +59,7 @@ void printaPacket(struct NetFragList *fragList)
     }
 }
 
-void readCallback(struct NetSocket *socket, struct NetFragList packet)
+void readCallback(struct NetSocket *socket, struct NetFragList packet, struct NetClient client)
 {
     char out[50];
     

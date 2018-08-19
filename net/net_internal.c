@@ -251,8 +251,6 @@ bool net_incomming_packet(struct NetFragList fragList)
                         {
                             core_log("--> Found UDP server socket!!!\n");
                             
-                            // TODO: check only local port. Any remote port and remote IP is accepted
-                            //       and filled in a NetClient struct by net_receive
                             if (net_insert_packet(netRegisteredSockets[sockIndex], fragList))
                             {
                                 netRegisteredSockets[sockIndex]->dataAvailable = true;
@@ -268,6 +266,8 @@ bool net_incomming_packet(struct NetFragList fragList)
                 }
                 else
                 {
+                    // TODO: implement RAW and other protocols
+                    
                     core_log("No UDP packet\n");
                 }
             }
@@ -350,14 +350,29 @@ struct NetFragList net_extract_packet(struct NetSocket *socket)
 
 void net_read_task()
 {
-    struct NetSocket *sock = (struct NetSocket *)core_userdata();
+    struct NetSocket *socket = (struct NetSocket *)core_userdata();
+    struct NetClient client;
     
     for (;;)
     {
         core_log("net_read_task(): Wait for packet\n");
         
+        struct NetClient *clientPtr = NULL;
+        
+        // TCP not implemented yet
+        if (socket->type == NET_SOCKET_TYPE_UDPSERVER ||
+            socket->type == NET_SOCKET_TYPE_RAWSERVER)
+        {
+            clientPtr = &client;
+        }
+        else
+        {
+            clientPtr = NULL;
+            client = (struct NetClient){.address = {0,0,0,0}, .port = 0};
+        }
+        
         // Get packet (list of fragments) and dettach from socket
-        struct NetFragList fragList = net_receive(sock, NULL);
+        struct NetFragList fragList = net_receive(socket, clientPtr);
         
         core_log("net_read_task(): Receiuved packet\n");
         
@@ -365,7 +380,7 @@ void net_read_task()
         if (fragList.packetID == 0 && fragList.numFragments == 0) break;
         
         // Run user callback
-        sock->readCallback(sock, fragList);
+        socket->readCallback(socket, fragList, client);
     }
     
     core_log("FINISHED net_read_task()");
@@ -400,7 +415,26 @@ struct NetFragList net_receive(struct NetSocket *socket, struct NetClient *clien
     
     socket->dataAvailable = false;
     
-    // TODO: if UDP/RAW server, fill client struct
+    struct NetFragList fragList = net_extract_packet(socket);
     
-    return net_extract_packet(socket);
+    if (client)
+    {
+        if (fragList.first->packet)
+        {
+            // fill client's address
+            struct IPv4_header *ipHeader = (struct IPv4_header *)fragList.first->packet;
+            memcpy(client->address, ipHeader->source, 4);
+            
+            if (socket->type == NET_SOCKET_TYPE_UDPSERVER)
+            {
+                // fill client's port
+                struct UDP_header *udpHeader = (struct UDP_header *)(fragList.first->packet + sizeof(struct IPv4_header));
+                client->port = udp_source_port(udpHeader);
+            }
+            
+            // TCP not implemented yet
+        }
+    }
+    
+    return fragList;
 }

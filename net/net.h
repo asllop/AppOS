@@ -55,6 +55,8 @@ typedef enum
     
 } NET_SOCKET_STATE;
 
+// TODO: create a struct NetAddress to cover both IPv4 and IPv6 and use it instead of the "byte address[4]" array
+
 struct NetClient
 {
     byte                    address[4];
@@ -104,13 +106,12 @@ struct NetSocket
     int                     front;
     int                     rear;
     int                     packetCount;
-    void                    (*readCallback)(struct NetSocket *socket, struct NetFragList packet);
+    void                    (*readCallback)(struct NetSocket *socket, struct NetFragList packet, struct NetClient client);
 };
 
-// TODO: create a struct NetAddress to cover both IPv4 and IPv6 and use it instead of the "byte address[4]" array
-
 struct NetSocket            net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t localPort, uint16_t remotePort, byte protocol);
-int                         net_open(struct NetSocket *socket, void (*readCallback)(struct NetSocket *socket, struct NetFragList packet));
+int                         net_open(struct NetSocket *socket,
+                                     void (*readCallback)(struct NetSocket *socket, struct NetFragList packet, struct NetClient client));
 int                         net_close(struct NetSocket *socket);
 size_t                      net_send(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len);
 size_t                      net_size(struct NetFragList *fragList);

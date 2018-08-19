@@ -11,7 +11,7 @@ byte pong[20] = "PING\n";
 
 // NOTE: readCallback and main are different threads, so using "pong" from both places mithout a mutex could cause gliches.
 
-void readCallback(struct NetSocket *socket, struct NetFragList packet)
+void readCallback(struct NetSocket *socket, struct NetFragList packet, struct NetClient client)
 {
     core_log("Received Pong: ");
     

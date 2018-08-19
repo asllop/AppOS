@@ -53,7 +53,7 @@ static void slip_receiver_task()
                 core_log("\n---------------------------------\n");
                 // TEST END
                 
-                // WARNING: hardcoded Network 0!
+                // TODO: warning, hardcoded Network 0! We need to get the network iface corresponding to SLIP in slip_port_num
                 struct NetFragList fragList;
                 int res = ipv4_receive(0, slip_input_buf, bufLen, &fragList);
                 
