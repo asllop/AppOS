@@ -1,7 +1,7 @@
 # AppOS
 *"Make your App the OS"*
 
-AppOS is a kernel designed to be embedded into an application, as if it were a static library. It features a small footprint memory management system, preemptive & cooperative multitasking with threads, networking, events, driver abstraction layer, Real-Time oriented design and more.
+AppOS is a kernel designed to be embedded into an application, as if it were a static library. It features a small footprint memory management system, preemptive & cooperative multitasking with threads, networking, events, driver abstraction layer, Real-Time oriented design and more. All its API functions are thread safe, doesn't stop the normal task scheduling and many of them are fully reentrant.
 
 The main fields of aplication are:
 
@@ -15,7 +15,7 @@ The main fields of aplication are:
 - Core for bigger Kernels / Operating Systems
 - Learning about OS development
 
-Designed to be small but scalable and modular, it could fit on a 8-bit microcontroller as well as on a full featured computer. It's based on a minimal super lightweight core, around which is possible to add multiple modules independently, making it highly customizable.
+Designed to be small but scalable and modular, it could fit on a 8-bit microcontroller as well as on a full featured computer. It's based on a super lightweight core, around which is possible to add multiple modules independently, making it highly customizable.
 
 AppOS is multiplatform and designed to be easily ported. Currently supported platforms are:
 
@@ -26,6 +26,8 @@ AppOS is multiplatform and designed to be easily ported. Currently supported pla
 - PIC microcontrollers and dev boards (planned)
 - MSP430 and LaunchPads (planned)
 - Others on demand
+
+AppOS versioning schema conforms to [Semantic Versioning](https://semver.org/) rules.
 
 ------
 
@@ -39,11 +41,11 @@ Write your app in **app/main.c** or add your own files and modify the Makefile.
 
 #### 3. Make
 
-Just it, from a terminal run:
+From a terminal run:
 
 	$ make
 
-Resulting binary is stored in **build** directory.
+The resulting binary will be stored in **build** directory.
 
 #### 4. Run
 
@@ -51,12 +53,12 @@ The easiest way is using QEMU:
 
 	$ qemu-system-i386 -kernel build/appos.elf
 
-Depending on the app configuration and resources usage, you could need to add some arguments.
+Depending on the app configuration and resources used, you may need some additional arguments.
 
 To redirect a serial port to stdio:
 
 	$ qemu-system-i386 -serial stdio -kernel build/appos.elf
 
-Or redirect a serial port to a virtual device serial port (in Linux):
+Or redirect a serial port to a virtual device (in Linux):
 
 	$ qemu-system-i386 -serial pty -kernel build/appos.elf
