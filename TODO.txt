@@ -1,9 +1,9 @@
 
  * Basic Networking: IPv4, UDP and RAW sockets, over SLIP.
  
- * Fix the gcc optimization problem
+ * Fix the gcc optimization problem.
  
- * Change Mutex system: work with local variables (structs) and pointers to it, instead of SO internat slots.
+ * Change Mutex system: work with local variables (structs) and pointers to it, instead of SO global slots.
   
  * Doxygen docs.
  
@@ -18,7 +18,8 @@
    - NET: crear multiples sockets, en diferents taskes, accedint al mateix i a diferents sockets. Enviant informació entre ells i a altres hosts.
 
  * Port AppOS to Arduino.
- * Port AppOS to NRF51/52 (microbit).
+ * Port AppOS to NRF51/52 (micro:bit).
+ * Port AppOS to RaspberryPi
 
  * Langs: C++, Lua and Google Blocky (compiles to Lua).
 
@@ -59,39 +60,36 @@ The "foo" must end in order to return the control to main_thread, because when a
 Once foo is finished, it is detached from the queue and never executed again. It must be attached again to be run. If multiple attaches, the SeqThr
 are executed sequentialy, taken from the queue, executed and removed.
 
-Do not make it part of the Core module. Too complex.
+NOTE: Do not make it part of the Core module. Too complex.
 
  * Real Time system for core/task:
 
-		TASK core_resident(void (*task)(void *, size_t), PRIORITY priority, size_t stackSize)
+		TASK core_resident(void (*task)(), PRIORITY priority, size_t stackSize)
 
-		This function creates a new task with statu TASK_STATE_RESIDENT, that is ignored by the task scheduler, so it won't get CPU time.
-		Unlike the normal tasks, this functions takes two arguments: void *buffer, size_t size
-		A buffer of data and the size of the buffer.
+		This function creates a new task with status TASK_STATE_RESIDENT, that is ignored by the task scheduler, so it won't get CPU time.
 
-		int core_wakeup(TASK taskID, void *buff, size_t size)
+		int core_wakeup(TASK taskID, void *userData)
 
-		With this other function we send an event to a resident task. By doing this, the task state changes to TASK_STATE_RESIDENT_RUNNING,
-		and is executed passing to the function the arguments buff and size.
+		With this other function we send an event to a resident task. By doing this, the task state changes to TASK_STATE_RESIDENT_RUNNING and is executed setting the userData. Once the wake event is sent, the task starts immediately passing over any other currently being executed and the schedling timers is reset. After the first context change, the resident task works as a normal task and scheduling happens as usual.
 
 		It returns 0 if ok
 		If the task is bussy attending a previous event (it was already in state TASK_STATE_RESIDENT_RUNNING), returns ERR_TASK_BUSSY.
 		If the task is not resident, returns ERR_TASK_NO_RESIDENT.
 
 		When a resident task ends, instead of being deleted as any other task, it goes back to the state TASK_STATE_RESIDENT and is ready to receive more events.
+		
+ * PROPOSAL: Create a "rt" module, outside of core, and add there the task extensions: resident, wakeup and attach. To keep core small and simple.
 
- * File System module
-
- * Port AppOS to RasPi.
+ * File System module.
 
  * USB: host controller driver and libUSB-like interface for API (or port libUSB).
 		PCI interface (required for USB suport in PC32 arch)
 
  * Interface for other serial ports (SPI & I2C), create modules "spi_" and "i2c_".
 
- * Implement SMP
+ * Implement SMP.
 
- * Memory Protection: implement a "supervisor" module who takes care of forbidden memory access, program memory integrity, illegal opcode execution, exceptions, etc.
+ * Memory Protection (low priority): implement a "supervisor" module who takes care of forbidden memory access, program memory integrity, illegal opcode execution, exceptions, etc.
 		Also create a small API to control its behaviour from the app, what do to in case of a exception (reset, halt, fallback function, etc). In this mode, the
 		kernel + app code resides in a read only segment, the kernel internal mem structures in a protected segment, the stack in another segment and the heap in another segment.
 
