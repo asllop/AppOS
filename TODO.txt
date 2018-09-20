@@ -1,11 +1,13 @@
 
  * Basic Networking: IPv4, UDP and RAW sockets, over SLIP.
  
- * Improve the NET iface management, now selection of iface is manual (hardcoded to 0 in some cases).
-
  * Fix the gcc optimization problem
-
+ 
  * Change Mutex system: work with local variables (structs) and pointers to it, instead of SO internat slots.
+  
+ * Doxygen docs.
+ 
+ * Improve the NET iface management, now selection of iface is manual (hardcoded to 0 in some cases).
 
  * Examine all TODO's in the code.
 
