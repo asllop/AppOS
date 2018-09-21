@@ -1,22 +1,25 @@
 
  * Basic Networking: IPv4, UDP and RAW sockets, over SLIP.
  
+ * Remove mutex from core_free, it should be reentrant. Test deeply the core/mem module.
+ 
  * Fix the gcc optimization problem:
    - Use "-O2" gcc flag.
-   - Declare volatile all the global variables declared in modules (instead of static or any other qualifier).
+   - Declare volatile all the global variables declared in modules.
    - Declare volatile all the memory structures, but not the logic ones (not necessary).
-   - Declare static the private functions only used inside is file.
+   - Declare static the private functions only used inside its file.
    - Make sure none of the variables are declared static, since it doesn't make sense in the context of AppOS.
    - Use "optimize ("O0")" for some code blocks or functions to disable gcc optimizations localy.
    - Use volatile as a qualifier for casting memory access that are sensitive.
-   - Start with only Core, fix it and then add modules progresively. Or even start with parts of Core.
+   - Make sure userData access not being optimized out (volatile struct/variable or volatile cast to read/write directy?).
+   - Check specially sensitive parts like mutex, that are used everywhere and handle much of the OS behaviour.
+   - Start with only core, fix it and then add modules progresively. Or even start with parts of core.
    - Refs:
    https://wiki.osdev.org/Optimizing
    https://wiki.osdev.org/Volatile_(keyword)
    https://stackoverflow.com/questions/2219829/how-to-prevent-gcc-optimizing-some-statements-in-c
    https://www.youth4work.com/es/Talent/C-Language/Forum/118628-what-is-the-use-of-static-variable-in-c
    
- 
  * Change Mutex system: work with local variables (structs) and pointers to it, instead of SO global slots.
   
  * Doxygen docs.
