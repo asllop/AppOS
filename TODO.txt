@@ -108,6 +108,6 @@ NOTE: Do not make it part of the Core module. Too complex.
 
  * Memory Protection (low priority): implement a "supervisor" module who takes care of forbidden memory access, program memory integrity, illegal opcode execution, exceptions, etc.
 		Also create a small API to control its behaviour from the app, what do to in case of a exception (reset, halt, fallback function, etc). In this mode, the
-		kernel + app code resides in a read only segment, the kernel internal mem structures in a protected segment, the stack in another segment and the heap in another segment.
+		kernel + app code resides in a read only segment, the kernel internal mem structures in a protected segment, the stack in another segment and the heap in another segment. We could also use different pages for task stacks in ordre to detect overflows.
 
  * Console (screen + keyboard) driver for term (low priority)
