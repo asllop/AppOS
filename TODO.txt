@@ -105,6 +105,10 @@ NOTE: Do not make it part of the Core module. Too complex.
  * Interface for other serial ports (SPI & I2C), create modules "spi_" and "i2c_".
 
  * Implement SMP.
+ 
+ * Stack Protection and Debug: to prevent or detect stack overflows we can use the same methods FreeRTOS does:
+ https://www.freertos.org/Stacks-and-stack-overflow-checking.html
+ Furthermore, we could implement a way to calculate the actual stack usage of a task, by attaching a debugger that interrupts the task every "t" (very short period) and look at the stack pointer and the stack written. If we do that during a long period of time we can calculate the maximum amount of memory used by the task's stack.
 
  * Memory Protection (low priority): implement a "supervisor" module who takes care of forbidden memory access, program memory integrity, illegal opcode execution, exceptions, etc.
 		Also create a small API to control its behaviour from the app, what do to in case of a exception (reset, halt, fallback function, etc). In this mode, the
