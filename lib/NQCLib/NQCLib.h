@@ -6,6 +6,8 @@
 
 // TODO: implement the most important Std C Lib functions, that are the ones in stdio.h, stdlib.h, string.h and math.h
 
+// TODO: create a prefix system to allow coexitence with other ANSI C libs. In the kernel, explicitely call the prefixed functions.
+
 #ifdef NQC_ITOA
 char                        *itoa(int value, char *str, int base);
 #endif

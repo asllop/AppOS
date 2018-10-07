@@ -64,5 +64,7 @@ typedef unsigned long long      TIME;
 typedef long                    time_t;
 typedef unsigned char           byte;
 
+// TODO: include all basic OS headers: sys, mem, task and NQCLib or create a core.h with all this (intended to be used from apps only)
+
 #endif
 

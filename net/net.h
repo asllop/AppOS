@@ -82,6 +82,7 @@ struct NetFragList
     bool                    closed;
 };
 
+// TODO: rename NetIfaceStruct to NetIface (in general, don't add "struct" to a struct name)
 struct NetIfaceStruct
 {
     NET_IFACE_TYPE          type;

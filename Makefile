@@ -1,5 +1,11 @@
-# WARNING: when setting -O2 kernel stops working. Look at http://wiki.osdev.org/Optimizing#Compiler_Optimization and http://wiki.osdev.org/Volatile_(keyword)
+# TODO: when setting -O2 kernel stops working. Look at http://wiki.osdev.org/Optimizing#Compiler_Optimization and http://wiki.osdev.org/Volatile_(keyword)
 # Use optimization flags in the linker as well (-O2)
+
+# TODO: set "lib" to include path
+
+# TODO: move all modules to a "modules" dir (net, term, serial) and add it to include path
+
+# TODO: create a distributed makefile system, each module and lib it's own makefile. Add a config system to decide what to compile.
 
 CC=i686-elf-gcc
 AS=i686-elf-as
