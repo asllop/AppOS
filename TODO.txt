@@ -3,6 +3,14 @@
  
  * Remove mutex from core_free, it should be reentrant. Test deeply the core/mem module.
  
+ * General discussion: structs vs slots. We are using slots in many places: tasks, terms, mutex, etc.
+   Slots are problematic, since we need to pre-allocate an amount of space for them, it could be too much and we are wasting
+   memory, or too little and we run out of resources. Furthermore, it adds the overhead of having to configure the slot array
+   size (right now using macros, defined in hader files).
+   Structs are nice because the user can choose how many of them they want to use, without wasting memory or having to setup
+   any configuration. In the other hand, it is much more verbose and it may not be possible in all cases, for example, in
+   tasks, we need an array of slots for the scheduler, in sockets happens something similar.
+ 
  * Fix the gcc optimization problem:
    - Use "-O2" gcc flag.
    - Declare volatile all the global variables declared in modules.
