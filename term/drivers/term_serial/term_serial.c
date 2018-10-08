@@ -2,6 +2,7 @@
 #include <term/term.h>
 #include <term/ansi.h>
 #include <lib/NQCLib/NQCLib.h>
+// TODO: use "" for local includes!
 #include <term/drivers/term_serial/term_serial.h>
 
 void term_serial_text(int customID, TERM_COLOR color)
