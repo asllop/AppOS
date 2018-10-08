@@ -8,6 +8,7 @@
 #define TERM_NUM_DRIVERS    2
 #endif
 
+// TODO: Remove the "struct" in TermDriverStruct!!
 struct TermDriverStruct
 {
     TERM_TYPE               type;
