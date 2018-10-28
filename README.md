@@ -15,7 +15,7 @@ The main fields of aplication are:
 - Core for bigger Kernels / Operating Systems
 - Learning about OS development
 
-Designed to be small but scalable and modular, it could fit on a 8-bit microcontroller as well as on a full featured computer. It's based on a super lightweight core, around which is possible to add multiple modules independently, making it highly customizable.
+Designed to be small but scalable and modular, it could fit in a 8-bit microcontroller as well as in a full featured computer. It's based on a super lightweight core, around which is possible to add multiple modules independently, making it highly customizable.
 
 AppOS is multiplatform and designed to be easily ported. Currently supported platforms are:
 
