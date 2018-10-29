@@ -56,7 +56,10 @@
 		Free IP stacks:
 		uIP (https://github.com/adamdunkels/uip)
 		lwIP (http://savannah.nongnu.org/projects/lwip/)
-
+		
+ * Struct to access OS API: instead of calling kernel functions directly, we could define a series of structs containing pointers to functions. This way we could do something like: Core.free(buf) or Net.send(...)
+   This way we give the ability to "overwrite" API functions from other modules. With this feature we will be able to extend other modules easily, without having to modify the module itself. Imagine we want to add more functionaly to Core (like Mem Reference Counting or RealTime Threads) but we want to keep the base Core as simple and small as possible, so it can continue working on small systems. The solution is extending the core from other modules, then we only get this extra functionality when we compile the new module.
+ 
  * Sequential Threads (SeqThr): to avoid the usage of mutex in simple cases, we could create a thread that is not concurrent with another selected one and only runs
    when the principal thread goes to sleep voluntarily. When core_sleep is called, if any SeqThr in the queue, then sleep and run it, if not, just continue normaly.
    Example:
