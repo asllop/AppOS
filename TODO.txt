@@ -115,6 +115,8 @@ NOTE: Do not make it part of the Core module. Too complex.
 		PCI interface (required for USB suport in PC32 arch)
 
  * Interface for other serial ports (SPI & I2C), create modules "spi_" and "i2c_".
+ 
+ * Mem Reference Counting. To make it easier to share buffers among different parts of an app, add a counter to the header of a memory allocation, called refcount. When a buffer is created with core_alloc, refcount = 0. By using a new function called core_keep() we increment the refcount by one. Finally, core_free will dealloc the buffer only if refcount == 0, otherwise it will simply decrement refcount and finish.
 
  * Implement SMP.
  
