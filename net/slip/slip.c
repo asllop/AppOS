@@ -27,6 +27,8 @@ PORT                    slip_port_num;
 byte                    slip_input_buf[SLIP_CALL_BACK_BUFFER_SIZE];
 TASK                    slipTaskID;
 
+// TODO: bad use of static functions here.
+
 static void slip_receiver_task()
 {
     for (;;)
