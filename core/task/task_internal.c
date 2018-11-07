@@ -5,6 +5,12 @@
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
 
+// TODO: make it dynamic!
+// Instead of a static array of slots, allocate memory for a task slot whenever it is created.
+// Should be easy to do, because we already have a linked list structure (next & prev pointers).
+// To make the most of the memory, we could put multiple slots inside each allocated buffer.
+// Use TaskStruct instead of TASK ID in the system API.
+
 static struct TaskStruct    taskArray[MAX_NUM_TASK];
 static int                  taskCounter;
 static struct TaskStruct    *currentTask;
