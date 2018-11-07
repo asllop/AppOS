@@ -32,6 +32,8 @@ void serial1_rx_isr()
     serial_rx_isr(1);
 }
 
+// TODO: make these "port_" functions static
+
 unsigned int port_address(PORT port)
 {
     switch (port)
