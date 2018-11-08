@@ -7,6 +7,7 @@
 #include <task/task.h>
 #include <lib/NQCLib/NQCLib.h>
 
+// TODO: make it dynamic, se allocated memory instead of a static array
 struct NetIfaceStruct   netInterfaces[NET_NUM_INTERFACES];
 int                     numNetInterfaces = 0;
 struct NetSocket *      netRegisteredSockets[NET_NUM_SOCKETS];
@@ -130,7 +131,8 @@ uint16_t net_checksum(byte *p, int len)
 void net_iface_tx(NETWORK net, byte *data, size_t len)
 {
     struct NetIfaceStruct *iface = net_iface(net);
-    
+    // TODO: create a Driver Abstraction Layer (like term) to register transport senders. This way we can
+    // compile only the modules we need, otherwise we need to compile all of them even if we only use one.
     switch (iface->type)
     {
         case NET_IFACE_TYPE_SLIP:
