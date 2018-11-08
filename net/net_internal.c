@@ -59,6 +59,7 @@ NETWORK net_create(NET_IFACE_TYPE type, byte id)
             };
         }
         
+        // TODO / WARNING : we are reseting all the sockets every time we register an iface. No problem with only one iface, but...
         for (int i = 0 ; i < NET_NUM_SOCKETS ; i ++)
         {
             netRegisteredSockets[i] = NULL;
