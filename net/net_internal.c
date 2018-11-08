@@ -7,9 +7,16 @@
 #include <task/task.h>
 #include <lib/NQCLib/NQCLib.h>
 
-// TODO: make it dynamic, se allocated memory instead of a static array
+// TODO: make it dynamic? allocated memory instead of a static array
 struct NetIfaceStruct   netInterfaces[NET_NUM_INTERFACES];
 int                     numNetInterfaces = 0;
+/*
+TODO:
+Doesn't make sense to have an array of pointers to structures.
+We are mixing static and dynamic world and we don't get the benefit of any of those. If we want static but fast (aka RT), we
+could use an array of structs, and then use an index to access this array, instead of having to traverse it looking for
+a pointer to a struct, as we do now.
+*/
 struct NetSocket *      netRegisteredSockets[NET_NUM_SOCKETS];
 
 NETWORK net_create(NET_IFACE_TYPE type, byte id)
