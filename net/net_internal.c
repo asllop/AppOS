@@ -16,6 +16,8 @@ Doesn't make sense to have an array of pointers to structures.
 We are mixing static and dynamic world and we don't get the benefit of any of those. If we want static but fast (aka RT), we
 could use an array of structs, and then use an index to access this array, instead of having to traverse it looking for
 a pointer to a struct, as we do now.
+Or even better, we could live it as it is (array of pointers), but once a socket is assigned, put on it an index, being
+its position in the array. This way we have a small array (only storing pointers) and a fast indexed search.
 */
 struct NetSocket *      netRegisteredSockets[NET_NUM_SOCKETS];
 
