@@ -4,6 +4,10 @@
 #include <sys/sys_internal.h>
 #include <lib/NQCLib/NQCLib.h>
 
+// TODO: keep a pointer to the last freed memory block, and start searching from there in the next alloc. If we choose the apropiate segment size it should be super fast to alloc.
+// TODO: create tests and benchmark the alloc/free avrg time.
+// TODO: add reference counting, and a core_keep(void *buf) function.
+
 void *core_malloc(size_t size)
 {
     size_t maxBuffSize = (size_t)((SEGMENT)-1) * SEGMENT_SIZE;
