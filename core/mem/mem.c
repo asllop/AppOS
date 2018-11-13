@@ -201,6 +201,8 @@ size_t core_size(void *buf)
     }
 }
 
+// TODO: when allocating, freeing and reallocating, simply update a counter with the amount of memory, instead of doing this.
+
 size_t core_avail(MEM_TYPE memtype)
 {
     switch (memtype)
