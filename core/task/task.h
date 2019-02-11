@@ -12,6 +12,9 @@
 #define MIN_STACK_SIZE      128
 #endif
 
+// TODO: we could create a function to return the task struct and let the user play with it,
+// instead of providing specific functions like: escalate, state, result and userdata.
+
 TASK                        core_create(void (*task)(), PRIORITY priority, size_t stackSize, void *userData);
 TASK                        core_self();
 int                         core_escalate(PRIORITY priority);
