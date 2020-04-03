@@ -53,12 +53,10 @@ The easiest way is using QEMU:
 
 	$ qemu-system-i386 -kernel build/appos.elf
 
-Depending on the app configuration and resources used, you may need some additional arguments.
-
-To redirect a serial port to stdio:
+Depending on the app configuration and resources used, you may need some additional arguments. If you are using the serial port as a terminal interface for printing logs and reading user input, you may want to redirect the serial port to stdio so you can interact with your appos:
 
 	$ qemu-system-i386 -serial stdio -kernel build/appos.elf
 
-Or redirect a serial port to a virtual device (in Linux):
+You can also use the serial port as a SLIP interface to connect your appos to the internet. In this case you would like to redirect the serial port to a virtual device (Linux only):
 
 	$ qemu-system-i386 -serial pty -kernel build/appos.elf
