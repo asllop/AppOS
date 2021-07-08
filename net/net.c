@@ -1,59 +1,298 @@
+#include <sys/sys.h>
+#include <task/task.h>
 #include <net/net.h>
+#include <net/net_internal.h>
+#include <net/udp/udp.h>
+#include <net/ipv4/ipv4.h>
+#include <net/ipv4/ipv4_internal.h>
+#include <mem/mem.h>
+#include <mem/mem_internal.h>
+#include <lib/NQCLib/NQCLib.h>
 
-static struct NetIfaceStruct netInterfaces[NET_NUM_INTERFACES];
-static int numNetInterfaces = 0;
+/* SOCKET INTERFACE
+ 
+ net_resolve: obté IP d'un nom de domini utilitzant un DNS o una llista local tipus resolv.conf (implementació futura)
+ -> Domain: string amb el nom
+ <- Retorna: IP o error.
+ 
+ net_socket: crea un nou socket
+ -> Tipus: udp-client, udp-server, tcp-client, tcp-server, raw-client, raw-server
+ -> Adreça: Si es socket client, es refereix a l'adreça remota, si es server, es refereix a la adreça local (per seleccionar net-iface)
+ -> Port (ignorat en cas de socket tipus raw)
+ -> Protocol: codi de protocol. Només per a RAW, a la resta de casos és ignorat.
+ <- Retorna: socket struct
+ 
+ net_listen: escolta connexions (només servidors TCP)
+ -> Socket struct (pointer)
+ <- Resultat: socket de client o error. A un servidor és aquest socket el que utilitzarem per fer open/close/send/receive i no el creat
+              amb net_socket. Cada connexió nova rebuda generarà un nou socket que representa un client diferent.
+ 
+ net_open: obre un socket / accepta una connexió
+ -> Socket struct (pointer)
+ <- Resultat: ok o error
+ 
+ net_close: tanca un socket / tanca una connexió
+ -> Socket struct (pointer)
+ <- Resultat: ok o error
+ 
+ net_send: envia dades per un socket ja obert
+ -> Socket struct (pointer)
+ -> Buffer: punter al buffer de dades
+ -> Mida: mida del buffer de dades
+ -> Client: només per al costat servidor en connexions UDP i RAW. Struct que descriu el client receptor del paquet (IP, port)
+ <- Resultat: mida dades enviades o 0 si error
+ 
+ net_receive: reb dades d'un socket ja obert
+ -> Socket struct (pointer)
+ -> Buffer: punter al buffer de dades
+ -> Mida: mida del buffer de dades
+ <- Resultat: mida dades rebudes o 0 si error
+ <- Client (punter): només per al costat servidor en connexions UDP i RAW. Struct que descriu el client emisor del paquet (IP, port)
+ 
+ NOTA: net_listen no funciona amb servidor UDP o RAW. Per tant net_send/net_receive utilitzen el descriptor de client només per a aquests casos (socket tipus UDP/RAW servidor). Per a la resta de casos l'argument "client descriptor" és ignorat i pot ser NULL.
+ 
+ */
 
-NETWORK net_create(NET_IFACE_TYPE type, byte id)
+// TODO: use string and net_parse_ipv4 insteaf of byte array for IP address
+struct NetSocket net_socket(NET_SOCKET_TYPE type, byte address[], uint16_t localPort, uint16_t remotePort, byte protocol)
 {
-    if (numNetInterfaces < NET_NUM_INTERFACES)
+    if (type == NET_SOCKET_TYPE_UDPCLIENT || type == NET_SOCKET_TYPE_UDPSERVER)
     {
-        netInterfaces[numNetInterfaces].type = type;
-        netInterfaces[numNetInterfaces].id = id;
-        
-        switch (type) {
-            case NET_IFACE_TYPE_SLIP:
-                netInterfaces[numNetInterfaces].mtu = 296;
-                break;
+        protocol = UDP_PROTOCOL;
+    }
+    else if (type == NET_SOCKET_TYPE_TCPCLIENT || type == NET_SOCKET_TYPE_TCPSERVER)
+    {
+        protocol = TCP_PROTOCOL;
+    }
+    
+    struct NetSocket socket = {
+        .type = type,
+        .protocol = protocol,
+        .localPort = localPort,
+        .remotePort = remotePort,
+        .state = NET_SOCKET_STATE_CLOSED,
+        .dataAvailable = false,
+        .front = 0,
+        .rear = -1,
+        .packetQueue = {{0}},
+        .packetCount = 0,
+        // TODO: find a network that matches the "address". Now we are getting the first iface for simplicity
+        .network = 0
+    };
+    
+    memcpy(socket.address, address, 4);
+    
+    return socket;
+}
 
-            case NET_IFACE_TYPE_PPP:
-                netInterfaces[numNetInterfaces].mtu = 1492;
-                break;
-                
-            case NET_IFACE_TYPE_ETH:
-            case NET_IFACE_TYPE_WIFI:
-                netInterfaces[numNetInterfaces].mtu = 1500;
-                break;
-                
-            case NET_IFACE_TYPE_BT:
-                netInterfaces[numNetInterfaces].mtu = 672;
-                break;
-                
-            default:
-                netInterfaces[numNetInterfaces].mtu = 576;
-                break;
-        }
-        
-        netInterfaces[numNetInterfaces].flags = 0;
-        netInterfaces[numNetInterfaces].front = 0;
-        netInterfaces[numNetInterfaces].rear = -1;
-        netInterfaces[numNetInterfaces].items = 0;
-        
-        return numNetInterfaces ++;
+int net_open(struct NetSocket *socket, void (*readCallback)(struct NetSocket *socket, struct NetFragList packet, struct NetClient client))
+{
+    core_lock(MUTEX_NET);
+    
+    if (!net_assign_socket(socket))
+    {
+        core_unlock(MUTEX_NET);
+        return ERR_CODE_NOSOCKETFREE;
+    }
+    
+    core_unlock(MUTEX_NET);
+    
+    socket->readCallback = readCallback;
+    
+    if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
+        socket->type == NET_SOCKET_TYPE_UDPSERVER ||
+        socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
+        socket->type == NET_SOCKET_TYPE_RAWSERVER)
+    {
+        socket->state = NET_SOCKET_STATE_OPEN;
+        // TODO: choose a more tight (and portable) stack size than a silly "thousand"
+        // simple way: create a macro. more complex way: create a setting struct modificable by user thru an API call
+        // or just add a parameter to net_open to chose the stack size, but is a bit strange.
+        core_create(net_read_task, 0, 1000, (void *)socket);
+        return 0;
+    }
+    else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
+    {
+        // TCP not implemented yet
+        return ERR_CODE_BADSOCKTYPE;
     }
     else
     {
-        return -1;
+        return ERR_CODE_BADSOCKTYPE;
     }
 }
 
-struct NetIfaceStruct *net_iface(NETWORK net)
+int net_close(struct NetSocket *socket)
 {
-    if (net < numNetInterfaces)
+    core_lock(MUTEX_NET);
+    
+    if (!net_release_socket(socket))
     {
-        return &netInterfaces[net];
+        core_unlock(MUTEX_NET);
+        return ERR_CODE_NOSOCKETFREE;
+    }
+    
+    core_unlock(MUTEX_NET);
+    
+    if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
+        socket->type == NET_SOCKET_TYPE_UDPSERVER ||
+        socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
+        socket->type == NET_SOCKET_TYPE_RAWSERVER)
+    {
+        socket->state = NET_SOCKET_STATE_CLOSED;
+        return 0;
+    }
+    else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
+    {
+        // TCP not implemented yet
+        return ERR_CODE_BADSOCKTYPE;
     }
     else
     {
-        return NULL;
+        return ERR_CODE_BADSOCKTYPE;
     }
+}
+
+size_t net_send(struct NetSocket *socket, struct NetClient *client, byte *data, size_t len)
+{
+    // If data is not a malloc buff, create one
+    byte *actualBuff = data;
+    
+    if (!mem_valid_buff(data))
+    {
+        actualBuff = core_malloc(len);
+        if (actualBuff)
+        {
+            memcpy(actualBuff, data, len);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    
+    if (socket->type == NET_SOCKET_TYPE_UDPCLIENT ||
+        socket->type == NET_SOCKET_TYPE_UDPSERVER )
+    {
+        size_t udp_packetLen = 0;
+        byte *address = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->address : client->address;
+        uint16_t dstPort = socket->type == NET_SOCKET_TYPE_UDPCLIENT ? socket->remotePort : client->port;
+        uint16_t srcPort = socket->localPort;
+        byte *upd_packet = udp_build(socket->network, actualBuff, len, address, dstPort, srcPort, &udp_packetLen);
+        size_t ip_packetLen = 0;
+        byte *ip_packet = ipv4_build(socket->network, upd_packet, udp_packetLen, 17, address, &ip_packetLen);
+        // TODO: fragment packet and send fragments instead of the whole buffer as is
+        
+        core_lock(MUTEX_NET);
+        net_iface_tx(socket->network, ip_packet, ip_packetLen);
+        core_unlock(MUTEX_NET);
+        
+        core_free(actualBuff);
+        
+        return ip_packetLen;
+    }
+    else if (socket->type == NET_SOCKET_TYPE_RAWCLIENT ||
+             socket->type == NET_SOCKET_TYPE_RAWSERVER)
+    {
+        size_t resultLen = 0;
+        byte *address = socket->type == NET_SOCKET_TYPE_RAWCLIENT ? socket->address : client->address;
+        byte *packet = ipv4_build(socket->network, actualBuff, len, socket->protocol, address, &resultLen);
+        // TODO: fragment packet and send fragments instead of the whole buffer as is
+        
+        core_lock(MUTEX_NET);
+        net_iface_tx(socket->network, packet, resultLen);
+        core_unlock(MUTEX_NET);
+        
+        core_free(actualBuff);
+        
+        return resultLen;
+    }
+    else if (socket->type == NET_SOCKET_TYPE_TCPCLIENT || socket->type == NET_SOCKET_TYPE_TCPSERVER)
+    {
+        // TCP not implemented yet
+        core_free(actualBuff);
+        return 0;
+    }
+    else
+    {
+        core_free(actualBuff);
+        return 0;
+    }
+}
+
+size_t net_size(struct NetFragList *fragList)
+{
+    size_t total = 0;
+    
+    struct NetFrag *nextBuff = fragList->first;
+    
+    while (nextBuff)
+    {
+        total += (nextBuff->size - nextBuff->payload);
+        nextBuff = nextBuff->next;
+    }
+    
+    return total;
+}
+
+void net_free(struct NetFragList *fragList)
+{
+    ipv4_free_packet(fragList);
+}
+
+size_t net_read(struct NetFragList *fragList, size_t offset, byte *buff, size_t size)
+{
+    size_t realOffset = 0;
+    
+    // Go to offset
+    struct NetFrag *currentFrag = fragList->first;
+    while (currentFrag)
+    {
+        // Go to start of real data, jumping protocol headers
+        realOffset = currentFrag->payload;
+        
+        if (realOffset + offset >= currentFrag->size)
+        {
+            // Offset is beyond current fragment
+            
+            // Substract from offset the amount of byte we are skiping
+            offset = offset - (currentFrag->size - realOffset);
+            
+            // Go to next fragment
+            currentFrag = currentFrag->next;
+            
+            if (currentFrag)
+            {
+                // Go to start of real data, jumping protocol headers
+                realOffset = currentFrag->payload;
+            }
+        }
+        else
+        {
+            // Offset is in current fragment
+            realOffset = realOffset + offset;
+            break;
+        }
+    }
+    
+    // Read data from offset
+    size_t buffIndex = 0;
+    while (currentFrag)
+    {
+        buff[buffIndex ++] = currentFrag->packet[realOffset ++];
+        // Already read all bytes
+        if (buffIndex >= size) break;
+        // Reached the end uf current fragment, go to next
+        if (realOffset >= currentFrag->size)
+        {
+            currentFrag = currentFrag->next;
+            if (currentFrag)
+            {
+                // Go to start of real data, jumping protocol headers
+                realOffset = currentFrag->payload;
+            }
+        }
+    }
+    
+    return buffIndex;
 }

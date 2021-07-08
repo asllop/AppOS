@@ -4,11 +4,15 @@
 #include <appos.h>
 
 #ifndef MAX_NUM_BLOCKS
-#define MAX_NUM_BLOCKS      1
+#define MAX_NUM_BLOCKS      4
 #endif
 
+// IMPROVEMENT: Create multiple blocks of memory, each one with different SEGMENT_SIZE,
+// and allocate memory on a block with a SEGMENT_SIZE close to buffer size.
+// This way we will be wasting less memory.
+
 #ifndef SEGMENT_SIZE
-#define SEGMENT_SIZE        256
+#define SEGMENT_SIZE        1024
 #endif
 
 struct BlockStruct
@@ -20,12 +24,14 @@ struct BlockStruct
 typedef uint16_t            SEGMENT;
 
 void                        mem_init();
-struct BlockStruct          *get_blocks(byte *num);
-void                        internal_free(void *buf);
+struct BlockStruct          *mem_get_blocks(byte *num);
+void                        mem_internal_free(void *buf);
+void                        *mem_move_offset(void *buf, size_t size, long offset);
+bool                        mem_valid_buff(void *buf);
 
 /* Architecture dependant functions */
 
-void                        setup_mem();
-int                         scan_blocks(struct BlockStruct *blockArray);
+void                        mem_internal_setup();
+int                         mem_scan_blocks(struct BlockStruct *blockArray);
 
 #endif

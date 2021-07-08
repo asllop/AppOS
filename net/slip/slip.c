@@ -1,11 +1,18 @@
-// SLIP implementation mainly stolen from the RFC1055 (https://tools.ietf.org/html/rfc1055)
+// SLIP implementation mainly taken from the RFC1055 (https://tools.ietf.org/html/rfc1055)
 // Original comments preserved.
 
 #include <net/slip/slip.h>
 #include <net/slip/slip_internal.h>
 #include <mem/mem.h>
+#include <task/task.h>
 #include <net/net.h>
+#include <net/net_internal.h>
 #include <net/ipv4/ipv4.h>
+#include <net/ipv4/ipv4_internal.h>
+
+// TEST
+#include <lib/NQCLib/NQCLib.h>
+#include <sys/sys.h>
 
 /* SLIP special character codes
  */
@@ -14,9 +21,94 @@
 #define ESC_END         0xDC    /* ESC ESC_END means END data byte */
 #define ESC_ESC         0xDD    /* ESC ESC_ESC means ESC data byte */
 
-NETWORK slip_init(PORT port)
+#define SLIP_CALL_BACK_BUFFER_SIZE  500         // MTU for SLIP interfaces use to be ~300, so 500 is far enought
+
+PORT                    slip_port_num;
+byte                    slip_input_buf[SLIP_CALL_BACK_BUFFER_SIZE];
+TASK                    slipTaskID;
+
+// TODO: bad use of static functions here.
+
+static void slip_receiver_task()
 {
-    return net_create(NET_IFACE_TYPE_SLIP, (byte)port);
+    for (;;)
+    {
+        if (serial_avail(slip_port_num))
+        {
+            int bufLen = slip_recv(slip_port_num, slip_input_buf, SLIP_CALL_BACK_BUFFER_SIZE);
+            
+            if (bufLen)
+            {
+                // TEST BEGIN
+                char out[50];
+                core_log("Size = ");
+                itoa(bufLen, out, 10);
+                core_log(out);
+                core_log(" > ");
+                
+                for (int i = 0 ; i < bufLen ; i++)
+                {
+                    itoa(slip_input_buf[i], out, 16);
+                    core_log(out);
+                    core_log(" ");
+                }
+                core_log("\n---------------------------------\n");
+                // TEST END
+                
+                // TODO: warning, hardcoded Network 0! We need to get the network iface corresponding to SLIP in slip_port_num
+                struct NetFragList fragList;
+                int res = ipv4_receive(0, slip_input_buf, bufLen, &fragList);
+                
+                if (res > 0)
+                {
+                    core_log("----> We have a complete packet!\n");
+                    
+                    if (!net_incomming_packet(fragList))
+                    {
+                        core_log("Free packet list...\n");
+                        ipv4_free_packet(&fragList);
+                    }
+                }
+                
+                sprintf(out, "---> USED MEM = %u\n", core_avail(MEM_TYPE_USED));
+                core_log(out);
+            }
+        }
+        else
+        {
+            // Stop task until data is available
+            core_stop();
+        }
+    }
+}
+
+// TODO: when implement resident tasks, this will be a good place to use it. Pass as argument the port so we can support multiple ports.
+// and delete "slip_port_num" global variable.
+
+static void slip_serial_callback(PORT port)
+{
+    core_start(slipTaskID);
+}
+
+NETWORK slip_init(PORT port, char *addr_str)
+{
+    slip_port_num = port;       // We only support SLIP in one port, multiple ports for future improvements
+    
+    NETWORK net = net_create(NET_IFACE_TYPE_SLIP, (byte)port);
+    struct NetIfaceStruct *iface = net_iface(net);
+    net_parse_ipv4(addr_str, iface->address);
+    net_parse_ipv4("255.255.255.0", iface->mask);
+    
+    slipTaskID = core_create(slip_receiver_task, 0, MIN_STACK_SIZE, NULL);
+    
+    if (!slipTaskID)
+    {
+        core_fatal("Couldn't create SLIP receiver task");
+    }
+    
+    serial_callback(port, slip_serial_callback);
+    
+    return net;
 }
 
 /* SEND_PACKET: sends a packet of length "len", starting at
@@ -89,7 +181,7 @@ int slip_recv(PORT port, byte *p, int len)
      * Make sure not to copy them into the packet if we
      * run out of room.
      */
-    while (1)
+    for (;;)
     {
         /* get a character to process
          */
@@ -140,6 +232,7 @@ int slip_recv(PORT port, byte *p, int len)
                         break;
                 }
             }
+                
                 /* here we fall into the default handler and let
                  * it store the character for us
                  */
@@ -147,7 +240,6 @@ int slip_recv(PORT port, byte *p, int len)
             {
                 if (received < len)
                     p[received++] = c;
-                // TODO: else, buffer overflow condition
             }
         }
     }

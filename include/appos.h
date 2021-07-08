@@ -29,14 +29,15 @@
 // Versioning rules: http://semver.org/
 
 #define VERSION_MAJOR       0
-#define VERSION_MINOR       0
-#define VERSION_BUILD       0
+#define VERSION_MINOR       1
+#define VERSION_PATCH       0
 
 typedef enum
 {
     ERR_CODE_TASKCNTOVR     = -512,
     ERR_CODE_TASKCNTUND,
     ERR_CODE_NOTASKID,
+    ERR_CODE_BADTASKSTATE,
     ERR_CODE_EVENTFULL,
     ERR_CODE_NOEVENT,
     ERR_CODE_MUTEXWHILEFORBID,
@@ -49,16 +50,21 @@ typedef enum
     ERR_CODE_BADIPCHECKSUM,
     ERR_CODE_NOMEMFORIPPACKET,
     ERR_CODE_IPBUFFEREMPTY,
+    ERR_CODE_NOPACKETSLOTS,
+    ERR_CODE_IPV4BADCHECK,
+    ERR_CODE_BADSOCKTYPE,
+    ERR_CODE_NOSOCKETFREE,
+    ERR_CODE_NOSOCKETFOUND,
     
 } ERR_CODE;
 
 typedef unsigned int            TASK;
 typedef unsigned int            PRIORITY;
-typedef unsigned char           EVENT;
 typedef unsigned long long      TIME;
-typedef unsigned char           NETWORK;
 typedef long                    time_t;
 typedef unsigned char           byte;
+
+// TODO: include all basic OS headers: sys, mem, task and NQCLib or create a core.h with all this (intended to be used from apps only)
 
 #endif
 

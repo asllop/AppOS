@@ -8,9 +8,9 @@ static byte                 numBlocks;
 
 void mem_init()
 {
-    setup_mem();
+    mem_internal_setup();
     
-    if ((numBlocks = scan_blocks(blocks)) > 0)
+    if ((numBlocks = mem_scan_blocks(blocks)) > 0)
     {
         // Init headers for all segments (free segment)
         
@@ -33,13 +33,13 @@ void mem_init()
     }
 }
 
-struct BlockStruct *get_blocks(byte *num)
+struct BlockStruct *mem_get_blocks(byte *num)
 {
     *num = numBlocks;
     return blocks;
 }
 
-void internal_free(void *buf)
+void mem_internal_free(void *buf)
 {
     if (!buf)
     {
@@ -66,4 +66,48 @@ void internal_free(void *buf)
             i --;
         }
     }
+}
+
+void *mem_move_offset(void *buf, size_t size, long offset)
+{
+    if (offset > 0)
+    {
+        // Move to higher address
+        
+        for (long i = size - 1 ; i >= 0 ; i --)
+        {
+            ((byte *)buf)[i + offset] = ((byte *)buf)[i];
+        }
+        
+        return buf + offset;
+    }
+    else if (offset < 0)
+    {
+        // Move to lower address
+        
+        for (long i = 0 ; i < (long)size ; i ++)
+        {
+            ((byte *)buf)[i + offset] = ((byte *)buf)[i];
+        }
+        
+        return buf + offset;
+    }
+    else
+    {
+        // Don't move at all
+        return buf;
+    }
+}
+
+bool mem_valid_buff(void *buf)
+{
+    for (int i = 0 ;i < numBlocks ; i++)
+    {
+        if (buf >= blocks[i].block && buf < blocks[i].block + blocks[i].blockSize)
+        {
+            return true;
+        }
+    }
+    
+    return false;
 }

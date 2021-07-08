@@ -1,40 +1,134 @@
 
- * Networking with support for drivers.
-    - Port an IP stack:
-      uIP (https://github.com/adamdunkels/uip)
-      lwIP (http://savannah.nongnu.org/projects/lwip/)
-    - SLIP-Serial port driver
+ * Basic Networking: IPv4, UDP and RAW sockets, over SLIP.
+ 
+ * Remove mutex from core_free, it should be reentrant. Test deeply the core/mem module.
+ 
+ * General discussion: structs vs slots. We are using slots in many places: tasks, terms, mutex, etc.
+   Slots are problematic, since we need to pre-allocate an amount of space for them, it could be too much and we are wasting
+   memory, or too little and we run out of resources. Furthermore, it adds the overhead of having to configure the slot array
+   size (right now using macros, defined in hader files).
+   Structs are nice because the user can choose how many of them they want to use, without wasting memory or having to setup
+   any configuration. In the other hand, it is much more verbose and it may not be possible in all cases, for example, in
+   tasks, we need an array of slots for the scheduler, in sockets happens something similar.
+   
+ * Move modules to a "modules" directory in the root (net, serial, term, etc).
+ 
+ * Move all config macros (now spread around multiple headers) to a include/config.h header file.
+ 
+ * Fix the gcc optimization problem:
+   - Use "-O2" gcc flag.
+   - Declare static the private functions only used inside its file.
+   - Declare volatile all the global variables declared in modules.
+   - Declare volatile all the memory structures, but not the logic ones (not necessary).
+   - Make sure none of the variables are declared static, since it doesn't make sense in the context of AppOS.
+   - Use "optimize ("O0")" for some code blocks or functions to disable gcc optimizations localy.
+   - Use volatile as a qualifier for casting memory access that are sensitive.
+   - Make sure userData access not being optimized out (volatile struct/variable or volatile cast to read/write directy?).
+   - Check specially sensitive parts like mutex, that are used everywhere and handle much of the OS behaviour.
+   - Start with only core, fix it and then add modules progresively. Or even start with parts of core.
+   - Refs:
+   https://wiki.osdev.org/Optimizing
+   https://wiki.osdev.org/Volatile_(keyword)
+   https://stackoverflow.com/questions/2219829/how-to-prevent-gcc-optimizing-some-statements-in-c
+   https://www.youth4work.com/es/Talent/C-Language/Forum/118628-what-is-the-use-of-static-variable-in-c
+   
+ * Change Mutex system: work with local variables (structs) and pointers to it, instead of SO global slots.
+  
+ * Doxygen docs.
+ 
+ * Improve the NET iface management, now selection of iface is manual (hardcoded to 0 in some cases).
 
- * File System
+ * Examine all TODO's in the code.
 
- * Interrupt system:
-CORE/TASK:
+ * Create tests dir with multiple programs to make stress tests:
+   - MEM: multiples tasks amb diferents prioritats, que reserven memoria, la omplen de dades (contador) amb sleeps entre mig i després miren que tot estigui bé.
+          cada cop que es fa una iteració es mira que el buffer encara sigui vàlid i tingui la mida que tenia.
+   - TASK: crear multiples tasques amb diferents prioritats, arrencar, acabar les tasques. Posar sleeps, mutex, etc.
+   - NET: crear multiples sockets, en diferents taskes, accedint al mateix i a diferents sockets. Enviant informació entre ells i a altres hosts.
 
-TASK core_resident(void (*task)(void *, size_t), PRIORITY priority, size_t stackSize)
+ * Port AppOS to Arduino.
+ * Port AppOS to NRF51/52 (micro:bit).
+ * Port AppOS to RaspberryPi
 
-Crea una tasca nova amb estat TASK_STATE_RESIDENT. A diferencia de les tasques normals, aquesta funció te dos arguments: void *buffer, size_t size
+ * Langs: The language strategie consist of 3 abstraction levels (from lower to higher): System level, Application level and Prototyping level. For System we already have C. For Application, C++ and Rust are both good options. For Prototyping, Lua and Google Blocky, since they are easy to integrate and suitable for embedded systems.
 
-int core_wakeup(TASK taskID, void *buff, size_t size)
+ * Full Networking (TCP, IPv6)
+		Free IP stacks:
+		uIP (https://github.com/adamdunkels/uip)
+		lwIP (http://savannah.nongnu.org/projects/lwip/)
+		
+ * Struct to access OS API: instead of calling kernel functions directly, we could define a series of structs containing pointers to functions. This way we could do something like: Core.free(buf) or Net.send(...)
+   This way we give the ability to "overwrite" API functions from other modules. With this feature we will be able to extend other modules easily, without having to modify the module itself. Imagine we want to add more functionaly to Core (like Mem Reference Counting or RealTime Threads) but we want to keep the base Core as simple and small as possible, so it can continue working on small systems. The solution is extending the core from other modules, then we only get this extra functionality when we compile the new module.
+ 
+ * Sequential Threads (SeqThr): to avoid the usage of mutex in simple cases, we could create a thread that is not concurrent with another selected one and only runs
+   when the principal thread goes to sleep voluntarily. When core_sleep is called, if any SeqThr in the queue, then sleep and run it, if not, just continue normaly.
+   Example:
 
-Envia un event a la tasca resident. Aixo fa que la taska resident s'executi amb els dos arguments passats.
-Si tot va bé, retorna 0.
-Si la tasca ja es troba ocupada atenent un altre event, retorna TASK_BUSSY.
-Si la tasca no es de tipus resident, retorna TASK_NO_RESIDENT.
+// This threas has task id == ID_MAIN
+void main_thread()
+{
+   for (;;)
+   {
+      // Do stuff ...
+   
+      core_sleep(XX);
 
- * PCI interface (required for USB suport in PC32 arch)
+      // ...
+   }
+}
+
+// Some where else...
+core_attach(ID_MAIN, foo);
+
+// Sequential Thread
+void foo()
+{
+   // Do stuff...
+   
+   // Return and End function
+}
+
+The "foo" must end in order to return the control to main_thread, because when attached and called it becomes part of the main_thread.
+Once foo is finished, it is detached from the queue and never executed again. It must be attached again to be run. If multiple attaches, the SeqThr
+are executed sequentialy, taken from the queue, executed and removed.
+
+NOTE: Do not make it part of the Core module. Too complex.
+
+ * Real Time system for core/task:
+
+		TASK core_resident(void (*task)(), PRIORITY priority, size_t stackSize)
+
+		This function creates a new task with status TASK_STATE_RESIDENT, that is ignored by the task scheduler, so it won't get CPU time.
+
+		int core_wakeup(TASK taskID, void *userData)
+
+		With this other function we send an event to a resident task. By doing this, the task state changes to TASK_STATE_RESIDENT_RUNNING and is executed setting the userData. Once the wake event is sent, the task starts immediately passing over any other currently being executed and the schedling timers is reset. After the first context change, the resident task works as a normal task and scheduling happens as usual.
+
+		It returns 0 if ok
+		If the task is bussy attending a previous event (it was already in state TASK_STATE_RESIDENT_RUNNING), returns ERR_TASK_BUSSY.
+		If the task is not resident, returns ERR_TASK_NO_RESIDENT.
+
+		When a resident task ends, instead of being deleted as any other task, it goes back to the state TASK_STATE_RESIDENT and is ready to receive more events.
+		
+ * PROPOSAL: Create a "rt" module, outside of core, and add there the task extensions: resident, wakeup and attach. To keep core small and simple.
+
+ * File System module.
 
  * USB: host controller driver and libUSB-like interface for API (or port libUSB).
+		PCI interface (required for USB suport in PC32 arch)
 
- * Port AppOS to Arduino UNO & Leonardo (ATmega328P, ATmega32u4)
+ * Interface for other ports (SPI, I2C, GPIO, etc), create a general module called "port", inside it submodules "serial", "spi", "i2c", "gpio", etc. Provide a port independant interface to access (read and write) any kind of port, and have a specific api for each type of port to config it or for hw specific stuff. Inside "port" module we could have "drivers" for those devices that are connected and controlled throught any port (e.g.: RF tx/rx devices) and are not dependant on any other module: a SD card interface connected to UART should be inside "filesystem" module, not "port".
+ 
+ * Mem Reference Counting. To make it easier to share buffers among different parts of an app, add a counter to the header of a memory allocation, called refcount. When a buffer is created with core_alloc, refcount = 0. By using a new function called core_keep() we increment the refcount by one. Finally, core_free will dealloc the buffer only if refcount == 0, otherwise it will simply decrement refcount and finish.
 
- * Port AppOS to RaspberryPI
+ * Implement SMP.
+ 
+ * Stack Protection and Debug: to prevent or detect stack overflows we can use the same methods FreeRTOS does:
+ https://www.freertos.org/Stacks-and-stack-overflow-checking.html
+ Furthermore, we could implement a way to calculate the actual stack usage of a task, by attaching a debugger that interrupts the task every "t" (very short period) and look at the stack pointer and the stack written. If we do that during a long period of time we can calculate the maximum amount of memory used by the task's stack.
 
- * Port AppOS to MSP430
+ * Memory Protection (low priority): implement a "supervisor" module who takes care of forbidden memory access, program memory integrity, illegal opcode execution, exceptions, etc.
+		Also create a small API to control its behaviour from the app, what do to in case of a exception (reset, halt, fallback function, etc). In this mode, the
+		kernel + app code resides in a read only segment, the kernel internal mem structures in a protected segment, the stack in another segment and the heap in another segment. We could also use different pages for task stacks in ordre to detect overflows.
 
- * Port AppOS to Microchip PIC 8 & 16 bits
-
- * Implement SMP for RasPI and PC.
-
- * Console driver for term.
-
- * Interface for other ports (SPI, I2C)
+ * Console (screen + keyboard) driver for term (low priority)

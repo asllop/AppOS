@@ -7,9 +7,11 @@ typedef enum
 {
     MUTEX_MEM               = 0,
     MUTEX_TASK,
-    MUTEX_EVENT,
-    MUTEX_SERIAL,
+    MUTEX_SERIAL_TX,
+    MUTEX_SERIAL_RX,
     MUTEX_TERM,
+    MUTEX_IPV4,
+    MUTEX_NET,
     MUTEX_GENERIC,
     
     /* Custom mutex goes here ... */

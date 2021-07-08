@@ -8,6 +8,7 @@
 #define TERM_NUM_DRIVERS    2
 #endif
 
+// TODO: Remove the "struct" in TermDriverStruct!!
 struct TermDriverStruct
 {
     TERM_TYPE               type;
@@ -24,6 +25,6 @@ struct TermDriverStruct
 };
 
 TERM                        term_register(struct TermDriverStruct *driver);
-struct TermDriverStruct     *get_term_driver(TERM term);
+struct TermDriverStruct     *term_get_driver(TERM term);
 
 #endif

@@ -4,7 +4,7 @@
 
 TERM_TYPE term_type(TERM term)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         return driver->type;
@@ -17,7 +17,7 @@ TERM_TYPE term_type(TERM term)
 
 void term_text(TERM term, TERM_COLOR color)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -28,7 +28,7 @@ void term_text(TERM term, TERM_COLOR color)
 
 void term_background(TERM term, TERM_COLOR color)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -39,7 +39,7 @@ void term_background(TERM term, TERM_COLOR color)
 
 void term_resolution(TERM term, int *w, int *h)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -50,7 +50,7 @@ void term_resolution(TERM term, int *w, int *h)
 
 void term_where(TERM term, int *x, int *y)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -61,7 +61,7 @@ void term_where(TERM term, int *x, int *y)
 
 void term_position(TERM term, int x, int y)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -72,7 +72,7 @@ void term_position(TERM term, int x, int y)
 
 void term_cursor(TERM term, bool visible)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -83,7 +83,7 @@ void term_cursor(TERM term, bool visible)
 
 void term_reset(TERM term)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -95,7 +95,7 @@ void term_reset(TERM term)
 // NOTE: Thread safety depends on driver implementation
 void term_putc(TERM term, char c)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         driver->putc(driver->customID, c);
@@ -104,7 +104,7 @@ void term_putc(TERM term, char c)
 
 void term_puts(TERM term, char *str)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -121,7 +121,7 @@ void term_puts(TERM term, char *str)
 // NOTE: Thread safety depends on driver implementation
 int term_getc(TERM term)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
     if (driver)
     {
         return driver->getc(driver->customID);
@@ -132,10 +132,10 @@ int term_getc(TERM term)
     }
 }
 
-// TODO: add char echo
 int term_gets(TERM term, char *str, int sz)
 {
-    struct TermDriverStruct *driver = get_term_driver(term);
+    struct TermDriverStruct *driver = term_get_driver(term);
+    
     if (driver)
     {
         core_lock(MUTEX_TERM);
@@ -156,6 +156,9 @@ int term_gets(TERM term, char *str, int sz)
             
             if (ch == '\r' || ch == '\n')
             {
+                // Echo
+                driver->putc(driver->customID, ch);
+                
                 str[i] = '\0';
                 core_unlock(MUTEX_TERM);
                 return i;
@@ -165,9 +168,17 @@ int term_gets(TERM term, char *str, int sz)
                 i --;
                 if (i < 0) i = 0;
                 str[i] = '\0';
+                
+                // Echo
+                driver->putc(driver->customID, ch);
+                driver->putc(driver->customID, ' ');
+                driver->putc(driver->customID, ch);
             }
             else if (ch >= 32)
             {
+                // Echo
+                driver->putc(driver->customID, ch);
+                
                 str[i] = ch;
                 i ++;
             }

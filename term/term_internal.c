@@ -18,7 +18,7 @@ TERM term_register(struct TermDriverStruct *driver)
     }
 }
 
-struct TermDriverStruct *get_term_driver(TERM term)
+struct TermDriverStruct *term_get_driver(TERM term)
 {
     if (term < term_driver_ID_count)
     {

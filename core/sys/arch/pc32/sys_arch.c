@@ -13,7 +13,7 @@ void console_puts(unsigned char color, const char *string, unsigned int x, unsig
     }
 }
 
-void emergency_puts(char *str)
+void sys_emergency_puts(char *str)
 {
     console_puts(0x4f, str, 0, 0);
 }
@@ -39,7 +39,7 @@ void core_reboot()
     core_halt();
 }
 
-// NOTE: We are not configuring serial port, Only for QEMU
+// NOTE: We are not configuring the serial port 0, the app must do it before using core_log
 void core_log(char *str)
 {
     for (int i = 0 ; str[i] != 0 ; i++)

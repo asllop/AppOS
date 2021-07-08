@@ -1,168 +1,202 @@
 #include <net/ipv4/ipv4_internal.h>
+#include <net/net_internal.h>
+#include <mem/mem.h>
 
-void *ipv4_peek(struct NetIfaceStruct *iface, unsigned short offset)
-{
-    return iface->packetQueue[iface->front - offset];
-}
+// Incoming Internal Functions
 
-byte ipv4_is_empty(struct NetIfaceStruct *iface)
+struct NetFragList *ipv4_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
 {
-    return iface->items == 0;
-}
-
-byte ipv4_is_full(struct NetIfaceStruct *iface)
-{
-    return iface->items == NET_BUFFER_SLOTS;
-}
-
-int ipv4_size(struct NetIfaceStruct *iface)
-{
-    return iface->items;
-}
-
-void ipv4_enqueue(struct NetIfaceStruct *iface, void *data)
-{
-    if (!ipv4_is_full(iface))
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
     {
-        if (iface->rear == NET_BUFFER_SLOTS - 1)
+        if (iface->incomingSlots[i].packetID == packetID) return &iface->incomingSlots[i];
+    }
+    
+    return NULL;
+}
+
+struct NetFragList ipv4_return_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    for (int i = 0 ; i < NET_NUM_INCOMING_SLOTS ; i ++)
+    {
+        if (iface->incomingSlots[i].packetID == packetID)
         {
-            iface->rear = -1;
+            struct NetFragList fragList = iface->incomingSlots[i];
+            iface->incomingSlots[i] = (struct NetFragList) {
+                .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = false
+            };
+            return fragList;
         }
+    }
+    
+    // We didn't found the packet, this should be treated as an error
+    return (struct NetFragList) {
+        .packetID = 0, .numFragments = 0, .first = NULL, .last = NULL, .closed = false
+    };
+}
+
+byte ipv4_exist_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
+    
+    return incomList != NULL;
+}
+
+void *ipv4_add_fragment(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size)
+{
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
+    
+    if (incomList)
+    {
+        struct NetFrag *newFrag = (struct NetFrag *)core_malloc(sizeof(struct NetFrag));
         
-        iface->packetQueue[++ iface->rear] = data;
-        iface->items ++;
-    }
-}
-
-void *ipv4_dequeue(struct NetIfaceStruct *iface)
-{
-    void *data = iface->packetQueue[iface->front ++];
-    
-    if (iface->front == NET_BUFFER_SLOTS)
-    {
-        iface->front = 0;
-    }
-    
-    iface->items --;
-    return data;
-}
-
-byte ipv4_fragment_present(struct NetIfaceStruct *iface, uint16_t packetID)
-{
-    if (iface->flags & NET_FRAGS_PRIMARY)
-    {
-        if (iface->fragOne.fragID == packetID)
+        if (newFrag)
         {
-            return 1;
-        }
-    }
-    else if (iface->flags & NET_FRAGS_SECONDARY)
-    {
-        if (iface->fragTwo.fragID == packetID)
-        {
-            return 2;
-        }
-    }
-    
-    return 0;
-}
-
-byte ipv4_add_existing_fragment(struct NetIfaceStruct *iface, uint16_t packetID, void *packet)
-{
-    if (iface->fragOne.fragID == packetID)
-    {
-        if (iface->fragOne.fragItems < NET_FRAGMENT_SLOTS)
-        {
-            iface->fragOne.fragQueue[iface->fragOne.fragItems] = packet;
-            iface->fragOne.fragItems ++;
+            // Set de payload start index (IP header)
+            newFrag->payload = ipv4_packet_header_len(buff);
             
-            return YES;
-        }
-    }
-    else if (iface->fragTwo.fragID == packetID)
-    {
-        if (iface->fragTwo.fragItems < NET_FRAGMENT_SLOTS)
-        {
-            iface->fragTwo.fragQueue[iface->fragTwo.fragItems] = packet;
-            iface->fragTwo.fragItems ++;
-            
-            return YES;
-        }
-    }
-    
-    return NO;
-}
-
-byte ipv4_add_new_fragment(struct NetIfaceStruct *iface, uint16_t packetID, void *packet)
-{
-    if (!(iface->flags & NET_FRAGS_PRIMARY))
-    {
-        iface->flags = iface->flags | NET_FRAGS_PRIMARY;
-        iface->fragOne.fragID = packetID;
-        iface->fragOne.fragQueue[0] = packet;
-        iface->fragOne.fragItems = 1;
-        
-        return YES;
-    }
-    else if (!(iface->flags & NET_FRAGS_SECONDARY))
-    {
-        iface->flags = iface->flags | NET_FRAGS_SECONDARY;
-        iface->fragTwo.fragID = packetID;
-        iface->fragTwo.fragQueue[0] = packet;
-        iface->fragTwo.fragItems = 1;
-        
-        return YES;
-    }
-    
-    return NO;
-}
-
-byte ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID)
-{
-    struct NetFragStruct *frag;
-    byte fragNum = 0;
-    
-    switch (ipv4_fragment_present(iface, packetID))
-    {
-        case 1:
-            frag = &iface->fragOne;
-            fragNum = 1;
-            break;
-            
-        case 2:
-            frag = &iface->fragTwo;
-            fragNum = 2;
-            break;
-            
-        default:
-            return NO;
-    }
-    
-    // Sort fragments
-    for (int i = 0 ; i < frag->fragItems ; i++)
-    {
-        for (int j = i + 1 ; j < frag->fragItems ; j++)
-        {
-            // Get packet offset on pos i and j
-            byte *packetI = (byte *)frag->fragQueue[i];
-            byte *packetJ = (byte *)frag->fragQueue[j];
-            uint16_t offsetPI = (packetI[6] & 0x1f) << 8 | packetI[7];
-            uint16_t offsetPJ = (packetJ[6] & 0x1f) << 8 | packetJ[7];
-            
-            if (offsetPI > offsetPJ)
+            // Is first fragment, the one that contains UDP/TCP header. Update payload
+            if (!incomList->last)
             {
-                // Move packetI to J pos and vice versa
-                frag->fragQueue[i] = (void *)packetJ;
-                frag->fragQueue[j] = (void *)packetI;
+                switch (((struct IPv4_header *)buff)->protocol)
+                {
+                    case UDP_PROTOCOL:
+                    {
+                        newFrag->payload += 8;
+                        break;
+                    }
+                        
+                    case TCP_PROTOCOL:
+                    {
+                        // Not implemented yet
+                        break;
+                    }
+                        
+                    default:
+                    {
+                        // Not implemented yet (other protocols)
+                        break;
+                    }
+                }
+            }
+            
+            newFrag->packet = buff;
+            newFrag->size = size;
+            
+            if (incomList->last)
+            {
+                incomList->last->next = newFrag;
+            }
+            
+            newFrag->prev = incomList->last;
+            newFrag->next = NULL;
+            incomList->last = newFrag;
+            incomList->numFragments ++;
+            
+            return newFrag;
+        }
+    }
+    
+    return NULL;
+}
+
+byte ipv4_create_packet_list(struct NetIfaceStruct *iface, uint16_t packetID, byte *buff, uint16_t size)
+{
+    struct NetFragList *incomList = ipv4_packet_list(iface, 0);
+    
+    if (incomList)
+    {
+        incomList->packetID = packetID;
+        incomList->numFragments = 0;
+        incomList->first = NULL;
+        incomList->last = NULL;
+        incomList->closed = false;
+        
+        void *firstFrag = ipv4_add_fragment(iface, packetID, buff, size);
+        incomList->first = firstFrag;
+        
+        return YES;
+    }
+    
+    return NO;
+}
+
+void ipv4_free_packet(struct NetFragList *incomList)
+{
+    if (incomList)
+    {
+        struct NetFrag *nextBuff = incomList->first->next;
+        struct NetFrag *freeBuff = incomList->first;
+        
+        for (int i = 0 ; i < incomList->numFragments ; i ++)
+        {
+            if (freeBuff)
+            {
+                core_free(freeBuff->packet);
+                core_free(freeBuff);
+            }
+            
+            freeBuff = nextBuff;
+            
+            if (nextBuff)
+            {
+                nextBuff = nextBuff->next;
             }
         }
+        
+        incomList->packetID = 0;
     }
+}
+
+void ipv4_free_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
+    ipv4_free_packet(incomList);
+}
+
+void ipv4_close_packet_list(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
     
-    // TODO: check for gaps, els offsets son del paquet original, per tant cal sumar la mina del header IP de cada fragment
+    if (incomList)
+    {
+        incomList->closed = true;
+    }
+}
+
+void ipv4_sort_fragments(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
     
-    // TODO: if all ok, move to main queue
+    // TODO: sort fragments by its offset field (sort a linked list)
     
-    // TODO: reset flags and "frag" state (items, ID, etc)
+    if (incomList)
+    {
+        
+    }
+}
+
+byte ipv4_check_packet(struct NetIfaceStruct *iface, uint16_t packetID)
+{
+    struct NetFragList *incomList = ipv4_packet_list(iface, packetID);
+    
+    ipv4_sort_fragments(iface, packetID);
+    
+    if (incomList)
+    {
+        struct NetFrag *packet = incomList->first;
+        struct NetFrag *nextPacket = packet->next;
+        uint16_t realDataSize = 0;
+        
+        while (packet != NULL && nextPacket != NULL)
+        {
+            realDataSize += packet->size - ipv4_packet_header_len(packet->packet);
+            
+            if (ipv4_packet_offset(nextPacket->packet) * 8 != realDataSize) return NO;
+            
+            packet = nextPacket;
+            nextPacket = packet->next;
+        }
+    }
     
     return YES;
 }

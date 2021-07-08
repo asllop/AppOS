@@ -4,6 +4,7 @@
 #include <sys/sys.h>
 #include <serial/serial.h>
 #include <term/ansi.h>
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 #define ESC "\x1b["
@@ -66,7 +67,7 @@ void main(__unused int argc, __unused char **argv)
     
     char data[5];
     
-    core_set(data, 0, 5);
+    memset(data, 0, 5);
     
     for (;;)
     {

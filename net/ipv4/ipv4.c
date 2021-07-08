@@ -1,51 +1,61 @@
 #include <net/net.h>
-#include <net/net_utils/net_utils.h>
+#include <net/net_internal.h>
 #include <net/ipv4/ipv4.h>
 #include <net/ipv4/ipv4_internal.h>
 #include <mem/mem.h>
+#include <task/task.h>
+#include <lib/NQCLib/NQCLib.h>
 
 // TEST:
-#include <app/utils.h>
 #include <sys/sys.h>
 
-int ipv4_receive(NETWORK net, byte *packet, size_t len)
+uint16_t                ipv4PacketSequence = 0;
+
+int ipv4_receive(NETWORK net, byte *buffer, size_t len, struct NetFragList *fragList)
 {
+    core_lock(MUTEX_IPV4);
+    
     struct NetIfaceStruct *iface = net_iface(net);
     
-    if ((packet[0] & 0xf0) != 0x40)
+    if ((buffer[0] & 0xf0) != 0x40)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_BADIPVERSION;
     }
     
-    byte hlen = (packet[0] & 0xf) * 4;
+    byte hlen = ipv4_packet_header_len(buffer);
     
     if (hlen < 20)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_BADIPHEADERSIZE;
     }
     
-    uint16_t totalLen = packet[2] << 8 | packet[3];
+    uint16_t totalLen = ipv4_packet_len(buffer);
     
     if (totalLen != len)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_BADIPPACKETSIZE;
     }
     
-    uint16_t cksum = net_checksum(packet, hlen);
+    uint16_t cksum = net_checksum(buffer, hlen);
     
     if (cksum)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_BADIPCHECKSUM;
     }
     
     // Copy packet from temporal storage into a new buffer
-    void *buff = core_malloc(len);
-    if (!buff)
+    byte *packet = (byte *)core_malloc(len);
+    if (!packet)
     {
+        core_unlock(MUTEX_IPV4);
         return ERR_CODE_NOMEMFORIPPACKET;
     }
     
-    core_copy(buff, packet, len);
+    memcpy(packet, buffer, len);
     
     uint16_t packetID = packet[4] << 8 | packet[5];
     
@@ -53,79 +63,146 @@ int ipv4_receive(NETWORK net, byte *packet, size_t len)
     {
         // More fragments
         
-        // TODO: what if fragOne and fragTwo are both in use? Must discard one (the oldest)
-        
-        if (ipv4_fragment_present(iface, packetID))
+        if (ipv4_exist_packet_list(iface, packetID))
         {
             core_log("Add new fragment\n");
             
-            ipv4_add_existing_fragment(iface, packetID, buff);
+            ipv4_add_fragment(iface, packetID, packet, (uint16_t)len);
+            
+            // TODO: check if we have all fragments already there (reorder and close) -> necessary only in case arrived last frag and something is missing
+            
+            core_unlock(MUTEX_IPV4);
+            return 0;
         }
         else
         {
             core_log("Start Fragmenting\n");
             
-            ipv4_add_new_fragment(iface, packetID, buff);
+            if (ipv4_create_packet_list(iface, packetID, packet, (uint16_t)len))
+            {
+                core_unlock(MUTEX_IPV4);
+                return 0;
+            }
+            else
+            {
+                core_log("ERROR: couldn't find an empty packet slot");
+                
+                core_unlock(MUTEX_IPV4);
+                return ERR_CODE_NOPACKETSLOTS;
+            }
         }
     }
     else
     {
         // No more fragments
         
-        if (ipv4_fragment_present(iface, packetID))
+        if (ipv4_exist_packet_list(iface, packetID))
         {
-            core_log("End Fragmenting\n");
+            core_log("Add last fragment\n");
             
-            // This is the last fragment
-            ipv4_add_existing_fragment(iface, packetID, buff);
+            ipv4_add_fragment(iface, packetID, packet, (uint16_t)len);
             
-            // Check fragments, reorder, and move to packet queue and reset fragment queue, flags, etc
-            ipv4_sort_fragments(iface, packetID);
+            ipv4_close_packet_list(iface, packetID);
             
-            
-            
-            // TEST : print offsets
-            char var_str[10];
-            struct NetFragStruct *frag = &iface->fragOne;
-            for (int i = 0 ; i < frag->fragItems ; i++)
+            if (ipv4_check_packet(iface, packetID))
             {
-                byte *packetI = (byte *)frag->fragQueue[i];
-                uint16_t offsetPI = (packetI[6] & 0x1f) << 8 | packetI[7];
+                core_log("Packet Check OK\n");
+
+                // Packet Ready, return it
+                *fragList = ipv4_return_packet_list(iface, packetID);
                 
-                core_log("Offset = ");
-                core_log(itoa(offsetPI, var_str, 10));
-                core_log("\n");
+                core_unlock(MUTEX_IPV4);
+                return 1;
+            }
+            else
+            {
+                // Some fragment is missing, discard all
+                ipv4_free_packet_list(iface, packetID);
+                
+                core_log("Packet Check ERROR, discard all\n");
+                
+                core_unlock(MUTEX_IPV4);
+                return ERR_CODE_IPV4BADCHECK;
             }
         }
         else
         {
             core_log("Not fragmented package\n");
             
-            // No previuous fragments, store packet in the queue
-            ipv4_enqueue(iface, buff);
+            ipv4_create_packet_list(iface, packetID, packet, (uint16_t)len);
+            
+            ipv4_close_packet_list(iface, packetID);
+            
+            // Packet Ready, return it
+            *fragList = ipv4_return_packet_list(iface, packetID);
+            
+            core_unlock(MUTEX_IPV4);
+            return 2;
         }
     }
-    
-    return 0;
 }
 
-int ipv4_send(NETWORK net, byte **packet, size_t *len)
+void *ipv4_build(NETWORK net, byte *data, size_t len, byte protocol, byte destIP[], size_t *resultSize)
 {
-    // TODO: rework, completely wrong
+    core_lock(MUTEX_IPV4);
     
     struct NetIfaceStruct *iface = net_iface(net);
     
-    if (!ipv4_is_empty(iface))
+    uint16_t packetSize = len + sizeof(struct IPv4_header);
+    
+    void *ipPacket = core_realloc(data, len, packetSize, sizeof(struct IPv4_header));
+    
+    if (!ipPacket)
     {
-        byte *buff = (byte *)ipv4_dequeue(iface);
-        uint16_t totalLen = buff[2] << 8 | buff[3];
-        *packet = buff;
-        *len = (size_t)totalLen;
-        
-        return 0;
+        core_unlock(MUTEX_IPV4);
+        return NULL;
+    }
+    
+    struct IPv4_header *header = ipPacket;
+    
+    header->versionAndHlen = 0x45;
+    header->serviceType = 0;
+    header->totalLength[0] = (packetSize >> 8) & 0xff;
+    header->totalLength[1] = packetSize & 0xff;
+    header->packetID[0] = (ipv4PacketSequence >> 8) & 0xff;
+    header->packetID[1] = ipv4PacketSequence & 0xff;
+    ipv4PacketSequence ++;
+    header->flagsAndOffset[0] = 0;
+    header->flagsAndOffset[1] = 0;
+    header->ttl = 127;
+    header->protocol = protocol;
+    memcpy(header->source, iface->address, 4);
+    memcpy(header->destination, destIP, 4);
+    header->headerChecksum[0] = 0;
+    header->headerChecksum[1] = 0;
+    uint16_t cksum = net_checksum(ipPacket, sizeof(struct IPv4_header));
+    header->headerChecksum[0] = (cksum >> 8) & 0xff;
+    header->headerChecksum[1] = cksum & 0xff;
+    *resultSize = packetSize;
+    
+    core_unlock(MUTEX_IPV4);
+    return ipPacket;
+}
+
+// TODO: takes a whole IP packet and generate a list of fragments depending on the MTU
+struct NetFragList *ipv4_fagment(NETWORK net, byte *packet, size_t len)
+{
+    core_lock(MUTEX_IPV4);
+    
+    struct NetIfaceStruct *iface = net_iface(net);
+    
+    if (len > iface->mtu)
+    {
+        // Fragment
     }
     else
     {
-        return ERR_CODE_IPBUFFEREMPTY;
+        // Don't fragment
     }
+    
+    // Generate a NetFragList with fragments and return it
+    
+    core_unlock(MUTEX_IPV4);
+    
+    return NULL;
 }

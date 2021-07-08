@@ -1,6 +1,38 @@
 #include <appos.h>
 #include <sys/io/arch/pc32/io.h>
+#include <mem/arch/pc32/mem_arch.h>
 #include <serial/serial.h>
+
+extern void serial0_isr();
+extern void serial1_isr();
+
+static void (*serial_rx_callback)(PORT);
+
+void serial_rx_isr(PORT port)
+{
+    // Disable NMI
+    outportb(0x70, inportb(0x70) | 0x80);
+    
+    if (serial_rx_callback) serial_rx_callback(port);
+    
+    // Enable NMI
+    outportb(0x70, inportb(0x70) & 0x7F);
+    
+    // End of PIC1 interrupt (enable for next interrupt)
+    outportb(PIC1, 0x20);
+}
+
+void serial0_rx_isr()
+{
+    serial_rx_isr(0);
+}
+
+void serial1_rx_isr()
+{
+    serial_rx_isr(1);
+}
+
+// TODO: make these "port_" functions static
 
 unsigned int port_address(PORT port)
 {
@@ -66,6 +98,8 @@ unsigned char port_parity(SERIAL_PARITY parity)
 
 int serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP stop, int baudrate)
 {
+    serial_rx_callback = NULL;
+    
     if (115200 % baudrate != 0 || baudrate <= 0)
     {
         return ERR_CODE_BADSERIALCONFIG;
@@ -89,12 +123,52 @@ int serial_init(PORT port, SERIAL_DATA data, SERIAL_PARITY parity, SERIAL_STOP s
     return 0;
 }
 
-byte is_data_ready(PORT port)
+void serial_callback(PORT port, void (*callback)(PORT))
+{
+    if (callback)
+    {
+        // Disable interrupts
+        outportb(0x70, inportb(0x70) | 0x80);
+        asm("cli");
+        
+        serial_rx_callback = callback;
+        
+        if (port == 0 || port == 2)
+        {
+            // Enable interrupt for IRQ4
+            set_isr(serial0_isr, PIC1_IRQ(4));
+            outportb(PIC1 + 1,(inportb(PIC1 + 1) & 0xEF));
+        }
+        else if (port == 1 || port == 3)
+        {
+            // Enable interrupt for IRQ3
+            set_isr(serial1_isr, PIC1_IRQ(3));
+            outportb(PIC1 + 1,(inportb(PIC1 + 1) & 0xF7));
+        }
+        
+        unsigned int port_addr = port_address(port);
+        outportb(port_addr + 1, 0x01);                          // Enable port interrupts for data available
+        
+        // Enable interrupts
+        outportb(0x70, inportb(0x70) & 0x7F);
+        asm("sti");
+        
+        // Enable PIC1 for next interrupt
+        outportb(PIC1, 0x20);
+    }
+    else
+    {
+        unsigned int port_addr = port_address(port);
+        outportb(port_addr + 1, 0x00);                          // Disable port interrupts
+    }
+}
+
+bool serial_is_data_ready(PORT port)
 {
     return inportb(port_address(port) + 5) & 1;
 }
 
-byte is_transmit_empty(PORT port)
+bool serial_is_transmit_empty(PORT port)
 {
     return inportb(port_address(port) + 5) & 0x20;
 }

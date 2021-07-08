@@ -4,6 +4,7 @@
 #include <task/task.h>
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 void cnt0_task()
@@ -11,11 +12,12 @@ void cnt0_task()
     char var_str[20];
     for (unsigned i = 0 ;; i++)
     {
-        core_forbid();
+        //core_forbid();
         core_lock(MUTEX_GENERIC);
+        core_sleep(0);
         console_put_string(0x4f, itoa(i, var_str, 10), 2, 5);
         core_unlock(MUTEX_GENERIC);
-        core_permit();
+        //core_permit();
     }
 }
 
@@ -25,6 +27,7 @@ void cnt1_task()
     for (unsigned i = 0 ;; i++)
     {
         core_lock(MUTEX_GENERIC);
+        core_sleep(0);
         console_put_string(0x4f, itoa(i, var_str, 10), 2, 6);
         core_unlock(MUTEX_GENERIC);
     }
@@ -36,14 +39,39 @@ void cnt2_task()
     for (unsigned i = 0 ;; i++)
     {
         core_lock(MUTEX_GENERIC);
+        core_sleep(0);
         console_put_string(0x4f, itoa(i, var_str, 10), 2, 7);
         core_unlock(MUTEX_GENERIC);
     }
 }
 
-void main(int argc, char **argv)
+void cnt3_task()
 {
-    console_put_data(0x1b, 176, 80*25, 0);
+    char var_str[20];
+    for (unsigned i = 0 ;; i++)
+    {
+        core_lock(MUTEX_GENERIC);
+        core_sleep(0);
+        console_put_string(0x4f, itoa(i, var_str, 10), 2, 8);
+        core_unlock(MUTEX_GENERIC);
+    }
+}
+
+void cnt4_task()
+{
+    char var_str[20];
+    for (unsigned i = 0 ;; i++)
+    {
+        core_lock(MUTEX_GENERIC);
+        core_sleep(0);
+        console_put_string(0x4f, itoa(i, var_str, 10), 2, 9);
+        core_unlock(MUTEX_GENERIC);
+    }
+}
+
+int main(int argc, char **argv)
+{
+    console_put_data(0x1b, (char)176, 80*25, 0);
     
     core_create(cnt0_task, 0, DEFAULT_STACK_SIZE);
     
@@ -51,5 +79,11 @@ void main(int argc, char **argv)
     
     core_create(cnt2_task, 10, DEFAULT_STACK_SIZE);
     
+    core_create(cnt3_task, 0, DEFAULT_STACK_SIZE);
+    
+    core_create(cnt4_task, 0, DEFAULT_STACK_SIZE);
+    
     core_exit(0, NULL);
+    
+    return 0;
 }

@@ -1,6 +1,7 @@
 #include <mem/mem.h>
 #include <task/task.h>
 #include <sys/sys.h>
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 void cnt0_task()
@@ -12,7 +13,7 @@ void cnt0_task()
         void *p = core_malloc(10000);
         unsigned long sleepTime = (core_timestamp() & 0xff) * 4;
         core_sleep(sleepTime);
-        console_put_string(0x4f, itoa(sleepTime, var_str, 10), 2, 10);
+        console_put_string(0x4f, ltoa(sleepTime, var_str, 10), 2, 10);
         core_free(p);
     }
 }
@@ -25,7 +26,7 @@ void test_task()
     {
         void *p = core_malloc(1000);
         core_sleep(0);
-        console_put_string(0x4f, itoa(i, var_str, 10), 60, 10);
+        console_put_string(0x4f, ltoa(i, var_str, 10), 60, 10);
         core_free(p);
     }
     
@@ -37,10 +38,10 @@ void showUsedMem()
     char var_str[20];
     size_t totalMem = core_avail(MEM_TYPE_USED);
     console_put_string(0x4f, "Used Mem:", 60, 3);
-    console_put_string(0x4f, itoa(totalMem, var_str, 10), 60, 4);
+    console_put_string(0x4f, ltoa(totalMem, var_str, 10), 60, 4);
 }
 
-void main(__unused int argc, __unused char **argv)
+int main(__unused int argc, __unused char **argv)
 {
     char var_str[20];
     
@@ -49,7 +50,7 @@ void main(__unused int argc, __unused char **argv)
     
     size_t totalMem = core_avail(MEM_TYPE_USED);
     console_put_string(0x4f, "Initial Used Mem:", 60, 5);
-    console_put_string(0x4f, itoa(totalMem, var_str, 10), 60, 6);
+    console_put_string(0x4f, ltoa(totalMem, var_str, 10), 60, 6);
     
     check_segments();
     
@@ -63,13 +64,13 @@ void main(__unused int argc, __unused char **argv)
     check_segments();
     
     core_log("\nP0 = 0x");
-    core_log(itoa(p0, var_str, 16));
+    core_log(ltoa((long)p0, var_str, 16));
     core_log("\nP1 = 0x");
-    core_log(itoa(p1, var_str, 16));
+    core_log(ltoa((long)p1, var_str, 16));
     core_log("\nP2 = 0x");
-    core_log(itoa(p2, var_str, 16));
+    core_log(ltoa((long)p2, var_str, 16));
     core_log("\nP3 = 0x");
-    core_log(itoa(p3, var_str, 16));
+    core_log(ltoa((long)p3, var_str, 16));
     core_log("\n");
 
     core_free(p0);

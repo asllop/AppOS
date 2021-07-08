@@ -1,7 +1,9 @@
 #include <mem/mem.h>
 #include <task/task.h>
 #include <event/event.h>
+#include <event/event_internal.h>
 #include <sys/sys.h>
+#include <lib/NQCLib/NQCLib.h>
 #include "utils.h"
 
 void counter_foo(int line)
@@ -20,7 +22,7 @@ void counter_foo(int line)
         
         if (mem)
         {
-            core_set(mem, 0x55, memsz);
+            memset(mem, 0x55, memsz);
             console_put_string(0x4f, itoa(i, var_str, 10), 2, line);
             core_free(mem);
             
@@ -88,6 +90,8 @@ void showUsedMem()
 void main(__unused int argc, __unused char **argv)
 {
 	char var_str[20];
+    
+    event_init();
     
     // Draw Background
     console_put_data(0x1b, 176, 80*25, 0);

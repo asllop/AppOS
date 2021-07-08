@@ -4,13 +4,14 @@
 #include <sys/io/arch/pc32/io.h>
 #include <mem/arch/pc32/mem_arch.h>
 
-#define FAKE_TIMER_IRQ      PIC2_IRQ(8)
+#define FAKE_TIMER_INT      0xA0
 #define TIMER_FREQ_HZ       100
 #define MILLIS_PER_TICK     (1000 / TIMER_FREQ_HZ)
-#define TMP_STACK_SIZE      128 * sizeof(void *)
 
 extern void pit_isr();
 extern void fake_timer_isr();
+
+extern uint16_t mem_code_selector;
 
 void *push32(void *stackPointer, uint32_t value)
 {
@@ -20,7 +21,7 @@ void *push32(void *stackPointer, uint32_t value)
 }
 
 // Setup an empty context on the stack for a new task
-void context_init(struct TaskStruct *slot)
+void task_context_init(struct TaskStruct *slot)
 {
     void *currentStackPointer = slot->stack;
     
@@ -30,9 +31,9 @@ void context_init(struct TaskStruct *slot)
     // This will be poped by IRET on pit_isr()
     
     // Push EFLAGS
-    currentStackPointer = push32(currentStackPointer, 0b1000000010);        // Bit 1 set (reserved), Interrupt flag set
+    currentStackPointer = push32(currentStackPointer, 0b1000000010);            // Bit 1 set (reserved), Interrupt flag set
     // Push CS
-    currentStackPointer = push32(currentStackPointer, 8);                   // Hardcoded to point at the first valid entry on GDT
+    currentStackPointer = push32(currentStackPointer, mem_code_selector * 8);   // CS selector on GDT
     // Push EIP
     currentStackPointer = push32(currentStackPointer, (uint32_t)slot->task);
     
@@ -58,7 +59,7 @@ void *timer_interrupt(void *stackPointer)
     
     systemTimestamp += MILLIS_PER_TICK;
     
-    void *newStackPointer = schedule(stackPointer);
+    void *newStackPointer = task_schedule(stackPointer);
     
     // Enable NMI
     outportb(0x70, inportb(0x70) & 0x7F);
@@ -85,7 +86,7 @@ void init_pit(unsigned int freq)
     
     // Set Timer ISR
     set_isr(pit_isr, PIC1_IRQ(0));
-    set_isr(fake_timer_isr, FAKE_TIMER_IRQ);
+    set_isr(fake_timer_isr, FAKE_TIMER_INT);
 
     // Setup PIT configuration
     unsigned int counter = 1193182 / freq;  // Base clock freq == 1193181.6666 Hz, we round to 1193182
@@ -101,17 +102,17 @@ void init_pit(unsigned int freq)
     asm("sti");
 }
 
-void force_task_scheduling()
+void task_force_scheduling()
 {
-    // Cal a fake timer interrupt to avoid incrementing timestamp
+    // Call a fake timer interrupt to avoid incrementing timestamp
     asm(
         "int %0;"
         :
-        : "i" (FAKE_TIMER_IRQ)
+        : "i" (FAKE_TIMER_INT)
         );
 }
 
-void scheduler_init()
+void task_scheduler_init()
 {
     systemTimestamp = 0;
     
@@ -120,7 +121,7 @@ void scheduler_init()
 
 extern void main_task();
 
-void setup_stack(void *stackPointer)
+void task_setup_stack(void *stackPointer)
 {
     // Use main task stack as current stack
     
@@ -140,5 +141,5 @@ void setup_stack(void *stackPointer)
     asm("jmp main_task");
     
     // We should never get here
-    core_fatal("Reached end of setup_stack");
+    core_fatal("Reached end of task_setup_stack");
 }

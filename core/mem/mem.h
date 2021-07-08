@@ -6,17 +6,21 @@
 typedef enum
 {
     MEM_TYPE_TOTAL          = 0,
-    MEM_TYPE_FREE,
-    MEM_TYPE_USED,
+    MEM_TYPE_USED
 
 } MEM_TYPE;
 
+typedef enum
+{
+    REALLOC_TYPE_AFTER          = 0,
+    REALLOC_TYPE_BEFORE
+    
+} REALLOC_TYPE;
+
 void                        *core_malloc(size_t size);
-void                        *core_realloc(void *buf, size_t size);
+void                        *core_realloc(void *buf, size_t currentBufferSize, size_t newSize, long moveOffset);
 void                        core_free(void *buf);
 size_t                      core_size(void *buf);
 size_t                      core_avail(MEM_TYPE memtype);
-int                         core_copy(void *to, void *from, size_t size);
-int                         core_set(void *to, unsigned char value, size_t size);
 
 #endif

@@ -2,6 +2,11 @@
 #include <mem/mem.h>
 #include <sys/sys.h>
 #include <sys/sys_internal.h>
+#include <lib/NQCLib/NQCLib.h>
+
+// TODO: keep a pointer to the last freed memory block, and start searching from there in the next alloc. If we choose the apropiate segment size it should be super fast to alloc.
+// TODO: create tests and benchmark the alloc/free avrg time.
+// TODO: add reference counting, and a core_keep(void *buf) function.
 
 void *core_malloc(size_t size)
 {
@@ -15,7 +20,7 @@ void *core_malloc(size_t size)
     core_lock(MUTEX_MEM);
     
     byte numBlocks;
-    struct BlockStruct *blocks = get_blocks(&numBlocks);
+    struct BlockStruct *blocks = mem_get_blocks(&numBlocks);
     
     // Add SEGMENT size to compensate the header part
     size += sizeof(SEGMENT);
@@ -70,34 +75,133 @@ void *core_malloc(size_t size)
     return NULL;
 }
 
-void *core_realloc(void *buf, size_t size)
+void *core_realloc(void *buf, size_t currentBufferSize, size_t newSize, long moveOffset)
 {
-    // TODO
-    return NULL;
+    if (!mem_valid_buff(buf)) return NULL;
+    
+    core_lock(MUTEX_MEM);
+    
+    SEGMENT currentSegmentSize = *((SEGMENT *)(buf - sizeof(SEGMENT)));
+    size_t currentSegmentPayloadSizeInBytes = ((size_t)currentSegmentSize * SEGMENT_SIZE) - sizeof(SEGMENT);
+    
+    if (currentSegmentPayloadSizeInBytes < newSize)
+    {
+        // Calculate how many additional segments we need
+        size_t additionalBytesNeeded = newSize - currentSegmentPayloadSizeInBytes;
+        SEGMENT additionalSegmentsNedded = additionalBytesNeeded / SEGMENT_SIZE;
+        if (additionalBytesNeeded % SEGMENT_SIZE)
+        {
+            additionalSegmentsNedded ++;
+        }
+        
+        void *newBuffPointer = NULL;
+        
+        // Find needed segments after
+        void *nextSegment = (buf - sizeof(SEGMENT)) + (currentSegmentPayloadSizeInBytes + sizeof(SEGMENT));
+        
+        SEGMENT foundSegments = 0;
+        
+        while (foundSegments < additionalSegmentsNedded)
+        {
+            SEGMENT segSize = *((SEGMENT *)nextSegment);
+            
+            if (segSize == 0)
+            {
+                // Found free segment
+                foundSegments ++;
+                // Go to next segment
+                nextSegment += SEGMENT_SIZE;
+            }
+            else
+            {
+                // Used segment, finish
+                break;
+            }
+        }
+        
+        // Added segments after, update pointer to new segment (basically the same it was)
+        newBuffPointer = buf - sizeof(SEGMENT);
+        
+        // NOTE: Currently we are only reallocating in one direction (forward to a higher address). The reason is:
+        // PROBLEM
+        // IF foundSegments < additionalSegmentsNedded => Not enought segments yet, we have to find needed segments before.
+        // But we can't go back because we don't know the size of previous segments
+        // Only two solutions (with current memory system)
+        // 1. Start seeking from the beggining of block and go forward up to current segment
+        // 2. Just realloc in one direction and ignore the other.
+        // The solution 1 is too slow, so we just ignore free segments behind and scan the ones allocated in front.
+        
+        if (foundSegments < additionalSegmentsNedded)
+        {
+            // Couldn't reallocate, try to alloc a new buffer and move the data
+            core_unlock(MUTEX_MEM);
+            void *newbuff = core_malloc(newSize);
+            
+            if (newbuff)
+            {
+                memcpy(newbuff, buf, currentBufferSize);
+                mem_move_offset(newbuff, currentBufferSize, moveOffset);
+                core_free(buf);
+                return newbuff;
+            }
+            else
+            {
+                // No luck, failed
+                return NULL;
+            }
+        }
+        else
+        {
+            // Found all segments!!
+            *((SEGMENT *)newBuffPointer) += additionalSegmentsNedded;
+            newBuffPointer += sizeof(SEGMENT);
+            mem_move_offset(newBuffPointer, currentBufferSize, moveOffset);
+            core_unlock(MUTEX_MEM);
+            return newBuffPointer;
+        }
+    }
+    else
+    {
+        // Current segment is big enought to alloc "size"
+        mem_move_offset(buf, currentBufferSize, moveOffset);
+        core_unlock(MUTEX_MEM);
+        return buf;
+    }
 }
 
 void core_free(void *buf)
 {
-    core_lock(MUTEX_MEM);
-    
-    internal_free(buf);
-    
-    core_unlock(MUTEX_MEM);
+    if (mem_valid_buff(buf))
+    {
+        // TODO: core_free should be reentrant, we could probably get rid of the mutex here
+        core_lock(MUTEX_MEM);
+        mem_internal_free(buf);
+        core_unlock(MUTEX_MEM);
+    }
 }
 
 size_t core_size(void *buf)
 {
-    SEGMENT sizeSegs = *((SEGMENT *)(buf - sizeof(SEGMENT)));
-    
-    if (sizeSegs > 0)
+    if (mem_valid_buff(buf))
     {
-        return ((size_t)sizeSegs * SEGMENT_SIZE) - sizeof(SEGMENT);
+        SEGMENT sizeSegs = *((SEGMENT *)(buf - sizeof(SEGMENT)));
+        
+        if (sizeSegs > 0)
+        {
+            return ((size_t)sizeSegs * SEGMENT_SIZE) - sizeof(SEGMENT);
+        }
+        else
+        {
+            return 0;
+        }
     }
     else
     {
         return 0;
     }
 }
+
+// TODO: when allocating, freeing and reallocating, simply update a counter with the amount of memory, instead of doing this.
 
 size_t core_avail(MEM_TYPE memtype)
 {
@@ -110,7 +214,7 @@ size_t core_avail(MEM_TYPE memtype)
             core_lock(MUTEX_MEM);
             
             byte numBlocks;
-            struct BlockStruct *blocks = get_blocks(&numBlocks);
+            struct BlockStruct *blocks = mem_get_blocks(&numBlocks);
             
             for (byte i = 0 ; i < numBlocks ; i++)
             {
@@ -122,44 +226,6 @@ size_t core_avail(MEM_TYPE memtype)
             return total;
         }
             
-        case MEM_TYPE_FREE:
-        {
-            size_t free = 0;
-            
-            core_lock(MUTEX_MEM);
-            
-            byte numBlocks;
-            struct BlockStruct *blocks = get_blocks(&numBlocks);
-            
-            for (byte i = 0 ; i < numBlocks ; i++)
-            {
-                size_t numSegments = blocks[i].blockSize / SEGMENT_SIZE;
-                void *p = blocks[i].block;
-                size_t j = 0;
-                
-                while (j < numSegments)
-                {
-                    if (*((SEGMENT *)p) == 0)
-                    {
-                        // Empty segment
-                        j ++;
-                        free += SEGMENT_SIZE;
-                    }
-                    else
-                    {
-                        // Used segment, part of a buffer. Jump to the end of the buffer
-                        j += *((SEGMENT *)p);
-                    }
-                    
-                    p = blocks[i].block + (SEGMENT_SIZE * j);
-                }
-            }
-            
-            core_unlock(MUTEX_MEM);
-            
-            return free;
-        }
-            
         case MEM_TYPE_USED:
         {
             size_t used = 0;
@@ -167,7 +233,7 @@ size_t core_avail(MEM_TYPE memtype)
             core_lock(MUTEX_MEM);
             
             byte numBlocks;
-            struct BlockStruct *blocks = get_blocks(&numBlocks);
+            struct BlockStruct *blocks = mem_get_blocks(&numBlocks);
             
             for (byte i = 0 ; i < numBlocks ; i++)
             {
@@ -203,26 +269,3 @@ size_t core_avail(MEM_TYPE memtype)
             return 0;
     }
 }
-
-// If ARCH_MEM is defined, means there is an architecture dependant definition, that is supposed to speed up the process.
-#ifndef ARCH_MEM
-int core_copy(void *to, void *from, size_t size)
-{
-    for (size_t i = 0 ; i < size ; i++)
-    {
-        ((unsigned char *)to)[i] = ((unsigned char *)from)[i];
-    }
-
-    return 0;
-}
-
-int core_set(void *to, unsigned char value, size_t size)
-{
-    for (size_t i = 0 ; i < size ; i++)
-    {
-        ((unsigned char *)to)[i] = value;
-    }
-    
-    return 0;
-}
-#endif
